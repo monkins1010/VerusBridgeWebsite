@@ -6,7 +6,7 @@ import Web3 from 'web3'
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
 
-const verusBridgeContractAdd = '0xb7863bC50f4909EE71Cb14053a7d149db1047640'
+const verusBridgeContractAdd = '0xa38C008CEA814f3B2B6b5C4ce14A4645d563F75F'
 const ethNode = 'wss://rinkeby.infura.io/ws/v3/46789909a2fe4985bbb866f2878f940c'
 let maxGas = 6000000;
 
@@ -205,6 +205,7 @@ const initialize = async () => {
       let _feeCurrencyID = {};
       let _nFees = {};
       let _destSystemID = {};
+      let flags =65;
 
       if (!isETH) {
 
@@ -226,14 +227,14 @@ const initialize = async () => {
       //const weiValue = web3.utils.toWei(etherAmount, 'ether')
       
       _destinationType = 4; // 4 for ID  and R is TODO:find what R address is
-      _feeCurrencyID = "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00"; // VETH
+      _feeCurrencyID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
       _nFees =  2000000; //0.02 VRSC
       _destSystemID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
 
 
       try {
 
-         let info = await verusBridge.methods.exportETH(_destination, _destinationType, _feeCurrencyID, _nFees, _destSystemID)
+         let info = await verusBridge.methods.exportETH(_destination, _destinationType, _feeCurrencyID, _nFees, _destSystemID, flags)
          .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(SendETHAmount1.value, 'ether')});
 
 
