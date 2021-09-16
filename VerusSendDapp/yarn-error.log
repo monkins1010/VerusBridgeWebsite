@@ -1,0 +1,77 @@
+Arguments: 
+  /usr/bin/node /usr/bin/yarn add git+https://github.com/VerusCoin/bitgo-utxo-lib.git#react-native
+
+PATH: 
+  /home/chris/.vscode-server/bin/83bd43bc519d15e50c4272c6cf5c1479df196a4d/bin:/home/chris/.npm-global/bin:/home/chris/.vscode-server/bin/83bd43bc519d15e50c4272c6cf5c1479df196a4d/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/lib/jvm/java-16-oracle/bin:/usr/lib/jvm/java-16-oracle/db/bin:/home/chris/Android/Sdk/emulator:/home/chris/Android/Sdk/tools:/home/chris/Android/Sdk/tools/bin:/home/chris/Android/Sdk/platform-tools
+
+Yarn version: 
+  1.22.10
+
+Node version: 
+  15.14.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  SyntaxError: /home/chris/verusdapp/VerusSendDapp/package.json: Unexpected token } in JSON at position 1289
+      at JSON.parse (<anonymous>)
+      at /usr/lib/node_modules/yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /usr/lib/node_modules/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "@metamask/test-dapp",
+    "version": "3.0.0",
+    "description": "A simple dapp used in MetaMask e2e tests.",
+    "scripts": {
+      "deploy": "./deploy.sh",
+      "lint": "eslint . --ext js,json && prettier ./src -c",
+      "lint:fix": "eslint . --fix --ext js,json && prettier ./src -c --write",
+      "start": "webpack-dev-server",
+      "build": "webpack --mode production",
+      "test": "yarn lint",
+      "prepare": "yarn test && yarn build"
+    },
+    "publishConfig": {
+      "access": "public"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/MetaMask/test-dapp.git"
+    },
+    "files": [
+      "dist/"
+    ],
+    "author": "MetaMask",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/MetaMask/test-dapp/issues"
+    },
+    "homepage": "https://github.com/MetaMask/test-dapp#readme",
+    "devDependencies": {
+      "@metamask/eslint-config": "^2.0.0",
+      "@metamask/onboarding": "^1.0.0",
+      "base58-js": "^1.0.0",
+      "clean-webpack-plugin": "^3.0.0",
+      "copy-webpack-plugin": "^6.0.2",
+      "eslint": "^6.8.0",
+      "eslint-plugin-import": "^2.20.1",
+      "eslint-plugin-json": "^2.0.1",
+      "eth-sig-util": "^2.5.3",
+      "prettier": "^2.0.5",
+      "web3": "^1.5.2",
+      "webpack": "^4.43.0",
+      "webpack-cli": "^3.3.12",
+      "webpack-dev-server": "^3.11.0",
+      
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

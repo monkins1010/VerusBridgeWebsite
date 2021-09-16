@@ -1,0 +1,172 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Verus Bridge Test Site</title>
+  
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.1/css/mdb.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="index.css" type="text/css" />
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    
+</head>
+
+  <body>
+    <main class="container-fluid">
+      <nav class="navbar navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">
+          <img src="verus-eth-bridge.png" width="110" height="50" class="d-inline-block " alt="">
+          Contract:  <span id="accountadd"></span>
+        </a>
+      </nav>
+
+      <section>
+        <h3 class="card-title">
+          Status
+        </h3>
+
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
+            <p class="info-text alert alert-success">
+              Your Accounts: <span id="accounts"></span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="row d-flex justify-content-center">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">
+                  Connect to Contract
+                </h4>
+
+                <button
+                  class="btn btn-primary btn-lg btn-block mb-3"
+                  id="connectButton"
+                  disabled
+                >
+                  Connect
+                </button>
+
+               
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
+      <section>
+        <div class="row">
+
+
+          <div
+            class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12 d-flex align-items-stretch"
+          >
+            <div class="card full-width">
+              <div class="card-body">
+                <h4 class="card-title">
+                  Send Tokens to Verus Blockchain
+                </h4>
+
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">To Address:</span>
+                  </div>
+                  <input type="text" id="InputToken1" class="form-control" placeholder="0x32789..." aria-label="Address" aria-describedby="basic-addon1">
+                </div>
+                
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Choose Token
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="#">vETH</a>
+                    <a class="dropdown-item" href="#">vUSDC</a>
+                    <a class="dropdown-item" href="#">vDAI</a>
+                  </div>
+                </div>
+
+                <form id="send-eth-form">
+                  <div class="form-group">
+                    <label id="InputTokenLable" for="exampleInputEmail1">none selected</label>
+                    <input  class="form-control" id="Inputamount1" aria-describedby="TokenHelp" placeholder="Enter Amount">
+                    </div>
+                   <button type="submit" id="sendETHButton" class="btn btn-primary">Send</button>
+                </form>
+                Status: <span id="statusVerus">Not Connected to contract..</span>
+                <hr />
+
+
+              </div>
+            </div>
+          </div>
+          <div
+            class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12 d-flex align-items-stretch"
+          >
+            <div class="card full-width">
+              <div class="card-body">
+                <h4 class="card-title">
+                  Send Tokens and bounce back
+                </h4>
+
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">To Address:</span>
+                  </div>
+                  <input type="text" class="form-control" placeholder="0x32789..." aria-label="Address" aria-describedby="basic-addon1">
+                </div>
+                
+                <div class="dropdown2">
+                  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Choose Token
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item1" href="#">vETH</a>
+                    <a class="dropdown-item1" href="#">vUSDC</a>
+                    <a class="dropdown-item1" href="#">vDAI</a>
+                  </div>
+                </div>
+
+                <form >
+                  <div class="form-group">
+                    <label id="InputTokenLable1" for="exampleInputEmail1">none selected</label>
+                    <input  class="form-control" id="InputToken2" aria-describedby="TokenHelp" placeholder="Enter Amount">
+                    </div>
+                   <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+
+                <hr />
+
+
+              </div>
+            </div>
+          </div>
+         
+      </section>
+
+      <section>
+        <div class="row">
+        
+        </div>
+      </section>
+    </main>
+
+    <script src="bundle.js" defer></script>
+  </body>
+</html>
