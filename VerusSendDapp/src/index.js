@@ -6,8 +6,8 @@ import Web3 from 'web3'
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
 
-const verusBridgeContractAdd = '0xa38C008CEA814f3B2B6b5C4ce14A4645d563F75F'
-const ethNode = 'wss://rinkeby.infura.io/ws/v3/46789909a2fe4985bbb866f2878f940c'
+const verusBridgeContractAdd = '0x01fA2b0bE594035eE458decd5636f2fE7D9F2605'
+
 let maxGas = 6000000;
 
 // var verusContract = Web3.eth.contract(verusBridgeAbi);
@@ -197,7 +197,7 @@ const initialize = async () => {
 
       const contractAddress = SendETHAddress1.value
       const amount = SendETHAmount1.value
-      const isETH = isETHAddress(contractAddress)
+      const isETHAdd = isETHAddress(contractAddress)
       const token = SendETHToken1.textContent
       
       let _destination = {};
@@ -206,8 +206,10 @@ const initialize = async () => {
       let _nFees = {};
       let _destSystemID = {};
       let flags =65;
+      let _tokenAddress = {};
+      let _destCurrencyID = {};
 
-      if (!isETH) {
+      if (!isETHAdd) {
 
         if (isiAddress(contractAddress)) {
           console.log('i address Valid: ', contractAddress)
@@ -223,20 +225,42 @@ const initialize = async () => {
         _destination = contractAddress;
       }
 
-      //const etherAmount = web3.utils.toBN(SendETHAmount1.value)
-      //const weiValue = web3.utils.toWei(etherAmount, 'ether')
-      
-      _destinationType = 4; // 4 for ID  and R is TODO:find what R address is
-      _feeCurrencyID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
-      _nFees =  2000000; //0.02 VRSC
-      _destSystemID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
+      if(token == 'vETH'){
+        _destinationType = 4; // 4 for ID  and R is TODO:find what R address is
+        _feeCurrencyID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
+        _nFees =  2000000; //0.02 VRSC
+        _destSystemID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
+      }
+      else if(token == 'USDC'){
+        _destinationType = 4;
+        _feeCurrencyID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
+        _nFees =  2000000; //0.02 VRSC
+        _destSystemID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
+        _tokenAddress = "Ethereum 0x address token address";
+        _destCurrencyID = "Verus 0x address token address";
+      }else if(token == 'DAI'){
 
+        _destinationType = 4;
+        _feeCurrencyID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
+        _nFees =  2000000; //0.02 VRSC
+        _destSystemID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
+        _tokenAddress = "Ethereum 0x address token address";
+        _destCurrencyID = "Verus 0x address token address";
 
+      }
+
+      let result ={};
       try {
+        if(token == 'vETH'){
+          result = await verusBridge.methods.exportETH(_destination, _destinationType, _feeCurrencyID, _nFees, _destSystemID, flags)
+         .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(amount, 'ether')});
+      } else {
 
-         let info = await verusBridge.methods.exportETH(_destination, _destinationType, _feeCurrencyID, _nFees, _destSystemID, flags)
-         .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(SendETHAmount1.value, 'ether')});
+        result = await verusBridge.methods.exportERC20(amount, _tokenAddress, _destination, _destinationType,
+           _destCurrencyID, _nFees, _feeCurrencyID, _destSystemID, flags)
+        .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(0.02, 'ether')});
 
+      }
 
 
       } catch (err) {
