@@ -6,7 +6,7 @@ import Web3 from 'web3'
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
 
-const verusBridgeContractAdd = '0x01fA2b0bE594035eE458decd5636f2fE7D9F2605'
+const verusBridgeContractAdd = '0xFB10E4e9150E2CFE2d1506794C13cfCD7fC124EE'
 
 let maxGas = 6000000;
 
@@ -44,8 +44,10 @@ const getAccountsResults = document.getElementById('getAccountsResult')
 const sendETHButton = document.getElementById('sendETHButton')
 const SendETHAddress1 = document.getElementById('InputToken1')
 const SendETHAmount1 = document.getElementById('Inputamount1')
-const SendETHToken1 = document.getElementById('InputTokenLable')
+const inputGroupSelect01 = document.getElementById('inputGroupSelect01')
+const inputGroupSelect02 = document.getElementById('inputGroupSelect02')
 const statusVerus1 = document.getElementById('statusVerus')
+const dropdownMenuButton  = document.getElementById('dropdownMenuButton')
 
 // Send Tokens Section
 const tokenAddress = document.getElementById('tokenAddress')
@@ -57,15 +59,10 @@ const approveTokensWithoutGas = document.getElementById('approveTokensWithoutGas
 
 
 // Encrypt / Decrypt Section
-const getEncryptionKeyButton = document.getElementById('getEncryptionKeyButton')
-const encryptMessageInput = document.getElementById('encryptMessageInput')
-const encryptButton = document.getElementById('encryptButton')
-const decryptButton = document.getElementById('decryptButton')
-const encryptionKeyDisplay = document.getElementById('encryptionKeyDisplay')
-const ciphertextDisplay = document.getElementById('ciphertextDisplay')
-const cleartextDisplay = document.getElementById('cleartextDisplay')
 
-const initialize = async () => {
+
+
+const initialize = async () => {InputToken1
 
   let onboarding
   try {
@@ -112,6 +109,8 @@ const initialize = async () => {
   //  encryptMessageInput.value = ''
   //  ciphertextDisplay.innerText = ''
   accountadd.innerText = " Not Connected";
+
+
   }
 
 
@@ -132,15 +131,18 @@ const initialize = async () => {
       onboardButton.onclick = onClickInstall
       onboardButton.disabled = false
     } else if (isMetaMaskConnected()) {
-      onboardButton.innerText = 'Connected'
+      onboardButton.innerText = 'Connected to MetaMask'
       onboardButton.disabled = true
+      sendETHButton.disabled = false
       if (onboarding) {
         onboarding.stopOnboarding()
       }
+
     } else {
-      onboardButton.innerText = 'Connect'
+      onboardButton.innerText = 'Connect to MetaMask'
       onboardButton.onclick = onClickConnect
       onboardButton.disabled = false
+      sendETHButton.disabled = true
     }
   }
 
@@ -192,84 +194,86 @@ const initialize = async () => {
       }
     }
 
-
     sendETHButton.onclick = async () => {
 
       const contractAddress = SendETHAddress1.value
       const amount = SendETHAmount1.value
       const isETHAdd = isETHAddress(contractAddress)
-      const token = SendETHToken1.textContent
-      
-      let _destination = {};
-      let _destinationType = {};
-      let _feeCurrencyID = {};
-      let _nFees = {};
-      let _destSystemID = {};
-      let flags =65;
-      let _tokenAddress = {};
-      let _destCurrencyID = {};
+      const token = inputGroupSelect01.value
+      const destination = inputGroupSelect02.value
 
+      let destinationtype = {};
+      let currency = {
+        VRSCTEST: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d",
+        vETH: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00",
+        USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f"
+      }
+
+
+      let destinationaddress = {};
+ 
       if (!isETHAdd) {
 
         if (isiAddress(contractAddress)) {
+          destinationtype = 4; //ID TYPE
           console.log('i address Valid: ', contractAddress)
-          _destination = convertVerusAddressToEthAddress(contractAddress)
-          console.log('Converted address ', _destination)
+          destinationaddress = convertVerusAddressToEthAddress(contractAddress)
+          console.log('Converted address ', destinationaddress)
         } else if (isRAddress(contractAddress)) {
+          destinationtype = 1; //R TYPE
           console.log('R address Valid: ', contractAddress)
-          _destination = convertVerusAddressToEthAddress(contractAddress)
-          console.log('Converted address ', _destination)
+          destinationaddress = convertVerusAddressToEthAddress(contractAddress)
+          console.log('Converted address ', destinationaddress)
+        }else {
+          alert("Not a valid i or R address");
+          return;
         }
-
-      }else{
-        _destination = contractAddress;
       }
 
-      if(token == 'vETH'){
-        _destinationType = 4; // 4 for ID  and R is TODO:find what R address is
-        _feeCurrencyID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
-        _nFees =  2000000; //0.02 VRSC
-        _destSystemID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
-      }
-      else if(token == 'USDC'){
-        _destinationType = 4;
-        _feeCurrencyID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
-        _nFees =  2000000; //0.02 VRSC
-        _destSystemID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
-        _tokenAddress = "Ethereum 0x address token address";
-        _destCurrencyID = "Verus 0x address token address";
-      }else if(token == 'DAI'){
-
-        _destinationType = 4;
-        _feeCurrencyID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
-        _nFees =  2000000; //0.02 VRSC
-        _destSystemID = "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"; // vrsctest
-        _tokenAddress = "Ethereum 0x address token address";
-        _destCurrencyID = "Verus 0x address token address";
+      if(token != 'Choose...'){
+        alert("Please choose a Token");
+        return;
 
       }
 
-      let result ={};
-      try {
-        if(token == 'vETH'){
-          result = await verusBridge.methods.exportETH(_destination, _destinationType, _feeCurrencyID, _nFees, _destSystemID, flags)
-         .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(amount, 'ether')});
-      } else {
-
-        result = await verusBridge.methods.exportERC20(amount, _tokenAddress, _destination, _destinationType,
-           _destCurrencyID, _nFees, _feeCurrencyID, _destSystemID, flags)
-        .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(0.02, 'ether')});
+      if(destination != 'Choose...'){
+        alert("Please Choose a destination type");
+        return;
+       
+      }
+      if(amount = 0){
+        alert("Please Set an amount");  //todo validate length e.g. 100000.00000000
+        return;
 
       }
 
-
-      } catch (err) {
-        console.error(err)
-        
-      }
+      let verusAmount = (amount * 100000000);
+      let CReserveTransfer =  {
+        version : 1,
+        currencyvalue : {currency: currency[token] , amount: verusAmount.toFixed(0)},
+        flags : 65,
+        feecurrencyid : currency.VRSCTEST,
+        fees : 2000000,
+        destination : {destinationtype, destinationaddress},
+        destcurrencyid : currency.VRSCTEST,
+        destsystemid : currency.VRSCTEST,
+        secondreserveid : "0x0000000000000000000000000000000000000000"
     }
 
+    let result ={};
+      
+        try {
+        
+            result = await verusBridge.methods.export(CReserveTransfer)
+          .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'vETH' ? amount : '0.00012', 'ether')});
+        
+        } catch (err) {
+          console.error(err)
+          
+        }
 
+
+  }
 
 
   }
@@ -321,6 +325,7 @@ const initialize = async () => {
     if (window.ethereum) {
       web3 = new Web3(window.ethereum);
       window.ethereum.enable();
+      
   }
 
     
@@ -339,18 +344,3 @@ const initialize = async () => {
 }
 
 window.addEventListener('DOMContentLoaded', initialize)
-
-
-$('.dropdown-item').click(function () {
-
-  $('#InputTokenLable').text($(this).text())
-
-  console.log($(this).text())
-})
-
-$('.dropdown-item1').click(function () {
-
-  $('#InputTokenLable1').text($(this).text())
-
-  console.log($(this).text())
-})
