@@ -1,12 +1,16 @@
-# VerusBridgeWebsite
+# VerusBridge Test APP Website
 
-`cd VerusSendDapp`
+```shell
+cd VerusSendDapp
 
-`npm install`
+```
 
-`npm start`
+```shell
+npm install
+```
 
 
-goto localhost:9011 on your webbrowser
-
-
+```shell
+npm start
+```
+# goto localhost:9011 on your webbrowser
