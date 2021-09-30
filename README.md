@@ -13,4 +13,4 @@ npm install
 ```shell
 npm start
 ```
-# goto localhost:9011 on your webbrowser
+## goto localhost:9011 on your web browser
