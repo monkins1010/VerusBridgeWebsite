@@ -30,14 +30,12 @@ const isMetaMaskInstalled = () => {
 }
 
 // Dapp Status Section
-const networkDiv = document.getElementById('network')
-const chainIdDiv = document.getElementById('chainId')
 const accountsDiv = document.getElementById('accounts')
 
 // Basic Actions Section
 const onboardButton = document.getElementById('connectButton')
 const accountadd = document.getElementById('accountadd')
-const getAccountsResults = document.getElementById('getAccountsResult')
+
 
 
 // Send Eth Section
@@ -46,11 +44,9 @@ const SendETHAddress1 = document.getElementById('InputToken1')
 const SendETHAmount1 = document.getElementById('Inputamount1')
 const inputGroupSelect01 = document.getElementById('inputGroupSelect01')
 const inputGroupSelect02 = document.getElementById('inputGroupSelect02')
-const statusVerus1 = document.getElementById('statusVerus')
-const dropdownMenuButton  = document.getElementById('dropdownMenuButton')
+
 
 // Send Tokens Section
-const tokenAddress = document.getElementById('tokenAddress')
 const createToken = document.getElementById('createToken')
 const transferTokens = document.getElementById('transferTokens')
 const approveTokens = document.getElementById('approveTokens')
@@ -105,9 +101,7 @@ const initialize = async () => {InputToken1
   }
 
   const clearTextDisplays = () => {
-  //  encryptionKeyDisplay.innerText = ''
-  //  encryptMessageInput.value = ''
-  //  ciphertextDisplay.innerText = ''
+
   accountadd.innerText = " Not Connected";
 
 
@@ -237,7 +231,7 @@ const initialize = async () => {InputToken1
       }
 
       if(destination != 'Choose...'){
-        alert("Please Choose a destination type");
+        alert("Please Choose a destination type"); //add in FLAGS logic for destination
         return;
        
       }
