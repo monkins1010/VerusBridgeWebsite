@@ -40,11 +40,15 @@ const inputGroupSelect01 = document.getElementById('inputGroupSelect01')
 const inputGroupSelect02 = document.getElementById('inputGroupSelect02')
 
 // Send Tokens Section
-const createToken = document.getElementById('createToken')
-const transferTokens = document.getElementById('transferTokens')
-const approveTokens = document.getElementById('approveTokens')
-const transferTokensWithoutGas = document.getElementById('transferTokensWithoutGas')
-const approveTokensWithoutGas = document.getElementById('approveTokensWithoutGas')
+
+const mintUSDCTokens = document.getElementById('mintUSDCbutton');
+const mintUSDCAmount = document.getElementById('mintUSDCAmount');
+const AuthUSDCbutton = document.getElementById('AuthUSDCbutton');
+const AuthUSDCAmount = document.getElementById('AuthUSDCAmount');
+
+const mintedUSDMSG = document.getElementById('MintedUSDMSG');
+const modal1 = document.getElementById('exampleModal');
+const modal2 = document.getElementById('exampleModal2');
 
 const initialize = async () => {InputToken1
 
@@ -61,11 +65,8 @@ const initialize = async () => {InputToken1
 
   const accountButtons = [
 
-    createToken,
-    transferTokens,
-    approveTokens,
-    transferTokensWithoutGas,
-    approveTokensWithoutGas,
+    mintUSDCTokens,
+    AuthUSDCbutton
 
   ]
 
@@ -100,7 +101,7 @@ const initialize = async () => {InputToken1
     const accountButtonsDisabled = !isMetaMaskInstalled() || !isMetaMaskConnected()
     if (accountButtonsDisabled) {
       for (const button of accountButtons) {
-       // button.disabled = true   ADD IN BUTTONS LIKE SEND
+        button.disabled = true   
       }
       clearTextDisplays()
     } else {
@@ -116,6 +117,9 @@ const initialize = async () => {InputToken1
       onboardButton.innerText = 'Connected to MetaMask'
       onboardButton.disabled = true
       sendETHButton.disabled = false
+      mintUSDCTokens.disabled = false  
+      AuthUSDCbutton.disabled = false 
+
       if (onboarding) {
         onboarding.stopOnboarding()
       }
@@ -176,6 +180,61 @@ const initialize = async () => {InputToken1
       }
     }
 
+    mintUSDCTokens.onclick = async () => {
+
+      const amount = mintUSDCAmount.value
+
+      if(isNaN(amount) || amount == ""){
+        alert(`Not a valid amount, amount: ${amount}`);
+        return;
+      }
+
+     // mintedUSDMSG.innerHTML = "USDC Minted, Add 0xeb8f08a975ab53e34d8a0330e0d34de942c95926 token to your metamask to see your balance ";
+      var accounts = await web3.eth.getAccounts();
+      const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);  
+
+
+      try{
+        await tokenInst.methods.mint(accounts[0],amount) 
+        .send({from: ethereum.selectedAddress, gas: maxGas});
+
+        await tokenInst.methods.increaseAllowance(verusBridgeContractAdd,amount) 
+        .send({from: ethereum.selectedAddress, gas: maxGas});
+       
+        }
+        catch (err){
+      console.error(err)
+          
+        }
+
+    }
+
+    AuthUSDCbutton.onclick = async () => {
+ 
+      const amount = AuthUSDCAmount.value
+
+      if(isNaN(amount) || amount == ""){
+        alert(`Not a valid amount, amount: ${amount}`);
+        return;
+      }
+
+     // mintedUSDMSG.innerHTML = "USDC Minted, Add 0xeb8f08a975ab53e34d8a0330e0d34de942c95926 token to your metamask to see your balance ";
+      var accounts = await web3.eth.getAccounts();
+      const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);  
+
+
+      try{
+         await tokenInst.methods.increaseAllowance(verusBridgeContractAdd,amount) 
+        .send({from: ethereum.selectedAddress, gas: maxGas});
+       
+        }
+        catch (err){
+      console.error(err)
+          
+        }
+
+      
+    }
     sendETHButton.onclick = async () => {
 
       const contractAddress = SendETHAddress1.value
