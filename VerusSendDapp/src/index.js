@@ -5,21 +5,17 @@ import Web3 from 'web3'
 
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
+const ERC20Abi = require('./ERC20Abi.json')
 
-const verusBridgeContractAdd = '0xFB10E4e9150E2CFE2d1506794C13cfCD7fC124EE'
+const verusBridgeContractAdd = '0x9eDce54773c69EA8cFe617C77E6Da6b0177E74B0'
+const USDCERC20Add = '0xeb8f08a975ab53e34d8a0330e0d34de942c95926'
+
 
 let maxGas = 6000000;
 
-// var verusContract = Web3.eth.contract(verusBridgeAbi);
-// var VerusContract = verusContract.at(verusBridgeContractAdd);
-
-let myweb3 = {};
-let verusBridge = {};
-
-
-
 
 const currentUrl = new URL(window.location.href)
+
 const forwarderOrigin = currentUrl.hostname === 'localhost'
   ? 'http://localhost:9010'
   : undefined
@@ -36,8 +32,6 @@ const accountsDiv = document.getElementById('accounts')
 const onboardButton = document.getElementById('connectButton')
 const accountadd = document.getElementById('accountadd')
 
-
-
 // Send Eth Section
 const sendETHButton = document.getElementById('sendETHButton')
 const SendETHAddress1 = document.getElementById('InputToken1')
@@ -45,18 +39,12 @@ const SendETHAmount1 = document.getElementById('Inputamount1')
 const inputGroupSelect01 = document.getElementById('inputGroupSelect01')
 const inputGroupSelect02 = document.getElementById('inputGroupSelect02')
 
-
 // Send Tokens Section
 const createToken = document.getElementById('createToken')
 const transferTokens = document.getElementById('transferTokens')
 const approveTokens = document.getElementById('approveTokens')
 const transferTokensWithoutGas = document.getElementById('transferTokensWithoutGas')
 const approveTokensWithoutGas = document.getElementById('approveTokensWithoutGas')
-
-
-// Encrypt / Decrypt Section
-
-
 
 const initialize = async () => {InputToken1
 
@@ -195,14 +183,44 @@ const initialize = async () => {InputToken1
       const isETHAdd = isETHAddress(contractAddress)
       const token = inputGroupSelect01.value
       const destination = inputGroupSelect02.value
-
+      const verusBridge = new web3.eth.Contract(verusBridgeAbi, verusBridgeContractAdd)
       let destinationtype = {};
       let currency = {
         VRSCTEST: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d",
-        vETH: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00",
+        ETH: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00",
         USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f"
       }
+      var accounts = await web3.eth.getAccounts();
+      var accbal = await web3.eth.getBalance(accounts[0]);
 
+      accbal = web3.utils.fromWei(accbal);
+      accbal = parseFloat(accbal);
+
+
+      if(token == 'Choose...'){
+        alert("Please choose a Token");
+        return;
+      }
+      
+      if(isNaN(amount)){
+        alert(`Not a valid amount, amount: ${amount}`);
+        return;
+
+      }else if(token == 'ETH' && accbal < parseFloat(amount)){
+        alert(`Not enough ETH in account, balance: ${accbal}`);
+        return;
+      }else if(token != 'ETH'){
+
+        const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
+        let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
+        let decimals = await tokenInst.methods.decimals().call();
+
+        balance = balance / ( 10 ** decimals );
+          if(balance < parseFloat(amount) ){
+            alert(`Not enough ${token} in account, balance: ${balance}`);
+            return;
+          }
+      }
 
       let destinationaddress = {};
  
@@ -224,18 +242,14 @@ const initialize = async () => {InputToken1
         }
       }
 
-      if(token != 'Choose...'){
-        alert("Please choose a Token");
-        return;
 
-      }
 
-      if(destination != 'Choose...'){
+      if(destination == 'Choose...'){
         alert("Please Choose a destination type"); //add in FLAGS logic for destination
         return;
        
       }
-      if(amount = 0){
+      if(amount == 0){
         alert("Please Set an amount");  //todo validate length e.g. 100000.00000000
         return;
 
@@ -259,7 +273,7 @@ const initialize = async () => {InputToken1
         try {
         
             result = await verusBridge.methods.export(CReserveTransfer)
-          .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'vETH' ? amount : '0.00012', 'ether')});
+          .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'ETH' ? amount : '0.00012', 'ether')});
         
         } catch (err) {
           console.error(err)
@@ -320,10 +334,10 @@ const initialize = async () => {InputToken1
       web3 = new Web3(window.ethereum);
       window.ethereum.enable();
       
+      
   }
 
     
-     verusBridge = new web3.eth.Contract(verusBridgeAbi, verusBridgeContractAdd)
     try {
       const newAccounts = await ethereum.request({
         method: 'eth_accounts',
