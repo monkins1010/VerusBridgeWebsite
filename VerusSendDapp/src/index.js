@@ -8,7 +8,7 @@ const verusBridgeAbi = require('./VerusBridgeAbi.json')
 const ERC20Abi = require('./ERC20Abi.json')
 const gist = document.getElementById('file-gistfile1-txt-LC1');
 
-const verusBridgeContractAdd = "0xbd0c43563b2e6BE7D7E718AD9ad514eC65F4C19C"
+const verusBridgeContractAdd = gist.textContent
 let USDCERC20Add = '0xeb8f08a975ab53e34d8a0330e0d34de942c95926' 
 
 
@@ -109,7 +109,7 @@ const initialize = async () => {InputToken1
       clearTextDisplays()
     } else {
 
-    accountadd.innerText = "0xbd0c43563b2e6BE7D7E718AD9ad514eC65F4C19C"; //verusBridgeContractAdd;
+    accountadd.innerText = gist.textContent; //verusBridgeContractAdd;
     }
 
     if (!isMetaMaskInstalled()) {
@@ -233,7 +233,7 @@ const initialize = async () => {InputToken1
         }
         catch (err){
       console.error(err)
-          
+      alert("Metamask end failed, reason: \n" + JSON.stringify(err));
         }
 
       
@@ -341,7 +341,7 @@ const initialize = async () => {InputToken1
         
         } catch (err) {
           console.error(err)
-          alert("Metamask end failed, reason: \n" + JSON.stringify(err));
+          
         }
 
 
