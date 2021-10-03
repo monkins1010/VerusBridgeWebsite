@@ -6,9 +6,10 @@ import Web3 from 'web3'
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
 const ERC20Abi = require('./ERC20Abi.json')
+const gist = document.getElementById('file-gistfile1-txt-LC1');
 
-const verusBridgeContractAdd = '0x9eDce54773c69EA8cFe617C77E6Da6b0177E74B0'
-const USDCERC20Add = '0xeb8f08a975ab53e34d8a0330e0d34de942c95926'
+const verusBridgeContractAdd = "0xbd0c43563b2e6BE7D7E718AD9ad514eC65F4C19C"
+let USDCERC20Add = '0xeb8f08a975ab53e34d8a0330e0d34de942c95926' 
 
 
 let maxGas = 6000000;
@@ -47,10 +48,12 @@ const AuthUSDCbutton = document.getElementById('AuthUSDCbutton');
 const AuthUSDCAmount = document.getElementById('AuthUSDCAmount');
 
 const mintedUSDMSG = document.getElementById('MintedUSDMSG');
-const modal1 = document.getElementById('exampleModal');
-const modal2 = document.getElementById('exampleModal2');
+
+
 
 const initialize = async () => {InputToken1
+
+ 
 
   let onboarding
   try {
@@ -106,7 +109,7 @@ const initialize = async () => {InputToken1
       clearTextDisplays()
     } else {
 
-    accountadd.innerText = verusBridgeContractAdd;
+    accountadd.innerText = "0xbd0c43563b2e6BE7D7E718AD9ad514eC65F4C19C"; //verusBridgeContractAdd;
     }
 
     if (!isMetaMaskInstalled()) {
@@ -254,8 +257,8 @@ const initialize = async () => {InputToken1
 
       accbal = web3.utils.fromWei(accbal);
       accbal = parseFloat(accbal);
-
-
+      try {
+      
       if(token == 'Choose...'){
         alert("Please choose a Token");
         return;
@@ -269,7 +272,9 @@ const initialize = async () => {InputToken1
         alert(`Not enough ETH in account, balance: ${accbal}`);
         return;
       }else if(token != 'ETH'){
-
+        
+        
+        
         const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
@@ -329,14 +334,14 @@ const initialize = async () => {InputToken1
 
     let result ={};
       
-        try {
+       
         
             result = await verusBridge.methods.export(CReserveTransfer)
           .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'ETH' ? amount : '0.00012', 'ether')});
         
         } catch (err) {
           console.error(err)
-          
+          alert("Metamask end failed, reason: \n" + JSON.stringify(err));
         }
 
 
@@ -392,7 +397,7 @@ const initialize = async () => {InputToken1
     if (window.ethereum) {
       web3 = new Web3(window.ethereum);
       window.ethereum.enable();
-      
+     
       
   }
 
