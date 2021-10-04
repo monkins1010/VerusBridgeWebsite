@@ -8,7 +8,7 @@ const verusBridgeAbi = require('./VerusBridgeAbi.json')
 const ERC20Abi = require('./ERC20Abi.json')
 const gist = document.getElementById('file-gistfile1-txt-LC1');
 
-const verusBridgeContractAdd = gist.textContent
+const verusBridgeContractAdd = gist.textContent;
 let USDCERC20Add = '0xeb8f08a975ab53e34d8a0330e0d34de942c95926' 
 
 
@@ -104,7 +104,7 @@ const initialize = async () => {InputToken1
     const accountButtonsDisabled = !isMetaMaskInstalled() || !isMetaMaskConnected()
     if (accountButtonsDisabled) {
       for (const button of accountButtons) {
-        button.disabled = true   
+       // button.disabled = true   
       }
       clearTextDisplays()
     } else {
@@ -183,7 +183,7 @@ const initialize = async () => {InputToken1
       }
     }
 
-    mintUSDCTokens.onclick = async () => {
+ /*   mintUSDCTokens.onclick = async () => {
 
       const amount = mintUSDCAmount.value
 
@@ -237,7 +237,7 @@ const initialize = async () => {InputToken1
         }
 
       
-    }
+    }*/
     sendETHButton.onclick = async () => {
 
       const contractAddress = SendETHAddress1.value
