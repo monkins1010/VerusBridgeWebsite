@@ -6,13 +6,19 @@ import Web3 from 'web3'
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
 const ERC20Abi = require('./ERC20Abi.json')
+const NOTARIZERAbi = require('./Notarizerabi.json')
 const gist = document.getElementById('file-gistfile1-txt-LC1');
 
-const verusBridgeContractAdd = gist.textContent;
-let USDCERC20Add = '0xeb8f08a975ab53e34d8a0330e0d34de942c95926' 
-
+const gistdata = JSON.parse(gist.textContent);
+const verusBridgeContractAdd = gistdata? gistdata.bridge : "";
+let USDCERC20Add = gistdata? gistdata.USDC : ""; //'0xeb8f08a975ab53e34d8a0330e0d34de942c95926'
+let VRSTERC20 = gistdata? gistdata.vrst : ""; //"0x94186e62590d82ef5cbfd89323d3da20c7153afb" 
+let BETHERC20 = gistdata? gistdata.beth : "";
+let VERUSNOTARIZER = gistdata? gistdata.notarizer : "";
+let BRIDGEVETH = gistdata? gistdata.bridgeveth : ""; 
 
 let maxGas = 6000000;
+let poolavailable = false;
 
 
 const currentUrl = new URL(window.location.href)
@@ -39,6 +45,7 @@ const SendETHAddress1 = document.getElementById('InputToken1')
 const SendETHAmount1 = document.getElementById('Inputamount1')
 const inputGroupSelect01 = document.getElementById('inputGroupSelect01')
 const inputGroupSelect02 = document.getElementById('inputGroupSelect02')
+const poollaunchedtext = document.getElementById('poollaunched')
 
 // Send Tokens Section
 
@@ -109,7 +116,7 @@ const initialize = async () => {InputToken1
       clearTextDisplays()
     } else {
 
-    accountadd.innerText = gist.textContent; //verusBridgeContractAdd;
+    accountadd.innerText = verusBridgeContractAdd;
     }
 
     if (!isMetaMaskInstalled()) {
@@ -120,8 +127,8 @@ const initialize = async () => {InputToken1
       onboardButton.innerText = 'Connected to MetaMask'
       onboardButton.disabled = true
       sendETHButton.disabled = false
-      mintUSDCTokens.disabled = false  
-      AuthUSDCbutton.disabled = false 
+     // mintUSDCTokens.disabled = false  
+     // AuthUSDCbutton.disabled = false 
 
       if (onboarding) {
         onboarding.stopOnboarding()
@@ -151,7 +158,7 @@ const initialize = async () => {InputToken1
 
 
     function convertVerusAddressToEthAddress (verusAddress) {
-      const test2 = bitGoUTXO.address.fromBase58Check(verusAddress, 160).hash.toString('hex')
+      const test2 = bitGoUTXO.address.fromBase58Check(verusAddress, 102).hash.toString('hex')
       return `0x${test2}`
     }
 
@@ -238,19 +245,31 @@ const initialize = async () => {InputToken1
 
       
     }*/
+
+    const removeHexLeader = (hexString) => {
+      if(hexString.substr(0,2) == '0x') return hexString.substr(2);
+      else return hexString;
+    }
+
+
     sendETHButton.onclick = async () => {
 
       const contractAddress = SendETHAddress1.value
       const amount = SendETHAmount1.value
-      const isETHAdd = isETHAddress(contractAddress)
       const token = inputGroupSelect01.value
       const destination = inputGroupSelect02.value
       const verusBridge = new web3.eth.Contract(verusBridgeAbi, verusBridgeContractAdd)
       let destinationtype = {};
+      let flagvalue = 65;
+      let bridgeHex = convertVerusAddressToEthAddress("iSojYsotVzXz4wh2eJriASGo6UidJDDhL2");
+
+      let destinationcurrency = "VRSCTEST";
+
       let currency = {
         VRSCTEST: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d",
         ETH: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00",
-        USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f"
+        USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f",
+        bridge: bridgeHex,
       }
       var accounts = await web3.eth.getAccounts();
       var accbal = await web3.eth.getBalance(accounts[0]);
@@ -271,11 +290,28 @@ const initialize = async () => {InputToken1
       }else if(token == 'ETH' && accbal < parseFloat(amount)){
         alert(`Not enough ETH in account, balance: ${accbal}`);
         return;
-      }else if(token != 'ETH'){
-        
-        
-        
+      }else if(token == 'USDC'){
         const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
+        let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
+        let decimals = await tokenInst.methods.decimals().call();
+
+        balance = balance / ( 10 ** decimals );
+          if(balance < parseFloat(amount) ){
+            alert(`Not enough ${token} in account, balance: ${balance}`);
+            return;
+          }
+      }else if(token == 'VRSCTEST'){
+        const tokenInst = new web3.eth.Contract(ERC20Abi, VRSTERC20);
+        let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
+        let decimals = await tokenInst.methods.decimals().call();
+
+        balance = balance / ( 10 ** decimals );
+          if(balance < parseFloat(amount) ){
+            alert(`Not enough ${token} in account, balance: ${balance}`);
+            return;
+          }
+      }else if(token == 'bridge'){
+        const tokenInst = new web3.eth.Contract(ERC20Abi, BETHERC20);
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
 
@@ -287,67 +323,105 @@ const initialize = async () => {InputToken1
       }
 
       let destinationaddress = {};
- 
-      if (!isETHAdd) {
 
-        if (isiAddress(contractAddress)) {
-          destinationtype = 4; //ID TYPE
-          console.log('i address Valid: ', contractAddress)
-          destinationaddress = convertVerusAddressToEthAddress(contractAddress)
-          console.log('Converted address ', destinationaddress)
-        } else if (isRAddress(contractAddress)) {
-          destinationtype = 1; //R TYPE
-          console.log('R address Valid: ', contractAddress)
-          destinationaddress = convertVerusAddressToEthAddress(contractAddress)
-          console.log('Converted address ', destinationaddress)
-        }else {
-          alert("Not a valid i or R address");
-          return;
-        }
+      if (isiAddress(contractAddress)) {
+        destinationtype = 4; //ID TYPE
+        console.log('i address Valid: ', contractAddress)
+        destinationaddress = convertVerusAddressToEthAddress(contractAddress)
+        console.log('Converted address ', destinationaddress)
+      } else if (isRAddress(contractAddress)) {
+        destinationtype = 2; //R TYPE
+        console.log('R address Valid: ', contractAddress)
+        destinationaddress = convertVerusAddressToEthAddress(contractAddress)
+        console.log('Converted address ', destinationaddress)
+      }else if (isETHAddress(contractAddress)) {
+        destinationtype = 9; //R TYPE
+        destinationaddress = contractAddress
+      }else {
+        alert("Not a valid i / R or ETH address");
+        return;
       }
-
-
 
       if(destination == 'Choose...'){
         alert("Please Choose a destination type"); //add in FLAGS logic for destination
-        return;
-       
+        return; 
       }
+
+      if(destination == "bridge" ){
+        flagvalue = 67;
+        destinationcurrency = "bridge";
+      }
+      if(destination == "swaptoUSDC" ){
+        if(destinationtype != 9){
+          alert("Destination must be ETH type address"); //add in FLAGS logic for destination
+          return; 
+
+        }
+
+
+        flagvalue = 67;
+        destinationcurrency = "bridge";
+        destinationtype = destinationtype + 128;
+
+        //to do a swap we need to append the gatewayID + gateway code + fees
+        destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
+      }
+
       if(amount == 0){
         alert("Please Set an amount");  //todo validate length e.g. 100000.00000000
         return;
-
       }
+
+        let feecurrency = {};
+        let fees = {};
+        if(poolavailable ){
+          feecurrency = currency.ETH;
+          fees = 300000
+
+        }else{
+          feecurrency = currency.VRSCTEST;
+          fees = 20000000
+        }
+      
 
       let verusAmount = (amount * 100000000);
       let CReserveTransfer =  {
         version : 1,
         currencyvalue : {currency: currency[token] , amount: verusAmount.toFixed(0)},
-        flags : 65,
-        feecurrencyid : currency.VRSCTEST,
-        fees : 2000000,
+        flags : flagvalue,
+        feecurrencyid : feecurrency,
+        fees : fees,
         destination : {destinationtype, destinationaddress},
-        destcurrencyid : currency.VRSCTEST,
+        destcurrencyid : currency[destinationcurrency],
         destsystemid : currency.VRSCTEST,
         secondreserveid : "0x0000000000000000000000000000000000000000"
-    }
+        }
+      console.log(JSON.stringify(CReserveTransfer));
 
-    let result ={};
-      
-       
-        
-            result = await verusBridge.methods.export(CReserveTransfer)
+      let result = await verusBridge.methods.export(CReserveTransfer)
           .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'ETH' ? amount : '0.00012', 'ether')});
         
-        } catch (err) {
+      } catch (err) {
           console.error(err)
           
-        }
+    }
 
 
   }
 
 
+  }
+
+  const checkBridgeLaunched = async () => {
+    try {
+
+      const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi, VERUSNOTARIZER);
+      poolavailable = await NotarizerInst.methods.poolAvailable(BRIDGEVETH).call()
+      poollaunchedtext.innerText = poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched";
+ 
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   function handleNewAccounts (newAccounts) {
@@ -355,6 +429,7 @@ const initialize = async () => {InputToken1
     accountsDiv.innerHTML = accounts
     if (isMetaMaskConnected()) {
       initializeAccountButtons()
+      checkBridgeLaunched()
     }
     updateButtons()
   }

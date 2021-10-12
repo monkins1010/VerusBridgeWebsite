@@ -96,6 +96,7 @@
                     <option value="ETH">ETH</option>
                     <option value="USDC">USDC</option>
                     <option value="VRSCTEST">VRSCTEST</option>
+                    <option value="bridge">Bridge.veth</option>
                   </select>
                 </div>
 
@@ -105,9 +106,9 @@
                   </div>
                   <select class="custom-select" id="inputGroupSelect02">
                     <option selected>Choose...</option>
-                    <option value="To standard R address or i address">To standard R address or i address</option>
-                    <option value="To gateway prelaunc">To gateway prelaunch</option>
-                    <option value="To launched gateway">To launched gateway</option>
+                    <option value="vrsctest">Direct to VRSCTEST address</option>
+                    <option value="bridge">To Launched Bridge.veth</option>
+                    <option value="swaptoUSDC">Convert to VRSCTEST Token (Bounce back)</option>
                   </select>
                 </div>
 
@@ -117,7 +118,7 @@
                     <input  class="form-control" id="Inputamount1" aria-describedby="TokenHelp" placeholder="Enter Amount">
                     </div>
                    <button id="sendETHButton" class="btn btn-primary">Send</button>
-                
+                   <span id="poollaunched"></span>
         
                 <hr />
 
