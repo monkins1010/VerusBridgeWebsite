@@ -262,7 +262,7 @@ const initialize = async () => {InputToken1
       let destinationtype = {};
       let flagvalue = 65;
       let bridgeHex = convertVerusAddressToEthAddress("iSojYsotVzXz4wh2eJriASGo6UidJDDhL2");
-
+      let secondreserveid = "0x0000000000000000000000000000000000000000"
       let destinationcurrency = "VRSCTEST";
 
       let currency = {
@@ -351,13 +351,12 @@ const initialize = async () => {InputToken1
         flagvalue = 67;
         destinationcurrency = "bridge";
       }
-      if(destination == "swaptoUSDC" ){
+      if(destination == "swaptoBRIDGE" || destination == "swaptoVRSCTEST" ){
         if(destinationtype != 9){
           alert("Destination must be ETH type address"); //add in FLAGS logic for destination
           return; 
 
         }
-
 
         flagvalue = 67;
         destinationcurrency = "bridge";
@@ -365,6 +364,11 @@ const initialize = async () => {InputToken1
 
         //to do a swap we need to append the gatewayID + gateway code + fees
         destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
+        if(destination == "swaptoVRSCTEST"){
+          secondreserveid = currency.VRSCTEST;
+          flagvalue = 67 + 1024;  //VALID + CONVERT + RESERVE_TO_RESERVE 
+        }
+      
       }
 
       if(amount == 0){
@@ -374,7 +378,7 @@ const initialize = async () => {InputToken1
 
         let feecurrency = {};
         let fees = {};
-        if(poolavailable ){
+        if(poolavailable != "0" ){
           feecurrency = currency.ETH;
           fees = 300000
 
@@ -394,7 +398,7 @@ const initialize = async () => {InputToken1
         destination : {destinationtype, destinationaddress},
         destcurrencyid : currency[destinationcurrency],
         destsystemid : currency.VRSCTEST,
-        secondreserveid : "0x0000000000000000000000000000000000000000"
+        secondreserveid : secondreserveid
         }
       console.log(JSON.stringify(CReserveTransfer));
 
