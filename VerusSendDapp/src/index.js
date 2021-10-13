@@ -263,7 +263,7 @@ const initialize = async () => {InputToken1
       let flagvalue = 65;
       let bridgeHex = convertVerusAddressToEthAddress("iSojYsotVzXz4wh2eJriASGo6UidJDDhL2");
       let secondreserveid = "0x0000000000000000000000000000000000000000"
-      let destinationcurrency = "VRSCTEST";
+      let destinationcurrency = "ETH";
 
       let currency = {
         VRSCTEST: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d",
