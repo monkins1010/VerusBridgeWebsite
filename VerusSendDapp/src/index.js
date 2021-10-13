@@ -421,7 +421,8 @@ const initialize = async () => {InputToken1
 
       const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi, VERUSNOTARIZER);
       poolavailable = await NotarizerInst.methods.poolAvailable(BRIDGEVETH).call()
-      poollaunchedtext.innerText = poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched";
+      let lastProof = await  NotarizerInst.methods.getLastProofRoot().call();
+      poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last Verus Notary height: " + lastProof.rootheight;
  
     } catch (err) {
       console.error(err)
