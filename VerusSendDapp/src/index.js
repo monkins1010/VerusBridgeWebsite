@@ -41,6 +41,7 @@ const accountadd = document.getElementById('accountadd')
 
 // Send Eth Section
 const sendETHButton = document.getElementById('sendETHButton')
+const AuthoriseCoinsButton = document.getElementById('AuthoriseCoins')
 const SendETHAddress1 = document.getElementById('InputToken1')
 const SendETHAmount1 = document.getElementById('Inputamount1')
 const inputGroupSelect01 = document.getElementById('inputGroupSelect01')
@@ -127,6 +128,7 @@ const initialize = async () => {InputToken1
       onboardButton.innerText = 'Connected to MetaMask'
       onboardButton.disabled = true
       sendETHButton.disabled = false
+      AuthoriseCoinsButton.disabled = false
      // mintUSDCTokens.disabled = false  
      // AuthUSDCbutton.disabled = false 
 
@@ -139,6 +141,7 @@ const initialize = async () => {InputToken1
       onboardButton.onclick = onClickConnect
       onboardButton.disabled = false
       sendETHButton.disabled = true
+      AuthoriseCoinsButton.disabled = true
     }
   }
 
@@ -251,6 +254,26 @@ const initialize = async () => {InputToken1
       else return hexString;
     }
 
+    AuthoriseCoinsButton.onclick = async () => {
+    try{
+      const tokenInst1 = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
+      await tokenInst1.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
+      .send({from: ethereum.selectedAddress, gas: maxGas});
+
+      const tokenInst2 = new web3.eth.Contract(ERC20Abi, VRSTERC20);
+      await tokenInst2.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
+      .send({from: ethereum.selectedAddress, gas: maxGas});
+
+      const tokenInst3 = new web3.eth.Contract(ERC20Abi, BETHERC20);
+      await tokenInst3.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
+      .send({from: ethereum.selectedAddress, gas: maxGas});
+
+    }catch(err){
+      console.error(err);
+      console.log(err);
+    }
+      alert("Your Rinkeby account has authorised USDC, VRSCTEST & bridge.veth tokens");
+    }
 
     sendETHButton.onclick = async () => {
 
