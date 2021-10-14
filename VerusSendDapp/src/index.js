@@ -277,12 +277,12 @@ const initialize = async () => {InputToken1
       accbal = web3.utils.fromWei(accbal);
       accbal = parseFloat(accbal);
       try {
-      
+      //deal with valid information in the input fields
       if(token == 'Choose...'){
         alert("Please choose a Token");
         return;
       }
-      
+      // check that user has enough in their account
       if(isNaN(amount)){
         alert(`Not a valid amount, amount: ${amount}`);
         return;
@@ -323,41 +323,43 @@ const initialize = async () => {InputToken1
       }
 
       let destinationaddress = {};
-
+      //set destination to correct type
       if (isiAddress(contractAddress)) {
         destinationtype = 4; //ID TYPE
-        console.log('i address Valid: ', contractAddress)
         destinationaddress = convertVerusAddressToEthAddress(contractAddress)
-        console.log('Converted address ', destinationaddress)
       } else if (isRAddress(contractAddress)) {
         destinationtype = 2; //R TYPE
-        console.log('R address Valid: ', contractAddress)
         destinationaddress = convertVerusAddressToEthAddress(contractAddress)
-        console.log('Converted address ', destinationaddress)
       }else if (isETHAddress(contractAddress)) {
-        destinationtype = 9; //R TYPE
+        destinationtype = 9; //ETH TYPE
         destinationaddress = contractAddress
       }else {
         alert("Not a valid i / R or ETH address");
         return;
       }
-
       if(destination == 'Choose...'){
         alert("Please Choose a destination type"); //add in FLAGS logic for destination
         return; 
       }
 
-      if(destination == "bridge" ){
-        flagvalue = 67;
-        destinationcurrency = "bridge";
+      if((destination == 'vrsctest' || destination == 'bridge') && destinationtype == 9){
+        alert("Cannot send direct to ETH address, must convert and bounce back"); //add in FLAGS logic for destination
+        return; 
       }
-      if(destination == "swaptoBRIDGE" || destination == "swaptoVRSCTEST" ){
+
+      if(destination == "bridge" && token != 'bridge' ){
+         flagvalue = 67;
+        destinationcurrency = "bridge";
+      }else if (destination == "bridge" && token == 'bridge' ){
+        alert("Cannot convert bridge to bridge, must be sent direct"); //add in FLAGS logic for destination
+        return; 
+      }
+
+      if((destination == "swaptoBRIDGE") && (token != 'bridge') || destination == "swaptoVRSCTEST" ){
         if(destinationtype != 9){
           alert("Destination must be ETH type address"); //add in FLAGS logic for destination
           return; 
-
         }
-
         flagvalue = 67;
         destinationcurrency = "bridge";
         destinationtype = destinationtype + 128;
@@ -368,52 +370,66 @@ const initialize = async () => {InputToken1
           secondreserveid = currency.VRSCTEST;
           flagvalue = 67 + 1024;  //VALID + CONVERT + RESERVE_TO_RESERVE 
         }
-      
+      }else if (destination == "swaptoBRIDGE" && token == 'bridge') {
+        alert("Cannot convert bridge to bridge, must be sent direct"); //add in FLAGS logic for destination
+        return; 
+
       }
 
-      if(amount == 0){
+      if(amount == 0 || amount == '' ){
         alert("Please Set an amount");  //todo validate length e.g. 100000.00000000
         return;
       }
 
-        let feecurrency = {};
-        let fees = {};
-        if(poolavailable != "0" ){
-          feecurrency = currency.ETH;
-          fees = 300000
-
-        }else{
-          feecurrency = currency.VRSCTEST;
-          fees = 20000000
+      if( poolavailable == "0"){
+        if(destination == "swaptoBRIDGE" || destination == "swaptoVRSCTEST" || destination == "bridge"){
+          alert("Bridge.veth not launched yet, send only direct until launch complete"); //add in FLAGS logic for destination
+          return; 
         }
+      }else if( poolavailable != "0"){
+        if(destination == 'vrsctest'){
+          alert("Bridge open, must go through bridge converter as fee subsidies are not available"); //add in FLAGS logic for destination
+          return; 
+        }
+      }
+
+      let feecurrency = {};
+      let fees = {};
+      if(poolavailable != "0" ){
+        feecurrency = currency.ETH;
+        fees = 30000; //0.0003 ETH FEE
+      }else{
+        feecurrency = currency.VRSCTEST; //pre bridge launch fees must be set as vrsctest
+        fees = 20000000  // 0.02 VRSCTEST
+      }
       
 
       let verusAmount = (amount * 100000000);
       let CReserveTransfer =  {
         version : 1,
-        currencyvalue : {currency: currency[token] , amount: verusAmount.toFixed(0)},
+        currencyvalue : {currency: currency[token] , amount: verusAmount.toFixed(0)}, //currency sending from ethereum
         flags : flagvalue,
-        feecurrencyid : feecurrency,
+        feecurrencyid : feecurrency, //fee is vrsctest pre bridge launch, veth or others post.
         fees : fees,
-        destination : {destinationtype, destinationaddress},
-        destcurrencyid : currency[destinationcurrency],
-        destsystemid : currency.VRSCTEST,
-        secondreserveid : secondreserveid
+        destination : {destinationtype, destinationaddress}, //destination address currecny is going to
+        destcurrencyid : currency[destinationcurrency],   // destination currency is veth on direct. bridge.veth on bounceback
+        destsystemid : currency.VRSCTEST,     // destination system going to can only be VRSCTEST
+        secondreserveid : secondreserveid    //used as return currency type on bounce back
         }
-      console.log(JSON.stringify(CReserveTransfer));
+        var date = new Date();
+        var n = date.toDateString();
+        var time = date.toLocaleTimeString();
+        console.log("Transaction output: ",`Date: ${n} Time: ${time}`);
+ 
+        console.log(CReserveTransfer);
 
       let result = await verusBridge.methods.export(CReserveTransfer)
-          .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'ETH' ? amount : '0.00012', 'ether')});
+          .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'ETH' ? amount : '0.0006', 'ether')});
         
       } catch (err) {
-          console.error(err)
-          
+          console.log(err)
     }
-
-
-  }
-
-
+   }
   }
 
   const checkBridgeLaunched = async () => {
@@ -422,7 +438,7 @@ const initialize = async () => {InputToken1
       const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi, VERUSNOTARIZER);
       poolavailable = await NotarizerInst.methods.poolAvailable(BRIDGEVETH).call()
       let lastProof = await  NotarizerInst.methods.getLastProofRoot().call();
-      poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last Verus Notary height: " + lastProof.rootheight;
+      poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last VerusTest Notary height: " + lastProof.rootheight;
  
     } catch (err) {
       console.error(err)
@@ -495,4 +511,18 @@ const initialize = async () => {InputToken1
 
 }
 
-window.addEventListener('DOMContentLoaded', initialize)
+window.addEventListener('DOMContentLoaded', initialize);
+
+(function () {
+  var old = console.log;
+  var logger = document.getElementById('log');
+  console.log = function () {
+    for (var i = 0; i < arguments.length; i++) {
+      if (typeof arguments[i] == 'object') {
+          logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(arguments[i], undefined, 2) : arguments[i]) + '<br />';
+      } else {
+          logger.innerHTML += arguments[i] + '<br />';
+      }
+    }
+  }
+})();
