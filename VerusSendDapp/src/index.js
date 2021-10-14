@@ -31,6 +31,12 @@ const isMetaMaskInstalled = () => {
   const { ethereum } = window
   return Boolean(ethereum && ethereum.isMetaMask)
 }
+//dropdown
+const dropvrsctest = document.getElementById('hidevrsctest')
+const dropswapbridge = document.getElementById('hideswaptobridge')
+const dropswapvrsctest = document.getElementById('hideswaptovrsctest')
+const dropbridgetoken = document.getElementById('hidebridgetoken')
+const dropbridgedest = document.getElementById('hidebridge')
 
 // Dapp Status Section
 const accountsDiv = document.getElementById('accounts')
@@ -47,7 +53,7 @@ const SendETHAmount1 = document.getElementById('Inputamount1')
 const inputGroupSelect01 = document.getElementById('inputGroupSelect01')
 const inputGroupSelect02 = document.getElementById('inputGroupSelect02')
 const poollaunchedtext = document.getElementById('poollaunched')
-
+const testhide = document.getElementById('testhide');
 // Send Tokens Section
 
 const mintUSDCTokens = document.getElementById('mintUSDCbutton');
@@ -193,61 +199,6 @@ const initialize = async () => {InputToken1
       }
     }
 
- /*   mintUSDCTokens.onclick = async () => {
-
-      const amount = mintUSDCAmount.value
-
-      if(isNaN(amount) || amount == ""){
-        alert(`Not a valid amount, amount: ${amount}`);
-        return;
-      }
-
-     // mintedUSDMSG.innerHTML = "USDC Minted, Add 0xeb8f08a975ab53e34d8a0330e0d34de942c95926 token to your metamask to see your balance ";
-      var accounts = await web3.eth.getAccounts();
-      const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);  
-
-
-      try{
-        await tokenInst.methods.mint(accounts[0],amount) 
-        .send({from: ethereum.selectedAddress, gas: maxGas});
-
-        await tokenInst.methods.increaseAllowance(verusBridgeContractAdd,amount) 
-        .send({from: ethereum.selectedAddress, gas: maxGas});
-       
-        }
-        catch (err){
-      console.error(err)
-          
-        }
-
-    }
-
-    AuthUSDCbutton.onclick = async () => {
- 
-      const amount = AuthUSDCAmount.value
-
-      if(isNaN(amount) || amount == ""){
-        alert(`Not a valid amount, amount: ${amount}`);
-        return;
-      }
-
-     // mintedUSDMSG.innerHTML = "USDC Minted, Add 0xeb8f08a975ab53e34d8a0330e0d34de942c95926 token to your metamask to see your balance ";
-      var accounts = await web3.eth.getAccounts();
-      const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);  
-
-
-      try{
-         await tokenInst.methods.increaseAllowance(verusBridgeContractAdd,amount) 
-        .send({from: ethereum.selectedAddress, gas: maxGas});
-       
-        }
-        catch (err){
-      console.error(err)
-      alert("Metamask end failed, reason: \n" + JSON.stringify(err));
-        }
-
-      
-    }*/
 
     const removeHexLeader = (hexString) => {
       if(hexString.substr(0,2) == '0x') return hexString.substr(2);
@@ -286,55 +237,58 @@ const initialize = async () => {InputToken1
       let flagvalue = 65;
       let bridgeHex = convertVerusAddressToEthAddress("iSojYsotVzXz4wh2eJriASGo6UidJDDhL2");
       let secondreserveid = "0x0000000000000000000000000000000000000000"
-      let destinationcurrency = "ETH";
+      let destinationcurrency = {};
 
-      let currency = {
+      let currency = { //vrsctest hex 'id' names of currencies
         VRSCTEST: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d",
         ETH: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00",
         USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f",
         bridge: bridgeHex,
       }
       var accounts = await web3.eth.getAccounts();
-      var accbal = await web3.eth.getBalance(accounts[0]);
-
+      var accbal = await web3.eth.getBalance(accounts[0]);  //your metamask eth balance
       accbal = web3.utils.fromWei(accbal);
       accbal = parseFloat(accbal);
+
+
       try {
       //deal with valid information in the input fields
       if(token == 'Choose...'){
         alert("Please choose a Token");
         return;
       }
-      // check that user has enough in their account
-      if(isNaN(amount)){
-        alert(`Not a valid amount, amount: ${amount}`);
+      //if no destination chosen error
+      if(destination == 'Choose...'){
+        alert("Please Choose a destination type"); //add in FLAGS logic for destination
+        return; 
+      }
+      // check that user has enough in their account of whatever token they have chosen
+      if(isNaN(amount) || amount == ''){
+        alert(`Not a valid amount: ${amount}`);
         return;
-
       }else if(token == 'ETH' && accbal < parseFloat(amount)){
         alert(`Not enough ETH in account, balance: ${accbal}`);
         return;
       }else if(token == 'USDC'){
-        const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
+        const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);  //get the users USDC token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
-
         balance = balance / ( 10 ** decimals );
           if(balance < parseFloat(amount) ){
             alert(`Not enough ${token} in account, balance: ${balance}`);
             return;
           }
       }else if(token == 'VRSCTEST'){
-        const tokenInst = new web3.eth.Contract(ERC20Abi, VRSTERC20);
+        const tokenInst = new web3.eth.Contract(ERC20Abi, VRSTERC20); //get the users VRSCTEST token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
-
         balance = balance / ( 10 ** decimals );
           if(balance < parseFloat(amount) ){
             alert(`Not enough ${token} in account, balance: ${balance}`);
             return;
           }
       }else if(token == 'bridge'){
-        const tokenInst = new web3.eth.Contract(ERC20Abi, BETHERC20);
+        const tokenInst = new web3.eth.Contract(ERC20Abi, BETHERC20); //get the users bridge.veth token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
 
@@ -360,60 +314,67 @@ const initialize = async () => {InputToken1
         alert("Not a valid i / R or ETH address");
         return;
       }
-      if(destination == 'Choose...'){
-        alert("Please Choose a destination type"); //add in FLAGS logic for destination
-        return; 
-      }
+  
 
-      if((destination == 'vrsctest' || destination == 'bridge') && destinationtype == 9){
-        alert("Cannot send direct to ETH address, must convert and bounce back"); //add in FLAGS logic for destination
-        return; 
-      }
+      if(destinationtype == 4 || destinationtype == 2 )  //if I or R address chosen then do one way specific stuff
+      {          
+          if(poolavailable == "0") // pool not available
+          {
+            if(destination != 'vrsctest'){
+              alert("Cannot convert yet Bridge.veth not launched"); //add in FLAGS logic for destination
+              return;
+            }
+            flagvalue = 65;
+            destinationcurrency = "ETH";
+          }
+          else 
+          {
+            if(destination == 'vrsctest') {
 
-      if(destination == "bridge" && token != 'bridge' ){
-         flagvalue = 67;
-        destinationcurrency = "bridge";
-      }else if (destination == "bridge" && token == 'bridge' ){
-        alert("Cannot convert bridge to bridge, must be sent direct"); //add in FLAGS logic for destination
-        return; 
-      }
 
-      if((destination == "swaptoBRIDGE") && (token != 'bridge') || destination == "swaptoVRSCTEST" ){
-        if(destinationtype != 9){
-          alert("Destination must be ETH type address"); //add in FLAGS logic for destination
-          return; 
+              
+              destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
+              flagvalue = 65  
+
+            }else if(destination == 'bridge') {  
+              
+              destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
+              if(token != 'bridge'){
+                flagvalue = 65 + 2;   //add convert flag on
+              }else{
+                alert("Cannot convert bridge to bridge."); //add in FLAGS logic for destination
+                return;
+              }
+            }else{
+              alert("Cannot bounce back, direct send only with i or R address"); //add in FLAGS logic for destination
+              return;
+            }
+          }
+      }else if (destinationtype == 9 && poolavailable != "0"){  // if ethereuem address and pool is available
+
+        if((destination == "swaptoBRIDGE") && (token != 'bridge') || destination == "swaptoVRSCTEST" && (token != 'VRSCTEST')){
+          destinationcurrency = "bridge";
+          destinationtype += 128; //add 128 = FLAG_DEST_GATEWAY
+          //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
+          destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
+
+          if(destination == "swaptoVRSCTEST"){
+            secondreserveid = currency.VRSCTEST;
+            flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE 
+          }
+          if(destination == "swaptoBRIDGE"){
+            secondreserveid = currency.bridge;
+            flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE 
+          }
+
+        }else{
+          alert("Cannot swap tokens to and from the same coin.  Or cannot go one way to an ETH address"); //add in FLAGS logic for destination
+          return;
         }
-        flagvalue = 67;
-        destinationcurrency = "bridge";
-        destinationtype = destinationtype + 128;
 
-        //to do a swap we need to append the gatewayID + gateway code + fees
-        destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
-        if(destination == "swaptoVRSCTEST"){
-          secondreserveid = currency.VRSCTEST;
-          flagvalue = 67 + 1024;  //VALID + CONVERT + RESERVE_TO_RESERVE 
-        }
-      }else if (destination == "swaptoBRIDGE" && token == 'bridge') {
-        alert("Cannot convert bridge to bridge, must be sent direct"); //add in FLAGS logic for destination
-        return; 
-
-      }
-
-      if(amount == 0 || amount == '' ){
-        alert("Please Set an amount");  //todo validate length e.g. 100000.00000000
+      }else{
+        alert("Bridge.veth not launched yet, send only direct to i or R until launch complete"); //add in FLAGS logic for destination
         return;
-      }
-
-      if( poolavailable == "0"){
-        if(destination == "swaptoBRIDGE" || destination == "swaptoVRSCTEST" || destination == "bridge"){
-          alert("Bridge.veth not launched yet, send only direct until launch complete"); //add in FLAGS logic for destination
-          return; 
-        }
-      }else if( poolavailable != "0"){
-        if(destination == 'vrsctest'){
-          alert("Bridge open, must go through bridge converter as fee subsidies are not available"); //add in FLAGS logic for destination
-          return; 
-        }
       }
 
       let feecurrency = {};
@@ -455,14 +416,23 @@ const initialize = async () => {InputToken1
    }
   }
 
+
   const checkBridgeLaunched = async () => {
     try {
 
       const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi, VERUSNOTARIZER);
-      poolavailable = await NotarizerInst.methods.poolAvailable(BRIDGEVETH).call()
+      poolavailable = await NotarizerInst.methods.poolAvailable(BRIDGEVETH).call(); poolavailable = "0";
       let lastProof = await  NotarizerInst.methods.getLastProofRoot().call();
       poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last VerusTest Notary height: " + lastProof.rootheight;
  
+      if(poolavailable == "0"){
+        dropbridge.hidden = true;
+        dropswapbridge.hidden = true;
+        dropswapvrsctest.hidden = true;
+        dropbridgetoken.hidden = true;
+        dropbridgedest.hidden = true;
+      }
+
     } catch (err) {
       console.error(err)
     }

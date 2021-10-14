@@ -47,9 +47,9 @@
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
             <div class="card">
               <div class="card-body">
-                <h4 class="card-title">
+                <h5 class="card-title">
                   Connect to Contract
-                </h4>
+                </h5>
 
                 <button
                   class="btn btn-primary btn-lg btn-block mb-3"
@@ -75,9 +75,9 @@
           
             <div class="card full-width">
               <div class="card-body">
-                <h4 class="card-title">
-                  Send Tokens to Verus Blockchain
-                </h4>
+                <h5 class="card-title">
+                  Swap Currencies with Verus and/or Send to the Verus Network
+                </h5>
 
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
@@ -96,7 +96,7 @@
                     <option value="ETH">ETH</option>
                     <option value="USDC">USDC</option>
                     <option value="VRSCTEST">VRSCTEST</option>
-                    <option value="bridge">Bridge.veth</option>
+                    <option id="hidebridgetoken" value="bridge">Bridge.veth</option>
                   </select>
                 </div>
 
@@ -106,10 +106,10 @@
                   </div>
                   <select class="custom-select" id="inputGroupSelect02">
                     <option selected>Choose...</option>
-                    <option value="vrsctest">Direct to VRSCTEST address</option>
-                    <option value="bridge">To Launched Bridge.veth</option>
-                    <option value="swaptoBRIDGE">Convert to bridge Token (Bounce back)</option>
-                    <option value="swaptoVRSCTEST">Convert to VRSCTEST Token (Bounce back)</option>
+                    <option id="hidevrsctest" value="vrsctest">To VRSCTEST wallet (no conversion)</option>
+                    <option id="hidebridge" value="bridge">Convert to Bridge.veth on VRSCTEST</option>
+                    <option id="hideswaptobridge" value="swaptoBRIDGE">Convert to bridge Token (Bounce back to ETH)</option>
+                    <option id="hideswaptovrsctest" value="swaptoVRSCTEST">Convert to VRSCTEST Token (Bounce back to ETH)</option>
                   </select>
                 </div>
 
