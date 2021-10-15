@@ -37,7 +37,7 @@ const dropswapbridge = document.getElementById('hideswaptobridge')
 const dropswapvrsctest = document.getElementById('hideswaptovrsctest')
 const dropbridgetoken = document.getElementById('hidebridgetoken')
 const dropbridgedest = document.getElementById('hidebridge')
-
+const dropusdcdest = document.getElementById('hideswaptousdc')
 // Dapp Status Section
 const accountsDiv = document.getElementById('accounts')
 
@@ -350,9 +350,10 @@ const initialize = async () => {InputToken1
               return;
             }
           }
-      }else if (destinationtype == 9 && poolavailable != "0"){  // if ethereuem address and pool is available
+      }else if (destinationtype == 9 && poolavailable != "0"){  // if ethereuem address and pool is available 
 
-        if((destination == "swaptoBRIDGE") && (token != 'bridge') || destination == "swaptoVRSCTEST" && (token != 'VRSCTEST')){
+        if((destination == "swaptoBRIDGE") && (token != 'bridge') || destination == "swaptoVRSCTEST" && (token != 'VRSCTEST') 
+            || destination == "swaptoUSDC" && (token != 'USDC')){
           destinationcurrency = "bridge";
           destinationtype += 128; //add 128 = FLAG_DEST_GATEWAY
           //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
@@ -363,10 +364,13 @@ const initialize = async () => {InputToken1
             flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE 
           }
           if(destination == "swaptoBRIDGE"){
-            secondreserveid = currency.bridge;
+            
+            flagvalue = 67;  //VALID + CONVERT + CROSS_SYSTEM 
+          }
+          if(destination == "swaptoUSDC"){
+            secondreserveid = currency.USDC;
             flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE 
           }
-
         }else{
           alert("Cannot swap tokens to and from the same coin.  Or cannot go one way to an ETH address"); //add in FLAGS logic for destination
           return;
@@ -431,6 +435,7 @@ const initialize = async () => {InputToken1
         dropswapvrsctest.hidden = true;
         dropbridgetoken.hidden = true;
         dropbridgedest.hidden = true;
+        dropusdcdest.hidden = true;
       }
 
     } catch (err) {
