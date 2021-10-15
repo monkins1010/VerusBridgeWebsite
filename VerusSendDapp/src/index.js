@@ -430,7 +430,6 @@ const initialize = async () => {InputToken1
       poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last VerusTest Notary height: " + lastProof.rootheight;
  
       if(poolavailable == "0"){
-        dropbridge.hidden = true;
         dropswapbridge.hidden = true;
         dropswapvrsctest.hidden = true;
         dropbridgetoken.hidden = true;
