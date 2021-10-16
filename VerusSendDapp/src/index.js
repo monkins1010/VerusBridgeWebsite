@@ -6,19 +6,27 @@ import Web3 from 'web3'
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
 const ERC20Abi = require('./ERC20Abi.json')
+const TOKENMANAGERABI = require('./TokenManagerAbi.json')
 const NOTARIZERAbi = require('./Notarizerabi.json')
 const gist = document.getElementById('file-gistfile1-txt-LC1');
 
 const gistdata = JSON.parse(gist.textContent);
 const verusBridgeContractAdd = gistdata? gistdata.bridge : "";
 let USDCERC20Add = gistdata? gistdata.USDC : ""; //'0xeb8f08a975ab53e34d8a0330e0d34de942c95926'
-let VRSTERC20 = gistdata? gistdata.vrst : ""; //"0x94186e62590d82ef5cbfd89323d3da20c7153afb" 
 let BETHERC20 = gistdata? gistdata.beth : "";
 let VERUSNOTARIZER = gistdata? gistdata.notarizer : "";
 let BRIDGEVETH = gistdata? gistdata.bridgeveth : ""; 
+let TOKENMANAGERERC20ADD = "0xabf54d90b5fa89c608ceea16a0dcf991cd259b64"; // gistdata? gistdata.tokenmanerc20 : ""; 
 
 let maxGas = 6000000;
 let poolavailable = false;
+
+let currencyglobal = { //vrsctest hex 'id' names of currencies
+  VRSCTEST: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d",
+  ETH: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00",
+  USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f",
+  bridge: "0xffece948b8a38bbcc813411d2597f7f8485a0689",
+}
 
 
 const currentUrl = new URL(window.location.href)
@@ -38,6 +46,7 @@ const dropswapvrsctest = document.getElementById('hideswaptovrsctest')
 const dropbridgetoken = document.getElementById('hidebridgetoken')
 const dropbridgedest = document.getElementById('hidebridge')
 const dropusdcdest = document.getElementById('hideswaptousdc')
+const spinner = document.getElementById("spinner")
 // Dapp Status Section
 const accountsDiv = document.getElementById('accounts')
 
@@ -135,6 +144,7 @@ const initialize = async () => {InputToken1
       onboardButton.disabled = true
       sendETHButton.disabled = false
       AuthoriseCoinsButton.disabled = false
+      spinner.hidden = true;
      // mintUSDCTokens.disabled = false  
      // AuthUSDCbutton.disabled = false 
 
@@ -199,31 +209,66 @@ const initialize = async () => {InputToken1
       }
     }
 
-
     const removeHexLeader = (hexString) => {
       if(hexString.substr(0,2) == '0x') return hexString.substr(2);
       else return hexString;
     }
 
-    AuthoriseCoinsButton.onclick = async () => {
+    const checkTokensAuthorised = async () => {
+
+
+
+      try{
+        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
+        let VRSCTESTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.VRSCTEST).call()
+        let bridgeTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.bridge).call()
+
+        const tokenInst1 = new web3.eth.Contract(ERC20Abi, VRSCTESTadd[0]);
+        let allowance1 = await tokenInst1.methods.allowance(accounts[0],verusBridgeContractAdd).call()
+        if(parseInt(allowance1) <= 0 )
+          return false;
+
+        const tokenInst2 = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
+        let allowance2 = await tokenInst2.methods.allowance(accounts[0],verusBridgeContractAdd).call()
+        if(parseInt(allowance2) <= 0 )
+          return false;
+
+        const tokenInst3 = new web3.eth.Contract(ERC20Abi, bridgeTadd[0]);
+        let allowance3 = await tokenInst3.methods.allowance(accounts[0],verusBridgeContractAdd).call()
+        if(parseInt(allowance3) <= 0 )
+          return false;
+
+      }catch(err){
+        console.error(err);
+        console.log(err);
+      }
+      return true;
+
+    }
+
+    const authoriseTokens = async () => {
     try{
+      const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
+      let VRSCTESTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.VRSCTEST).call()
+      let bridgeTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.bridge).call()
+
       const tokenInst1 = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
       await tokenInst1.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
       .send({from: ethereum.selectedAddress, gas: maxGas});
 
-      const tokenInst2 = new web3.eth.Contract(ERC20Abi, VRSTERC20);
+      const tokenInst2 = new web3.eth.Contract(ERC20Abi, VRSCTESTadd[0]);
       await tokenInst2.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
       .send({from: ethereum.selectedAddress, gas: maxGas});
 
-      const tokenInst3 = new web3.eth.Contract(ERC20Abi, BETHERC20);
+      const tokenInst3 = new web3.eth.Contract(ERC20Abi, bridgeTadd[0]);
       await tokenInst3.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
       .send({from: ethereum.selectedAddress, gas: maxGas});
-
+      alert("Your Rinkeby account has authorised USDC, VRSCTEST & bridge.veth tokens");
     }catch(err){
       console.error(err);
       console.log(err);
     }
-      alert("Your Rinkeby account has authorised USDC, VRSCTEST & bridge.veth tokens");
+     
     }
 
     sendETHButton.onclick = async () => {
@@ -249,7 +294,7 @@ const initialize = async () => {InputToken1
       var accbal = await web3.eth.getBalance(accounts[0]);  //your metamask eth balance
       accbal = web3.utils.fromWei(accbal);
       accbal = parseFloat(accbal);
-
+      spinner.hidden = false;
 
       try {
       //deal with valid information in the input fields
@@ -270,6 +315,12 @@ const initialize = async () => {InputToken1
         alert(`Not enough ETH in account, balance: ${accbal}`);
         return;
       }else if(token == 'USDC'){
+
+        if(!(await checkTokensAuthorised())){
+          alert(`The Website will now authorise Verus be allowed to spend your Tokens. \n\nPlease click the Metamask popup that appears 3 seperate times (please be patient). \n \nOnce you have clicked 3 times a completion message saying "Accounts Authorised" will appear`);
+          await authoriseTokens();
+        } 
+
         const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);  //get the users USDC token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
@@ -279,7 +330,15 @@ const initialize = async () => {InputToken1
             return;
           }
       }else if(token == 'VRSCTEST'){
-        const tokenInst = new web3.eth.Contract(ERC20Abi, VRSTERC20); //get the users VRSCTEST token balance
+
+        if(!(await checkTokensAuthorised())){
+          alert(`The Website will now authorise Verus be allowed to spend your Tokens. \n\nPlease click the Metamask popup that appears 3 seperate times (please be patient). \n \nOnce you have clicked 3 times a completion message saying "Accounts Authorised" will appear`);
+          await authoriseTokens();
+        } 
+
+        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
+        let VRSCTESTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.VRSCTEST).call()
+        const tokenInst = new web3.eth.Contract(ERC20Abi, VRSCTESTadd[0]); //get the users VRSCTEST token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
         balance = balance / ( 10 ** decimals );
@@ -288,7 +347,16 @@ const initialize = async () => {InputToken1
             return;
           }
       }else if(token == 'bridge'){
-        const tokenInst = new web3.eth.Contract(ERC20Abi, BETHERC20); //get the users bridge.veth token balance
+
+        if(!(await checkTokensAuthorised())){
+          alert(`The Website will now authorise Verus be allowed to spend your Tokens. \n\nPlease click the Metamask popup that appears 3 seperate times (please be patient). \n \nOnce you have clicked 3 times a completion message saying "Accounts Authorised" will appear`);
+          await authoriseTokens();
+        } 
+
+        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
+        let bridgeTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.bridge).call()
+
+        const tokenInst = new web3.eth.Contract(ERC20Abi, bridgeTadd[0]); //get the users bridge.veth token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
 
@@ -314,8 +382,7 @@ const initialize = async () => {InputToken1
         alert("Not a valid i / R or ETH address");
         return;
       }
-  
-
+ 
       if(destinationtype == 4 || destinationtype == 2 )  //if I or R address chosen then do one way specific stuff
       {          
           if(poolavailable == "0") // pool not available
@@ -330,8 +397,6 @@ const initialize = async () => {InputToken1
           else 
           {
             if(destination == 'vrsctest') {
-
-
               
               destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
               flagvalue = 65  
@@ -342,7 +407,7 @@ const initialize = async () => {InputToken1
               if(token != 'bridge'){
                 flagvalue = 65 + 2;   //add convert flag on
               }else{
-                alert("Cannot convert bridge to bridge."); //add in FLAGS logic for destination
+                alert("Cannot convert bridge to bridge. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
                 return;
               }
             }else{
@@ -413,8 +478,12 @@ const initialize = async () => {InputToken1
 
       let result = await verusBridge.methods.export(CReserveTransfer)
           .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'ETH' ? amount : '0.0006', 'ether')});
-        
+          spinner.hidden = true;
+          alert("Transaction sent"); 
+
       } catch (err) {
+        spinner.hidden = true;
+        alert("Transaction error Check log"); 
           console.log(err)
     }
    }
@@ -523,3 +592,5 @@ window.addEventListener('DOMContentLoaded', initialize);
     }
   }
 })();
+
+console.log("-")

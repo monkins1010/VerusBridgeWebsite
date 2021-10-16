@@ -119,7 +119,9 @@
                     
                     <input  class="form-control" id="Inputamount1" aria-describedby="TokenHelp" placeholder="Enter Amount">
                     </div>
-                   <button id="sendETHButton" class="btn btn-primary">Send</button>
+                   <button id="sendETHButton" class="btn btn-primary">
+                    <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Send</button>
                    <span id="poollaunched"></span>
         
                 <hr />
@@ -135,12 +137,26 @@
       <h4>Instructions</h4>
       <p>To get some testnet coins please install metamask, and select Rinkeby testnetwork in the metamask plugin.
         Then copy your address and goto <a href="https://faucet.rinkeby.io/">https://faucet.rinkeby.io/</a> and follow the instructions</p>
-        <h4>Output:</h4>
+        <h5>Output (console.log):</h5>
+        <style type="text/css">
+          pre {
+            max-height: 400px;
+            color: #444;
+            padding: 10px;
+            background: #eee;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            word-wrap: normal;
+            overflow: auto;
+          }
+          </style>
         <pre id="log"></pre>
-        <button id="AuthoriseCoins" class="btn btn-primary">Authorise Coins</button>
-        <p>Press the "Authorise Coins" Button and Metamask will pop up 3 times to ask you to confirm the allowance.  Then after that
-          you may send USDC, VRSCTEST & Bridge.vETH from your Rinkeby ETH account to Verustest network.
+        <h5>Notes:</h5>
+        <p> <b>Authorising Tokens:</b> <br> Metamask will pop up 3 times to ask you to confirm the allowance.  Then after that
+          you may send USDC, VRSCTEST & Bridge.vETH from your Rinkeby ETH account to the Verustest network. Pleaase be patient during this process
+          MetaMask will popup 3 times during this process, then only after a successful completion message may you send your Tokens.
         </p>
+        <button id="AuthoriseCoins" class="btn btn-primary invisible">Authorise Coins</button>
     </div>
     
     
