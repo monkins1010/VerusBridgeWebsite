@@ -10,13 +10,14 @@ const TOKENMANAGERABI = require('./TokenManagerAbi.json')
 const NOTARIZERAbi = require('./Notarizerabi.json')
 const gist = document.getElementById('file-gistfile1-txt-LC1');
 
-const gistdata = JSON.parse(gist.textContent);
-const verusBridgeContractAdd = gistdata? gistdata.bridge : "";
-let USDCERC20Add = gistdata? gistdata.USDC : ""; //'0xeb8f08a975ab53e34d8a0330e0d34de942c95926'
-let BETHERC20 = gistdata? gistdata.beth : "";
-let VERUSNOTARIZER = gistdata? gistdata.notarizer : "";
-let BRIDGEVETH = gistdata? gistdata.bridgeveth : ""; 
-let TOKENMANAGERERC20ADD = "0xabf54d90b5fa89c608ceea16a0dcf991cd259b64"; // gistdata? gistdata.tokenmanerc20 : ""; 
+const contracts = {"bridge":"0xC7d6b4B701E3A59890DB713fe3400ff85D0755ed",
+                   "notarizer":"0x84fd35f61D1D66C233A461D69dfF03E6753fc9eb",
+                   "tokenmanager":"0xabf54d90b5fa89c608ceea16a0dcf991cd259b64"}  //update these on launch of new contracts
+
+const verusBridgeContractAdd = contracts.bridge;
+const VERUSNOTARIZERCONTRACT = contracts.notarizer;
+const TOKENMANAGERERC20ADD = contracts.tokenmanager; 
+const USDCERC20Add = "0xeb8f08a975ab53e34d8a0330e0d34de942c95926";  // USDC token is pre-existing
 
 let maxGas = 6000000;
 let poolavailable = false;
@@ -27,7 +28,6 @@ let currencyglobal = { //vrsctest hex 'id' names of currencies
   USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f",
   bridge: "0xffece948b8a38bbcc813411d2597f7f8485a0689",
 }
-
 
 const currentUrl = new URL(window.location.href)
 
@@ -72,11 +72,7 @@ const AuthUSDCAmount = document.getElementById('AuthUSDCAmount');
 
 const mintedUSDMSG = document.getElementById('MintedUSDMSG');
 
-
-
-const initialize = async () => {InputToken1
-
- 
+const initialize = async () => { 
 
   let onboarding
   try {
@@ -119,9 +115,7 @@ const initialize = async () => {InputToken1
 
   accountadd.innerText = " Not Connected";
 
-
   }
-
 
   const updateButtons = () => {
     const accountButtonsDisabled = !isMetaMaskInstalled() || !isMetaMaskConnected()
@@ -145,8 +139,6 @@ const initialize = async () => {InputToken1
       sendETHButton.disabled = false
       AuthoriseCoinsButton.disabled = false
       spinner.hidden = true;
-     // mintUSDCTokens.disabled = false  
-     // AuthUSDCbutton.disabled = false 
 
       if (onboarding) {
         onboarding.stopOnboarding()
@@ -280,21 +272,13 @@ const initialize = async () => {InputToken1
       const verusBridge = new web3.eth.Contract(verusBridgeAbi, verusBridgeContractAdd)
       let destinationtype = {};
       let flagvalue = 65;
-      let bridgeHex = convertVerusAddressToEthAddress("iSojYsotVzXz4wh2eJriASGo6UidJDDhL2");
       let secondreserveid = "0x0000000000000000000000000000000000000000"
       let destinationcurrency = {};
 
-      let currency = { //vrsctest hex 'id' names of currencies
-        VRSCTEST: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d",
-        ETH: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00",
-        USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f",
-        bridge: bridgeHex,
-      }
       var accounts = await web3.eth.getAccounts();
       var accbal = await web3.eth.getBalance(accounts[0]);  //your metamask eth balance
       accbal = web3.utils.fromWei(accbal);
       accbal = parseFloat(accbal);
-      spinner.hidden = false;
 
       try {
       //deal with valid information in the input fields
@@ -426,7 +410,7 @@ const initialize = async () => {InputToken1
           destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
 
           if(destination == "swaptoVRSCTEST"){
-            secondreserveid = currency.VRSCTEST;
+            secondreserveid = currencyglobal.VRSCTEST;
             flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE 
           }
           if(destination == "swaptoBRIDGE"){
@@ -434,7 +418,7 @@ const initialize = async () => {InputToken1
             flagvalue = 67;  //VALID + CONVERT + CROSS_SYSTEM 
           }
           if(destination == "swaptoUSDC"){
-            secondreserveid = currency.USDC;
+            secondreserveid = currencyglobal.USDC;
             flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE 
           }
         }else{
@@ -451,37 +435,36 @@ const initialize = async () => {InputToken1
       let feecurrency = {};
       let fees = {};
       if(poolavailable != "0" ){
-        feecurrency = currency.ETH;
+        feecurrency = currencyglobal.ETH;
         fees = 30000; //0.0003 ETH FEE
       }else{
-        feecurrency = currency.VRSCTEST; //pre bridge launch fees must be set as vrsctest
+        feecurrency = currencyglobal.VRSCTEST; //pre bridge launch fees must be set as vrsctest
         fees = 20000000  // 0.02 VRSCTEST
       }
       
 
-      let verusAmount = (amount * 100000000);
-      let CReserveTransfer =  {
-        version : 1,
-        currencyvalue : {currency: currency[token] , amount: verusAmount.toFixed(0)}, //currency sending from ethereum
-        flags : flagvalue,
-        feecurrencyid : feecurrency, //fee is vrsctest pre bridge launch, veth or others post.
-        fees : fees,
-        destination : {destinationtype, destinationaddress}, //destination address currecny is going to
-        destcurrencyid : currency[destinationcurrency],   // destination currency is veth on direct. bridge.veth on bounceback
-        destsystemid : currency.VRSCTEST,     // destination system going to can only be VRSCTEST
-        secondreserveid : secondreserveid    //used as return currency type on bounce back
-        }
+        let verusAmount = (amount * 100000000);
+        let CReserveTransfer =  {
+          version : 1,
+          currencyvalue : {currency: currencyglobal[token] , amount: verusAmount.toFixed(0)}, //currency sending from ethereum
+          flags : flagvalue,
+          feecurrencyid : feecurrency, //fee is vrsctest pre bridge launch, veth or others post.
+          fees : fees,
+          destination : {destinationtype, destinationaddress}, //destination address currecny is going to
+          destcurrencyid : currencyglobal[destinationcurrency],   // destination currency is veth on direct. bridge.veth on bounceback
+          destsystemid : currencyglobal.VRSCTEST,     // destination system going to can only be VRSCTEST
+          secondreserveid : secondreserveid    //used as return currency type on bounce back
+          }
         var date = new Date();
         var n = date.toDateString();
         var time = date.toLocaleTimeString();
         console.log("Transaction output: ",`Date: ${n} Time: ${time}`);
- 
         console.log(CReserveTransfer);
 
-      let result = await verusBridge.methods.export(CReserveTransfer)
+        await verusBridge.methods.export(CReserveTransfer)
           .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'ETH' ? amount : '0.0006', 'ether')});
 
-          alert("Transaction sent"); 
+        alert("Transaction sent"); 
 
       } catch (err) {
         if(err.code != 4001 )
@@ -492,6 +475,7 @@ const initialize = async () => {InputToken1
 
     sendETHButton.onclick = async () => {
       sendETHButton.disabled = true;
+      spinner.hidden = false;
       await processTransaction();
       spinner.hidden = true;
       sendETHButton.disabled = false;
@@ -504,8 +488,8 @@ const initialize = async () => {InputToken1
   const checkBridgeLaunched = async () => {
     try {
 
-      const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi, VERUSNOTARIZER);
-      poolavailable = await NotarizerInst.methods.poolAvailable(BRIDGEVETH).call();
+      const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi, VERUSNOTARIZERCONTRACT);
+      poolavailable = await NotarizerInst.methods.poolAvailable(currencyglobal.bridge).call();
       let lastProof = await  NotarizerInst.methods.getLastProofRoot().call();
       poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last VerusTest Notary height: " + lastProof.rootheight;
  
