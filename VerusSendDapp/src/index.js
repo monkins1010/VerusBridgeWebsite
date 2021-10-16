@@ -292,6 +292,12 @@ const initialize = async () => {
         return; 
       }
       // check that user has enough in their account of whatever token they have chosen
+
+      if(amount > 100000){
+        alert(`Amount too large try a smaller amount`);
+        return;
+      }
+
       if(isNaN(amount) || amount == ''){
         alert(`Not a valid amount: ${amount}`);
         return;
