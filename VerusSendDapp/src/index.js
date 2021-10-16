@@ -300,19 +300,23 @@ const initialize = async () => {InputToken1
       //deal with valid information in the input fields
       if(token == 'Choose...'){
         alert("Please choose a Token");
+        spinner.hidden = true;
         return;
       }
       //if no destination chosen error
       if(destination == 'Choose...'){
         alert("Please Choose a destination type"); //add in FLAGS logic for destination
+        spinner.hidden = true;
         return; 
       }
       // check that user has enough in their account of whatever token they have chosen
       if(isNaN(amount) || amount == ''){
         alert(`Not a valid amount: ${amount}`);
+        spinner.hidden = true;
         return;
       }else if(token == 'ETH' && accbal < parseFloat(amount)){
         alert(`Not enough ETH in account, balance: ${accbal}`);
+        spinner.hidden = true;
         return;
       }else if(token == 'USDC'){
 
@@ -327,6 +331,7 @@ const initialize = async () => {InputToken1
         balance = balance / ( 10 ** decimals );
           if(balance < parseFloat(amount) ){
             alert(`Not enough ${token} in account, balance: ${balance}`);
+            spinner.hidden = true;
             return;
           }
       }else if(token == 'VRSCTEST'){
@@ -344,6 +349,7 @@ const initialize = async () => {InputToken1
         balance = balance / ( 10 ** decimals );
           if(balance < parseFloat(amount) ){
             alert(`Not enough ${token} in account, balance: ${balance}`);
+            spinner.hidden = true;
             return;
           }
       }else if(token == 'bridge'){
@@ -363,6 +369,7 @@ const initialize = async () => {InputToken1
         balance = balance / ( 10 ** decimals );
           if(balance < parseFloat(amount) ){
             alert(`Not enough ${token} in account, balance: ${balance}`);
+            spinner.hidden = true;
             return;
           }
       }
@@ -380,6 +387,7 @@ const initialize = async () => {InputToken1
         destinationaddress = contractAddress
       }else {
         alert("Not a valid i / R or ETH address");
+        spinner.hidden = true;
         return;
       }
  
@@ -389,6 +397,7 @@ const initialize = async () => {InputToken1
           {
             if(destination != 'vrsctest'){
               alert("Cannot convert yet Bridge.veth not launched"); //add in FLAGS logic for destination
+              spinner.hidden = true;
               return;
             }
             flagvalue = 65;
@@ -408,10 +417,12 @@ const initialize = async () => {InputToken1
                 flagvalue = 65 + 2;   //add convert flag on
               }else{
                 alert("Cannot convert bridge to bridge. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+                spinner.hidden = true;
                 return;
               }
             }else{
               alert("Cannot bounce back, direct send only with i or R address"); //add in FLAGS logic for destination
+              spinner.hidden = true;
               return;
             }
           }
@@ -438,11 +449,13 @@ const initialize = async () => {InputToken1
           }
         }else{
           alert("Cannot swap tokens to and from the same coin.  Or cannot go one way to an ETH address"); //add in FLAGS logic for destination
+          spinner.hidden = true;
           return;
         }
 
       }else{
         alert("Bridge.veth not launched yet, send only direct to i or R until launch complete"); //add in FLAGS logic for destination
+        spinner.hidden = true;
         return;
       }
 
@@ -483,6 +496,7 @@ const initialize = async () => {InputToken1
 
       } catch (err) {
         spinner.hidden = true;
+        if(err.code != 4001 )
         alert("Transaction error Check log"); 
           console.log(err)
     }
