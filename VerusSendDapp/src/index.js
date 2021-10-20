@@ -298,7 +298,7 @@ const initialize = async () => {
         return;
       }
 
-      if(isNaN(amount) || amount == ''){
+      if(isNaN(amount) || amount == '' || Number(amount) == 0){
         alert(`Not a valid amount: ${amount}`);
         return;
       }else if(token == 'ETH' && accbal < parseFloat(amount)){
@@ -406,10 +406,11 @@ const initialize = async () => {
               return;
             }
           }
-      }else if (destinationtype == 9 && poolavailable != "0"){  // if ethereuem address and pool is available 
+      }else if (destinationtype == 9 && poolavailable != "0"  && token != 'bridge' && (destination != 'vrsctest') && (destination != 'bridge') ){  // if ethereuem address and pool is available 
 
-        if((destination == "swaptoBRIDGE") && (token != 'bridge') || destination == "swaptoVRSCTEST" && (token != 'VRSCTEST') 
-            || destination == "swaptoUSDC" && (token != 'USDC')){
+        if(destination == "swaptoVRSCTEST" && (token != 'VRSCTEST') 
+            || destination == "swaptoUSDC" && (token != 'USDC')
+              || destination == "swaptoBRIDGE"){
           destinationcurrency = "bridge";
           destinationtype += 128; //add 128 = FLAG_DEST_GATEWAY
           //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
@@ -419,22 +420,47 @@ const initialize = async () => {
             secondreserveid = currencyglobal.VRSCTEST;
             flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE 
           }
-          if(destination == "swaptoBRIDGE"){
-            
-            flagvalue = 67;  //VALID + CONVERT + CROSS_SYSTEM 
-          }
           if(destination == "swaptoUSDC"){
             secondreserveid = currencyglobal.USDC;
             flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE 
+          }
+          if(destination == "swaptoBRIDGE"){
+            flagvalue = 67;  //VALID + CONVERT + CROSS_SYSTEM 
           }
         }else{
           alert("Cannot swap tokens to and from the same coin.  Or cannot go one way to an ETH address"); //add in FLAGS logic for destination
           return;
         }
+      }else if (destinationtype == 9 && poolavailable != "0"  && token == 'bridge' && (destination != 'vrsctest') 
+      && (destination != 'bridge') ){  // if ethereuem address and pool is available 
 
-      }else{
+          if((destination == "swaptoBRIDGE")){
+
+            alert("Cannot swap bridge to bridge."); //add in FLAGS logic for destination
+            return;
+
+          }
+
+          destinationtype += 128; //add 128 = FLAG_DEST_GATEWAY
+          //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
+          destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
+
+          if(destination == "swaptoVRSCTEST"){
+            destinationcurrency = "VRSCTEST";
+            flagvalue = 67 + 512;  //VALID + CONVERT + CROSS_SYSTEM + IMPORT_TO_SOURCE
+          }
+          if(destination == "swaptoUSDC"){
+            destinationcurrency = "USDC";
+            flagvalue = 67 + 512;  //VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE
+          }
+    
+      } else if(destinationtype == 9  && (destination == 'vrsctest') || (destination == 'bridge') )  {
+      
+        alert("Cannot go one way to an ETH address"); //add in FLAGS logic for destination
+        return;
+
+       }else{
         alert("Bridge.veth not launched yet, send only direct to i or R until launch complete"); //add in FLAGS logic for destination
-
         return;
       }
 
