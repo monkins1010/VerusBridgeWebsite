@@ -2,7 +2,7 @@
 import { encrypt } from 'eth-sig-util'
 import MetaMaskOnboarding from '@metamask/onboarding'
 import Web3 from 'web3'
-const BigNumber = require('big-number');
+const BigNumber = require('bignumber.js');
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
 const ERC20Abi = require('./ERC20Abi.json')
@@ -185,24 +185,19 @@ const initialize = async () => {
     }
 
     const authoriseOneTokenAmount = async (token, amount) => {
-      try{
+      
         alert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}: ${token} from your Rinkeby balance.`);
         const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
         let tokenERCAddress = await tokenManInst.methods.verusToERC20mapping(currencyglobal[token]).call()
          
         const tokenInst = new web3.eth.Contract(ERC20Abi, tokenERCAddress[0]);
         let decimals = await tokenInst.methods.decimals().call();
-        let bigAmount = BigNumber(amount).multiply( 10 ** decimals ).toString();
+        let bigAmount = BigNumber(amount).multipliedBy( 10 ** decimals ).toString();
         await tokenInst.methods.increaseAllowance(verusBridgeContractAdd,bigAmount) 
         .send({from: ethereum.selectedAddress, gas: maxGas2});
 
         alert(`Your Rinkeby account has authorised the bridge to spend ${token} token, the amount: ${amount}. \n Next, after this window please check the amount in Meta mask is what you wish to send.`);
-      }
-        catch(err){
-        console.error(err);
-        console.log(err);
-      }
-       
+    
     }
 
     const processTransaction = async () => {
@@ -243,7 +238,9 @@ const initialize = async () => {
       if(isNaN(amount) || amount == '' || Number(amount) == 0){
         alert(`Not a valid amount: ${amount}`);
         return;
-      }else if(token == 'ETH' && accbal < parseFloat(amount)){
+      }
+      
+      if(token == 'ETH' && accbal < parseFloat(amount)){
         alert(`Not enough ETH in account, balance: ${accbal}`);
         return;
       }else if(token == 'USDC'){
@@ -251,7 +248,7 @@ const initialize = async () => {
         const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);  //get the users USDC token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
-        balance = BigNumber(balance).div( 10 ** decimals ).toString();
+        balance = BigNumber(balance).dividedBy( 10 ** decimals ).toString();
           if(parseFloat(balance) < parseFloat(amount) ){
             alert(`Not enough ${token} in account, balance: ${balance}`);   
             return;
@@ -287,7 +284,7 @@ const initialize = async () => {
             alert(`Not enough ${token} in account, balance: ${balance}`);  
             return;
           }
-          await authoriseOneTokenAmount("bridge",parseFloat(amount));
+          await authoriseOneTokenAmount("bridge",(amount));
       }
 
 
@@ -321,21 +318,79 @@ const initialize = async () => {
           }
           else 
           {
-            if(destination == 'vrsctest') {
+            if(destination == 'vrsctest') 
+            {              
+              destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
+              flagvalue = VALID + CROSS_SYSTEM; 
+            }
+            else if(destination == 'bridgeUSDC')
+            {
+              destinationcurrency = "bridge";  //bridge open convert from token  to USDC 
+              if(token != 'USDC' && token != "bridge"){
+                secondreserveid = currencyglobal.USDC;
+                flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
+              }
+              else if( token == "bridge")
+              {
+                destinationcurrency = "USDC";
+                flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
+              }else
+              {
+                alert("Cannot convert USDC to USDC. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+                return;
+              }
+            }
+            else if(destination == 'bridgeVRSCTEST')
+            {
+              destinationcurrency = "bridge";  //bridge open convert from token to VRSCTEST
+              if(token != 'VRSCTEST' && token != "bridge"){
+                secondreserveid = currencyglobal.VRSCTEST;
+                flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
+              }
+              else if( token == "bridge")
+              {
+                destinationcurrency = "VRSCTEST";
+                flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
+              }
+              else
+              {
+                alert("Cannot convert VRSCTEST to VRSCTEST. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+                return;
+              }
+            }
+            else if(destination == 'bridgeETH')
+            {
+              destinationcurrency = "bridge";  //bridge open convert from token to ETH
+              if(token != 'ETH' && token != "bridge")
+              {
+                secondreserveid = currencyglobal.ETH;
+                flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
+              }
+              else if( token == "bridge")
+              {
+                destinationcurrency = "ETH";
+                flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
+              }else
+              {
+                alert("Cannot convert ETH to ETH. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+                return;
+              }
+            }
+            else if(destination == 'bridge') {  
               
               destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
-              flagvalue = VALID + CROSS_SYSTEM;  
-
-            }else if(destination == 'bridge') {  
-              
-              destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
-              if(token != 'bridge'){
+              if(token != 'bridge')
+              {
                 flagvalue = VALID + CONVERT + CROSS_SYSTEM ;   //add convert flag on
-              }else{
+              }
+              else
+              {
                 alert("Cannot convert bridge to bridge. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
                 return;
               }
-            }else{
+            }
+            else
+            {
               alert("Cannot bounce back, direct send only with i or R address"); //add in FLAGS logic for destination
               return;
             }

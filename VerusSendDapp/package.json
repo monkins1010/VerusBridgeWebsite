@@ -44,7 +44,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "big-number": "^2.0.0",
+    "bignumber.js": "^9.0.1",
     "bitgo-utxo-lib": "^1.8.0"
   }
 }
