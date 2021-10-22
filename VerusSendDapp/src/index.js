@@ -2,14 +2,12 @@
 import { encrypt } from 'eth-sig-util'
 import MetaMaskOnboarding from '@metamask/onboarding'
 import Web3 from 'web3'
-var BigNumber = require('big-number');
-
+const BigNumber = require('big-number');
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
 const ERC20Abi = require('./ERC20Abi.json')
 const TOKENMANAGERABI = require('./TokenManagerAbi.json')
 const NOTARIZERAbi = require('./Notarizerabi.json')
-const gist = document.getElementById('file-gistfile1-txt-LC1');
 
 const contracts = {"bridge":"0x12EaC7B6127f301cD36e57Ef38773F6F7fF8240A",
                    "notarizer":"0xE4aB5B6F7cf329BB6b6354eDe4B43a6a6BFd9f95",
@@ -31,6 +29,20 @@ let currencyglobal = { //vrsctest hex 'id' names of currencies
   USDC: "0xf0a1263056c30e221f0f851c36b767fff2544f7f",
   bridge: "0xffece948b8a38bbcc813411d2597f7f8485a0689",
 }
+//FLAGS for cReserveTransfer
+
+const  VALID = 1
+const  CONVERT = 2
+const  PRECONVERT = 4
+const  CROSS_SYSTEM = 0x40                // if this is set there is a systemID serialized and deserialized as well for destination
+const  IMPORT_TO_SOURCE = 0x200           // set when the source currency not destination is the import currency
+const  RESERVE_TO_RESERVE = 0x400         // for arbitrage or transient conversion 2 stage solving (2nd from new fractional to reserves)
+
+//Flags for CTransferDesination type
+const  DEST_PKH = 2
+const  DEST_ID = 4
+const  DEST_ETH = 9
+const  FLAG_DEST_GATEWAY = 128
 
 const currentUrl = new URL(window.location.href)
 
@@ -66,15 +78,6 @@ const SendETHAmount1 = document.getElementById('Inputamount1')
 const inputGroupSelect01 = document.getElementById('inputGroupSelect01')
 const inputGroupSelect02 = document.getElementById('inputGroupSelect02')
 const poollaunchedtext = document.getElementById('poollaunched')
-const testhide = document.getElementById('testhide');
-// Send Tokens Section
-
-const mintUSDCTokens = document.getElementById('mintUSDCbutton');
-const mintUSDCAmount = document.getElementById('mintUSDCAmount');
-const AuthUSDCbutton = document.getElementById('AuthUSDCbutton');
-const AuthUSDCAmount = document.getElementById('AuthUSDCAmount');
-
-const mintedUSDMSG = document.getElementById('MintedUSDMSG');
 
 const initialize = async () => { 
 
@@ -85,16 +88,7 @@ const initialize = async () => {
     console.error(error)
   }
 
-  let accounts
-
-  let accountButtonsInitialized = false
-
-  const accountButtons = [
-
-    mintUSDCTokens,
-    AuthUSDCbutton
-
-  ]
+  let accounts;
 
   const isMetaMaskConnected = () => accounts && accounts.length > 0
 
@@ -124,9 +118,7 @@ const initialize = async () => {
   const updateButtons = () => {
     const accountButtonsDisabled = !isMetaMaskInstalled() || !isMetaMaskConnected()
     if (accountButtonsDisabled) {
-      for (const button of accountButtons) {
-       // button.disabled = true   
-      }
+ 
       clearTextDisplays()
     } else {
 
@@ -158,19 +150,6 @@ const initialize = async () => {
   }
 
   const initializeAccountButtons = () => {
-
-    if (accountButtonsInitialized) {
-      return
-    }
-    accountButtonsInitialized = true
-
-
-    function buf2hex (buffer) { // buffer is an ArrayBuffer
-      return [...new Uint8Array(buffer)]
-        .map((x) => x.toString(16).padStart(2, '0'))
-        .join('')
-    }
-
 
     function convertVerusAddressToEthAddress (verusAddress) {
       const test2 = bitGoUTXO.address.fromBase58Check(verusAddress, 102).hash.toString('hex')
@@ -205,11 +184,6 @@ const initialize = async () => {
       }
     }
 
-    const removeHexLeader = (hexString) => {
-      if(hexString.substr(0,2) == '0x') return hexString.substr(2);
-      else return hexString;
-    }
-
     const authoriseOneTokenAmount = async (token, amount) => {
       try{
         alert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}: ${token} from your Rinkeby balance.`);
@@ -239,7 +213,7 @@ const initialize = async () => {
       const destination = inputGroupSelect02.value
       const verusBridge = new web3.eth.Contract(verusBridgeAbi, verusBridgeContractAdd)
       let destinationtype = {};
-      let flagvalue = 65;
+      let flagvalue = VALID + CROSS_SYSTEM;
       let secondreserveid = "0x0000000000000000000000000000000000000000"
       let destinationcurrency = {};
 
@@ -320,13 +294,13 @@ const initialize = async () => {
       let destinationaddress = {};
       //set destination to correct type
       if (isiAddress(contractAddress)) {
-        destinationtype = 4; //ID TYPE
+        destinationtype = DEST_ID; //ID TYPE 
         destinationaddress = convertVerusAddressToEthAddress(contractAddress)
       } else if (isRAddress(contractAddress)) {
-        destinationtype = 2; //R TYPE
+        destinationtype = DEST_PKH; //R TYPE
         destinationaddress = convertVerusAddressToEthAddress(contractAddress)
       }else if (isETHAddress(contractAddress)) {
-        destinationtype = 9; //ETH TYPE
+        destinationtype = DEST_ETH; //ETH TYPE
         destinationaddress = contractAddress
       }else {
         alert("Not a valid i / R or ETH address");
@@ -334,7 +308,7 @@ const initialize = async () => {
         return;
       }
  
-      if(destinationtype == 4 || destinationtype == 2 )  //if I or R address chosen then do one way specific stuff
+      if(destinationtype == DEST_ID || destinationtype == DEST_PKH )  //if I or R address chosen then do one way specific stuff
       {          
           if(poolavailable == "0") // pool not available
           {
@@ -342,7 +316,7 @@ const initialize = async () => {
               alert("Cannot convert yet Bridge.veth not launched"); //add in FLAGS logic for destination    
               return;
             }
-            flagvalue = 65;
+            flagvalue = VALID + CROSS_SYSTEM;
             destinationcurrency = "ETH";
           }
           else 
@@ -350,13 +324,13 @@ const initialize = async () => {
             if(destination == 'vrsctest') {
               
               destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
-              flagvalue = 65  
+              flagvalue = VALID + CROSS_SYSTEM;  
 
             }else if(destination == 'bridge') {  
               
               destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
               if(token != 'bridge'){
-                flagvalue = 65 + 2;   //add convert flag on
+                flagvalue = VALID + CONVERT + CROSS_SYSTEM ;   //add convert flag on
               }else{
                 alert("Cannot convert bridge to bridge. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
                 return;
@@ -366,38 +340,38 @@ const initialize = async () => {
               return;
             }
           }
-      }else if (destinationtype == 9 && poolavailable != "0"  && token != 'bridge' && (destination != 'vrsctest') && (destination != 'bridge') ){  // if ethereuem address and pool is available 
+      }else if (destinationtype == DEST_ETH && poolavailable != "0"  && token != 'bridge' && (destination != 'vrsctest') && (destination != 'bridge') ){  // if ethereuem address and pool is available 
 
         if(destination == "swaptoVRSCTEST" && (token != 'VRSCTEST') 
             || destination == "swaptoUSDC" && (token != 'USDC')  
             || destination == "swaptoETH" && (token != 'ETH')
               || destination == "swaptoBRIDGE"){
           destinationcurrency = "bridge";
-          destinationtype += 128; //add 128 = FLAG_DEST_GATEWAY
+          destinationtype += FLAG_DEST_GATEWAY; //add 128 = FLAG_DEST_GATEWAY
           //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
           destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
 
           if(destination == "swaptoVRSCTEST"){
             secondreserveid = currencyglobal.VRSCTEST;
-            flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE 
+            flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE;
           }
           if(destination == "swaptoUSDC"){
             secondreserveid = currencyglobal.USDC;
-            flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE 
+            flagvalue = VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE;
           }
           if(destination == "swaptoBRIDGE"){
-            flagvalue = 67;  //VALID + CONVERT + CROSS_SYSTEM 
+            flagvalue = VALID + CONVERT + CROSS_SYSTEM ;
           }
           if(destination == "swaptoETH"){
             secondreserveid = currencyglobal.ETH;
-            flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE 
+            flagvalue = VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE ;
           }
         }else{
           alert("Cannot swap tokens to and from the same coin.  Or cannot go one way to an ETH address"); //add in FLAGS logic for destination
           return;
         }
-      }else if (destinationtype == 9 && poolavailable != "0"  && token == 'bridge' && (destination != 'vrsctest') 
-      && (destination != 'bridge') ){  // if ethereuem address and pool is available 
+      }else if (destinationtype == DEST_ETH && poolavailable != "0"  && token == 'bridge' && (destination != 'vrsctest') 
+                && (destination != 'bridge') ){  // if ethereuem address and pool is available 
 
           if((destination == "swaptoBRIDGE")){
 
@@ -412,18 +386,18 @@ const initialize = async () => {
 
           if(destination == "swaptoVRSCTEST"){
             destinationcurrency = "VRSCTEST";
-            flagvalue = 67 + 512;  //VALID + CONVERT + CROSS_SYSTEM + IMPORT_TO_SOURCE
+            flagvalue = VALID + CONVERT + CROSS_SYSTEM + IMPORT_TO_SOURCE;
           }
           if(destination == "swaptoUSDC"){
             destinationcurrency = "USDC";
-            flagvalue = 67 + 512;  //VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE
+            flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
           }
           if(destination == "swaptoETH"){
             destinationcurrency = "ETH";
-            flagvalue = 67 + 512;  //VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE
+            flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
           }
     
-      } else if(destinationtype == 9  && (destination == 'vrsctest') || (destination == 'bridge') )  {
+      } else if(destinationtype == DEST_ETH  && (destination == 'vrsctest') || (destination == 'bridge') )  {
       
         alert("Cannot go one way to an ETH address"); //add in FLAGS logic for destination
         return;
@@ -474,7 +448,7 @@ const initialize = async () => {
     }
    }
 
-    sendETHButton.onclick = async () => {
+      sendETHButton.onclick = async () => {
       sendETHButton.disabled = true;
       spinner.hidden = false;
       await processTransaction();
