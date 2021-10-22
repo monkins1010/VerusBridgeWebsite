@@ -380,7 +380,7 @@ const initialize = async () => {
 
           }
 
-          destinationtype += 128; //add 128 = FLAG_DEST_GATEWAY
+          destinationtype += FLAG_DEST_GATEWAY; 
           //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
           destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
 
