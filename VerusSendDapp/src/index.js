@@ -325,8 +325,8 @@ const initialize = async () => {
             }
             else if(destination == 'bridgeUSDC')
             {
-              destinationcurrency = "bridge";  //bridge open convert from token  to USDC 
               if(token != 'USDC' && token != "bridge"){
+                destinationcurrency = "bridge";  //bridge open convert from token  to USDC 
                 secondreserveid = currencyglobal.USDC;
                 flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
               }
@@ -342,8 +342,8 @@ const initialize = async () => {
             }
             else if(destination == 'bridgeVRSCTEST')
             {
-              destinationcurrency = "bridge";  //bridge open convert from token to VRSCTEST
               if(token != 'VRSCTEST' && token != "bridge"){
+                destinationcurrency = "bridge";  //bridge open convert from token to VRSCTEST
                 secondreserveid = currencyglobal.VRSCTEST;
                 flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
               }
@@ -360,9 +360,9 @@ const initialize = async () => {
             }
             else if(destination == 'bridgeETH')
             {
-              destinationcurrency = "bridge";  //bridge open convert from token to ETH
               if(token != 'ETH' && token != "bridge")
               {
+                destinationcurrency = "bridge";  //bridge open convert from token to ETH
                 secondreserveid = currencyglobal.ETH;
                 flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
               }
