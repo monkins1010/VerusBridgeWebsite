@@ -2,6 +2,7 @@
 import { encrypt } from 'eth-sig-util'
 import MetaMaskOnboarding from '@metamask/onboarding'
 import Web3 from 'web3'
+var BigNumber = require('big-number');
 
 const bitGoUTXO = require('./bitUTXO')
 const verusBridgeAbi = require('./VerusBridgeAbi.json')
@@ -10,9 +11,9 @@ const TOKENMANAGERABI = require('./TokenManagerAbi.json')
 const NOTARIZERAbi = require('./Notarizerabi.json')
 const gist = document.getElementById('file-gistfile1-txt-LC1');
 
-const contracts = {"bridge":"0xC7d6b4B701E3A59890DB713fe3400ff85D0755ed",
-                   "notarizer":"0x84fd35f61D1D66C233A461D69dfF03E6753fc9eb",
-                   "tokenmanager":"0xabf54d90b5fa89c608ceea16a0dcf991cd259b64"}  //update these on launch of new contracts
+const contracts = {"bridge":"0x12EaC7B6127f301cD36e57Ef38773F6F7fF8240A",
+                   "notarizer":"0xE4aB5B6F7cf329BB6b6354eDe4B43a6a6BFd9f95",
+                   "tokenmanager":"0x0d4eA7889741aBf7A100C97829dbaa8C9c8Ef51D"}  //update these on launch of new contracts
 
 const verusBridgeContractAdd = contracts.bridge;
 const VERUSNOTARIZERCONTRACT = contracts.notarizer;
@@ -20,6 +21,8 @@ const TOKENMANAGERERC20ADD = contracts.tokenmanager;
 const USDCERC20Add = "0xeb8f08a975ab53e34d8a0330e0d34de942c95926";  // USDC token is pre-existing
 
 let maxGas = 6000000;
+
+let maxGas2 = 100000;
 let poolavailable = false;
 
 let currencyglobal = { //vrsctest hex 'id' names of currencies
@@ -46,6 +49,7 @@ const dropswapvrsctest = document.getElementById('hideswaptovrsctest')
 const dropbridgetoken = document.getElementById('hidebridgetoken')
 const dropbridgedest = document.getElementById('hidebridge')
 const dropusdcdest = document.getElementById('hideswaptousdc')
+const dropethdest = document.getElementById('hideswaptoeth')
 const spinner = document.getElementById("spinner")
 // Dapp Status Section
 const accountsDiv = document.getElementById('accounts')
@@ -206,61 +210,25 @@ const initialize = async () => {
       else return hexString;
     }
 
-    const checkTokensAuthorised = async () => {
-
-
-
+    const authoriseOneTokenAmount = async (token, amount) => {
       try{
+        alert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}: ${token} from your Rinkeby balance.`);
         const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
-        let VRSCTESTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.VRSCTEST).call()
-        let bridgeTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.bridge).call()
+        let tokenERCAddress = await tokenManInst.methods.verusToERC20mapping(currencyglobal[token]).call()
+         
+        const tokenInst = new web3.eth.Contract(ERC20Abi, tokenERCAddress[0]);
+        let decimals = await tokenInst.methods.decimals().call();
+        let bigAmount = BigNumber(amount).multiply( 10 ** decimals ).toString();
+        await tokenInst.methods.increaseAllowance(verusBridgeContractAdd,bigAmount) 
+        .send({from: ethereum.selectedAddress, gas: maxGas2});
 
-        const tokenInst1 = new web3.eth.Contract(ERC20Abi, VRSCTESTadd[0]);
-        let allowance1 = await tokenInst1.methods.allowance(accounts[0],verusBridgeContractAdd).call()
-        if(parseInt(allowance1) <= 0 )
-          return false;
-
-        const tokenInst2 = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
-        let allowance2 = await tokenInst2.methods.allowance(accounts[0],verusBridgeContractAdd).call()
-        if(parseInt(allowance2) <= 0 )
-          return false;
-
-        const tokenInst3 = new web3.eth.Contract(ERC20Abi, bridgeTadd[0]);
-        let allowance3 = await tokenInst3.methods.allowance(accounts[0],verusBridgeContractAdd).call()
-        if(parseInt(allowance3) <= 0 )
-          return false;
-
-      }catch(err){
+        alert(`Your Rinkeby account has authorised the bridge to spend ${token} token, the amount: ${amount}. \n Next, after this window please check the amount in Meta mask is what you wish to send.`);
+      }
+        catch(err){
         console.error(err);
         console.log(err);
       }
-      return true;
-
-    }
-
-    const authoriseTokens = async () => {
-    try{
-      const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
-      let VRSCTESTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.VRSCTEST).call()
-      let bridgeTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.bridge).call()
-
-      const tokenInst1 = new web3.eth.Contract(ERC20Abi, USDCERC20Add);
-      await tokenInst1.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
-      .send({from: ethereum.selectedAddress, gas: maxGas});
-
-      const tokenInst2 = new web3.eth.Contract(ERC20Abi, VRSCTESTadd[0]);
-      await tokenInst2.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
-      .send({from: ethereum.selectedAddress, gas: maxGas});
-
-      const tokenInst3 = new web3.eth.Contract(ERC20Abi, bridgeTadd[0]);
-      await tokenInst3.methods.increaseAllowance(verusBridgeContractAdd,"1000000000000000000000000") 
-      .send({from: ethereum.selectedAddress, gas: maxGas});
-      alert("Your Rinkeby account has authorised USDC, VRSCTEST & bridge.veth tokens");
-    }catch(err){
-      console.error(err);
-      console.log(err);
-    }
-     
+       
     }
 
     const processTransaction = async () => {
@@ -305,26 +273,19 @@ const initialize = async () => {
         alert(`Not enough ETH in account, balance: ${accbal}`);
         return;
       }else if(token == 'USDC'){
-
-        if(!(await checkTokensAuthorised())){
-          alert(`The Website will now authorise Verus be allowed to spend your Tokens. \n\nPlease click the Metamask popup that appears 3 seperate times (please be patient). \n \nOnce you have clicked 3 times a completion message saying "Accounts Authorised" will appear`);
-          await authoriseTokens();
-        } 
-
+        
         const tokenInst = new web3.eth.Contract(ERC20Abi, USDCERC20Add);  //get the users USDC token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
         let decimals = await tokenInst.methods.decimals().call();
-        balance = balance / ( 10 ** decimals );
-          if(balance < parseFloat(amount) ){
+        balance = BigNumber(balance).div( 10 ** decimals ).toString();
+          if(parseFloat(balance) < parseFloat(amount) ){
             alert(`Not enough ${token} in account, balance: ${balance}`);   
             return;
           }
-      }else if(token == 'VRSCTEST'){
 
-        if(!(await checkTokensAuthorised())){
-          alert(`The Website will now authorise Verus be allowed to spend your Tokens. \n\nPlease click the Metamask popup that appears 3 seperate times (please be patient). \n \nOnce you have clicked 3 times a completion message saying "Accounts Authorised" will appear`);
-          await authoriseTokens();
-        } 
+        await authoriseOneTokenAmount("USDC",parseFloat(amount));
+        
+      }else if(token == 'VRSCTEST'){
 
         const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
         let VRSCTESTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.VRSCTEST).call()
@@ -336,12 +297,9 @@ const initialize = async () => {
             alert(`Not enough ${token} in account, balance: ${balance}`);
             return;
           }
-      }else if(token == 'bridge'){
 
-        if(!(await checkTokensAuthorised())){
-          alert(`The Website will now authorise Verus be allowed to spend your Tokens. \n\nPlease click the Metamask popup that appears 3 seperate times (please be patient). \n \nOnce you have clicked 3 times a completion message saying "Accounts Authorised" will appear`);
-          await authoriseTokens();
-        } 
+          await authoriseOneTokenAmount("VRSCTEST",parseFloat(amount));
+      }else if(token == 'bridge'){
 
         const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
         let bridgeTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.bridge).call()
@@ -355,7 +313,9 @@ const initialize = async () => {
             alert(`Not enough ${token} in account, balance: ${balance}`);  
             return;
           }
+          await authoriseOneTokenAmount("bridge",parseFloat(amount));
       }
+
 
       let destinationaddress = {};
       //set destination to correct type
@@ -409,7 +369,8 @@ const initialize = async () => {
       }else if (destinationtype == 9 && poolavailable != "0"  && token != 'bridge' && (destination != 'vrsctest') && (destination != 'bridge') ){  // if ethereuem address and pool is available 
 
         if(destination == "swaptoVRSCTEST" && (token != 'VRSCTEST') 
-            || destination == "swaptoUSDC" && (token != 'USDC')
+            || destination == "swaptoUSDC" && (token != 'USDC')  
+            || destination == "swaptoETH" && (token != 'ETH')
               || destination == "swaptoBRIDGE"){
           destinationcurrency = "bridge";
           destinationtype += 128; //add 128 = FLAG_DEST_GATEWAY
@@ -426,6 +387,10 @@ const initialize = async () => {
           }
           if(destination == "swaptoBRIDGE"){
             flagvalue = 67;  //VALID + CONVERT + CROSS_SYSTEM 
+          }
+          if(destination == "swaptoETH"){
+            secondreserveid = currencyglobal.ETH;
+            flagvalue = 67 + 1024;  //VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE 
           }
         }else{
           alert("Cannot swap tokens to and from the same coin.  Or cannot go one way to an ETH address"); //add in FLAGS logic for destination
@@ -451,6 +416,10 @@ const initialize = async () => {
           }
           if(destination == "swaptoUSDC"){
             destinationcurrency = "USDC";
+            flagvalue = 67 + 512;  //VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE
+          }
+          if(destination == "swaptoETH"){
+            destinationcurrency = "ETH";
             flagvalue = 67 + 512;  //VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE
           }
     
@@ -531,6 +500,7 @@ const initialize = async () => {
         dropbridgetoken.hidden = true;
         dropbridgedest.hidden = true;
         dropusdcdest.hidden = true;
+        dropethdest.hhidden = true;
       }
 
     } catch (err) {

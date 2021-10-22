@@ -19,7 +19,7 @@
     
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-    
+    <script src='path/to/bignumber.js'></script>
 </head>
 
   <body>
@@ -111,6 +111,7 @@
                     <option id="hideswaptobridge" value="swaptoBRIDGE">Convert to bridge Token (Bounce back to ETH)</option>
                     <option id="hideswaptovrsctest" value="swaptoVRSCTEST">Convert to VRSCTEST Token (Bounce back to ETH)</option>
                     <option id="hideswaptousdc" value="swaptoUSDC">Convert to USDC Token (Bounce back to ETH)</option>
+                    <option id="hideswaptoeth" value="swaptoETH">Convert to ETH (Bounce back to ETH)</option>
                   </select>
                 </div>
 
@@ -152,9 +153,7 @@
           </style>
         <pre class="prettyprint" id="log"></pre>
         <h5>Notes:</h5>
-        <p> <b>Authorising Tokens:</b> <br> Metamask will pop up 3 times to ask you to confirm the allowance.  Then after that
-          you may send USDC, VRSCTEST & Bridge.vETH from your Rinkeby ETH account to the Verustest network. Pleaase be patient during this process
-          MetaMask will popup 3 times during this process, then only after a successful completion message may you send your Tokens.
+        <p> <b>Authorising Tokens:</b> <br> Metamask will pop up before the actual transaction when sending USDC, VRSCTEST & Bridge.vETH to ask you to confirm the amount you want the contract to spend on your behalf.
         </p>
         <button id="AuthoriseCoins" class="btn btn-primary invisible">Authorise Coins</button>
     </div>
