@@ -521,7 +521,7 @@ const initialize = async () => {
       const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi, VERUSNOTARIZERCONTRACT);
       poolavailable = await NotarizerInst.methods.poolAvailable(currencyglobal.bridge).call();
       let lastProof = await  NotarizerInst.methods.getLastProofRoot().call();
-      poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last VerusTest Notary height: " + lastProof.rootheight;
+      poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last Confirmed VerusTest height: " + lastProof.rootheight;
  
       if(poolavailable == "0"){
         dropswapbridge.hidden = true;
