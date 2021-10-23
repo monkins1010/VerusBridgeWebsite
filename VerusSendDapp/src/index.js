@@ -452,7 +452,7 @@ const initialize = async () => {
             flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
           }
     
-      } else if(destinationtype == DEST_ETH  && (destination == 'vrsctest') || (destination == 'bridge') )  {
+      } else if(destinationtype == DEST_ETH  && (destination == 'vrsctest') || (destination == 'bridge') || (destination == 'bridgeUSDC') || (destination == 'bridgeVRSCTEST') || (destination == 'bridgeETH'))  {
       
         alert("Cannot go one way to an ETH address"); //add in FLAGS logic for destination
         return;
