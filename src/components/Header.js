@@ -4,6 +4,7 @@ import WalletConnectDialog from './WalletConnectDialog';
 import ConnectButton from '../components/ConnectButton'
 import { useWeb3React } from '@web3-react/core';
 import { injectedConnector } from '../connectors/injectedConnector';
+import Logo from '../images/logos/verus-eth-bridge.png'
 
 const Header = () => {
   const [walletDialogOpen, setWalletDialogOpen] = useState(false);
@@ -26,6 +27,10 @@ const Header = () => {
     }
   }
 
+  const handleClickLogo = () => {
+    window.location.reload();
+  }
+
   return (
     <AppBar
       position="absolute"
@@ -37,11 +42,12 @@ const Header = () => {
       }}
     >
       <Toolbar>
+        <img width="80px" style={{cursor: "pointer"}} onClick={handleClickLogo} src={Logo} />
         <Typography 
           variant="h6" 
           color="inherit" 
           noWrap 
-          sx={{flexGrow: 1}}
+          sx={{flexGrow: 1, marginLeft: '20px'}}
         >
           Verus
         </Typography>
