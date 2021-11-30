@@ -1,8 +1,10 @@
+import React, { useEffect } from 'react'
+
 import { Button } from '@mui/material';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
-import React, { useEffect } from 'react'
-import { ID_NAME_MAPPING } from '../constants/chain';
 import { NoEthereumProviderError, UserRejectedRequestError } from '@web3-react/injected-connector';
+
+import { ID_NAME_MAPPING } from '../constants/chain';
 
 const ConnectButton = ({ onClick }) => {
   const { account, chainId, error } = useWeb3React();

@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { ReactComponent as Metamask } from '../images/icons/metamask-icon.svg';
 import { ReactComponent as Wallet } from '../images/icons/wallet-icon.svg';
 

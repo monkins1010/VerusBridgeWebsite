@@ -1,10 +1,13 @@
-import { useWeb3React } from '@web3-react/core';
 import { useEffect } from 'react';
+
+import { useWeb3React } from '@web3-react/core';
+
 import { injectedConnector } from '../connectors/injectedConnector';
 
 const useInactiveListener = (suppress = false) => {
   const { active, error, activate } = useWeb3React();
 
+  // eslint-disable-next-line consistent-return
   useEffect(() => {
     const { ethereum } = window;
     if (ethereum && ethereum.on && !active && !error && !suppress) {
@@ -42,6 +45,8 @@ const useInactiveListener = (suppress = false) => {
       };
     }
   }, [active, error, suppress, activate]);
+
+  return null;
 };
 
 export default useInactiveListener;

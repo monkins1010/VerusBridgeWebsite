@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
+
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Grid } from '@mui/material'
-import { useWeb3React } from '@web3-react/core'
+
 import { WALLET_CONFIG } from '../constants/walletConfig'
 import WalletCard from './WalletCard'
 
@@ -43,7 +44,6 @@ const WalletConnectDialog = ({ isOpen, onClose, onConfirm }) => {
           Cancel
         </Button>
         <Button 
-          onClick={onClose} 
           autoFocus 
           variant="contained" 
           onClick={onConfirm}

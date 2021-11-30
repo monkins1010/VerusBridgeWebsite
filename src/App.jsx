@@ -1,6 +1,8 @@
+import React from 'react';
+
 import Checkout from './pages/Checkout';
-import WrappedWeb3ReactProvider from './providers/WrappedWeb3ReactProvider';
 import Web3ConnectionProvider from './providers/Web3ConnectionProvider';
+import WrappedWeb3ReactProvider from './providers/WrappedWeb3ReactProvider';
 
 function App() {
   return (
