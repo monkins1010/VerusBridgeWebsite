@@ -10,7 +10,7 @@ import WalletConnectDialog from './WalletConnectDialog';
 
 const Header = () => {
   const [walletDialogOpen, setWalletDialogOpen] = useState(false);
-  const { account, chainId, error, activate, deactivate } = useWeb3React();
+  const { account, activate, deactivate } = useWeb3React();
 
   const handleClickConnect = () => {
     if(account) {
@@ -23,10 +23,6 @@ const Header = () => {
   const handleConfirm = async () => {
     await activate(injectedConnector);
     setWalletDialogOpen(false);
-  }
-
-  const handleClickLogo = () => {
-    window.location.reload();
   }
 
   return (

@@ -1,85 +1,181 @@
 import React from 'react';
 
 import Button from '@mui/material/Button';
-import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select'
-import TextField from '@mui/material/TextField';
 import { Box } from '@mui/system';
+import { useWeb3React } from '@web3-react/core';
+import { useForm } from 'react-hook-form';
+import web3 from 'web3';
+
+
+import ERC20_ABI from 'abis/ERC20Abi.json';
+import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
+import VERUS_BRIDGE_ABI from 'abis/VerusBridgeAbi.json';
+import { BRIDGE_CONTRACT_ADD, ETH_ERC20ADD, GLOBAL_ADDRESS, TOKEN_MANAGERE_RC20ADD, USDC_ERC20ADD } from 'constants/contractAddress';
+import useContract from 'hooks/useContract';
+import { getMaxAmount } from 'utils/contract';
+import { convertVerusAddressToEthAddress } from 'utils/convert';
+import { DESTINATION_OPTIONS, TOKEN_OPTIONS } from 'utils/options';
+import { isiAddress, isRAddress, isETHAddress, validateAddress } from 'utils/rules';
+import { getConfigOptions } from 'utils/txConfig';
+
+import InputControlField from './InputControlField';
+import SelectControlField from './SelectControlField';
+
+const maxGas = 6000000;
+
+const maxGas2 = 100000;
 
 export default function AddressForm() {
+  const { account } = useWeb3React();
+  const verusBridgeContract = useContract(BRIDGE_CONTRACT_ADD, VERUS_BRIDGE_ABI);
+  const tokenManInstContract = useContract(TOKEN_MANAGERE_RC20ADD, TOKEN_MANAGER_ABI);
+  const USDCContract = useContract(USDC_ERC20ADD, ERC20_ABI);
+  const ETHContract = useContract(ETH_ERC20ADD, ERC20_ABI);
+
+  const { handleSubmit, control, watch } = useForm({
+    mode: 'all'
+  });
+
+  const selectedToken = watch('token');
+
+  const validateAmount = async (amount) => {
+    if( selectedToken === 'USDC') {
+      const maxAmount = await getMaxAmount(USDCContract, account);
+      if(maxAmount < amount) {
+        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
+      }
+      return true;
+    } if (selectedToken === 'ETH') {
+      const maxAmount = await getMaxAmount(ETHContract, account);
+      if(maxAmount < amount) {
+        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
+      }
+      return true;
+    } if (selectedToken === 'VRSCTEST') {
+      const VRSCTEST_ADD = await tokenManInstContract.verusToERC20mapping(GLOBAL_ADDRESS.VRSCTEST)
+      const maxAmount = await getMaxAmount(tokenManInstContract, VRSCTEST_ADD);
+      if(maxAmount < amount) {
+        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
+      }
+      return true;
+    } if (selectedToken === 'bridge') {
+      const VRSCTEST_ADD = await tokenManInstContract.verusToERC20mapping(GLOBAL_ADDRESS.BRIDGE)
+      const maxAmount = await getMaxAmount(tokenManInstContract, VRSCTEST_ADD);
+      if(maxAmount < amount) {
+        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
+      }
+      return true;
+    }
+
+    return true;
+  }
+
+  
+  const onSubmit = async (values) => {
+    
+    const { address, token, amount } = values;
+
+    const result = getConfigOptions(values);
+    if(result) {
+      const {flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid} = result
+      const verusAmount = (amount * 100000000);
+      const CReserveTransfer =  {
+        version : 1,
+        currencyvalue : {currency: GLOBAL_ADDRESS[token] , amount: verusAmount.toFixed(0)}, // currency sending from ethereum
+        flags : flagvalue,
+        feecurrencyid : feecurrency, // fee is vrsctest pre bridge launch, veth or others post.
+        fees,
+        destination : {destinationtype, destinationaddress}, // destination address currecny is going to
+        destcurrencyid : GLOBAL_ADDRESS[destinationcurrency],   // destination currency is veth on direct. bridge.veth on bounceback
+        destsystemid : GLOBAL_ADDRESS.VRSCTEST,     // destination system going to can only be VRSCTEST
+        secondreserveid    // used as return currency type on bounce back
+      }
+      const date = new Date();
+      const n = date.toDateString();
+      const time = date.toLocaleTimeString();
+      console.log("Transaction output: ",`Date: ${n} Time: ${time}`);
+      console.log(CReserveTransfer);
+
+      await verusBridgeContract.export(CReserveTransfer)
+        .send({from: address, gas: maxGas, value: web3.utils.toWei(token === 'ETH' ? amount : '0.0006', 'ether')});
+    }
+  }
+
   return (
-    <>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <TextField
-            required
-            id="address"
+          <InputControlField
             name="address"
             label="Address"
             fullWidth
             variant="standard"
+            defaultValue=""
+            control={control}
             helperText="I-Address, R-address, or Etherium address to send conversion back to Ethereum"
+            rules={{
+              required: 'Address is required',
+              validate: validateAddress
+            }}
           />
         </Grid>
         <Grid item xs={12}>
-          <FormControl variant="standard" fullWidth>
-            <InputLabel id="token-label">Token</InputLabel>
-            <Select
-              labelId="token-label"
-              id="token"
-              label="Token"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem selected>Choose...</MenuItem>
-              <MenuItem value="ETH">ETH</MenuItem>
-              <MenuItem value="USDC">USDC</MenuItem>
-              <MenuItem value="VRSCTEST">VRSCTEST</MenuItem>
-              <MenuItem id="hidebridgetoken" value="bridge">Bridge.veth</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12}>
-          <FormControl variant="standard" fullWidth>
-            <InputLabel id="destination-label">Destination</InputLabel>
-            <Select
-              labelId="destination-label"
-              id="destionation"
-              name="destination"
-              label="Destination"
-            >
-              <MenuItem value=""><em>Choose...</em></MenuItem>
-              <MenuItem id="hidevrsctest" value="vrsctest">To VRSCTEST wallet (no conversion)</MenuItem>
-              <MenuItem id="hidebridge" value="bridge">Convert to Bridge.veth on VRSCTEST</MenuItem>
-              <MenuItem id="hideUSDC" value="bridgeUSDC">Convert to USDC on VRSCTEST</MenuItem>
-              <MenuItem id="hideVRSCTEST" value="bridgeVRSCTEST">Convert to VRSCTEST on VRSCTEST</MenuItem>
-              <MenuItem id="hideETH" value="bridgeETH">Convert to ETH on VRSCTEST</MenuItem>
-              <MenuItem id="hideswaptobridge" value="swaptoBRIDGE">Convert to bridge Token (Bounce back to ETH)</MenuItem>
-              <MenuItem id="hideswaptovrsctest" value="swaptoVRSCTEST">Convert to VRSCTEST Token (Bounce back to ETH)</MenuItem>
-              <MenuItem id="hideswaptousdc" value="swaptoUSDC">Convert to USDC Token (Bounce back to ETH)</MenuItem>
-              <MenuItem id="hideswaptoeth" value="swaptoETH">Convert to ETH (Bounce back to ETH)</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            required
-            id="amount"
-            name="amount"
-            label="Amount"
-            type="number"
+          <SelectControlField 
+            name="token"
+            label="Token"
             fullWidth
             variant="standard"
+            defaultValue=""
+            control={control}
+            options={TOKEN_OPTIONS}
+            rules={{
+              required: 'Address is required'
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <SelectControlField 
+            name="destination"
+            label="Destination"
+            fullWidth
+            defaultValue=""
+            variant="standard"
+            control={control}
+            options={DESTINATION_OPTIONS}
+            rules={{
+              required: 'Destination is required'
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <InputControlField
+            name="amount"
+            label="Amount"
+            fullWidth
+            variant="standard"
+            control={control}
+            type="number"
+            defaultValue="0"
+            min={0}
+            rules={{
+              required: 'Amount is required',
+              min: {
+                value: 0,
+                message: 'Amount should be more than 0.'
+              },
+              max: {
+                value: 100000,
+                message: "Amount too large try a smaller amount"
+              },
+              validate: validateAmount
+            }}
           />
         </Grid>
         <Box mt="30px" textAlign="center" width="100%">
-          <Button variant="contained">Send</Button>
+          <Button type="submit" variant="contained">Send</Button>
         </Box>
       </Grid>
-    </>
+    </form>
   );
 }
