@@ -14,9 +14,8 @@ import VERUS_BRIDGE_ABI from 'abis/VerusBridgeAbi.json';
 import { BRIDGE_CONTRACT_ADD, ETH_ERC20ADD, GLOBAL_ADDRESS, TOKEN_MANAGERE_RC20ADD, USDC_ERC20ADD } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getMaxAmount } from 'utils/contract';
-import { convertVerusAddressToEthAddress } from 'utils/convert';
 import { DESTINATION_OPTIONS, TOKEN_OPTIONS } from 'utils/options';
-import { isiAddress, isRAddress, isETHAddress, validateAddress } from 'utils/rules';
+import { validateAddress } from 'utils/rules';
 import { getConfigOptions } from 'utils/txConfig';
 
 import InputControlField from './InputControlField';

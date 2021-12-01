@@ -1,4 +1,6 @@
 import { convertVerusAddressToEthAddress } from "./convert";
+import { isiAddress, isRAddress, isETHAddress } from 'utils/rules';
+import { GLOBAL_ADDRESS } from "constants/contractAddress";
 
 // Flags for CTransferDesination type
 const  DEST_PKH = 2
@@ -49,7 +51,7 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
         } else if(destination == 'bridgeUSDC') {
           if(token != 'USDC' && token != "bridge") {
             destinationcurrency = "bridge";  //bridge open convert from token  to USDC 
-            secondreserveid = currencyglobal.USDC;
+            secondreserveid = GLOBAL_ADDRESS.USDC;
             flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
           } else if( token == "bridge") {
             destinationcurrency = "USDC";
@@ -61,7 +63,7 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
         } else if (destination == 'bridgeVRSCTEST') {
           if(token != 'VRSCTEST' && token != "bridge"){
             destinationcurrency = "bridge";  //bridge open convert from token to VRSCTEST
-            secondreserveid = currencyglobal.VRSCTEST;
+            secondreserveid = GLOBAL_ADDRESS.VRSCTEST;
             flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
           } else if( token == "bridge") {
             destinationcurrency = "VRSCTEST";
@@ -73,7 +75,7 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
         } else if(destination == 'bridgeETH') {
           if(token != 'ETH' && token != "bridge") {
             destinationcurrency = "bridge";  //bridge open convert from token to ETH
-            secondreserveid = currencyglobal.ETH;
+            secondreserveid = GLOBAL_ADDRESS.ETH;
             flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
           } else if( token == "bridge") {
             destinationcurrency = "ETH";
@@ -115,18 +117,18 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
       destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
 
       if(destination == "swaptoVRSCTEST"){
-        secondreserveid = currencyglobal.VRSCTEST;
+        secondreserveid = GLOBAL_ADDRESS.VRSCTEST;
         flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE;
       }
       if(destination == "swaptoUSDC"){
-        secondreserveid = currencyglobal.USDC;
+        secondreserveid = GLOBAL_ADDRESS.USDC;
         flagvalue = VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE;
       }
       if(destination == "swaptoBRIDGE"){
         flagvalue = VALID + CONVERT + CROSS_SYSTEM ;
       }
       if(destination == "swaptoETH"){
-        secondreserveid = currencyglobal.ETH;
+        secondreserveid = GLOBAL_ADDRESS.ETH;
         flagvalue = VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE ;
       }
     } else{
@@ -183,10 +185,10 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
   let feecurrency = {};
   let fees = {};
   if(poolavailable != "0" ){
-    feecurrency = currencyglobal.ETH;
+    feecurrency = GLOBAL_ADDRESS.ETH;
     fees = 30000; //0.0003 ETH FEE
   }else{
-    feecurrency = currencyglobal.VRSCTEST; //pre bridge launch fees must be set as vrsctest
+    feecurrency = GLOBAL_ADDRESS.VRSCTEST; //pre bridge launch fees must be set as vrsctest
     fees = 20000000  // 0.02 VRSCTEST
   }
 
