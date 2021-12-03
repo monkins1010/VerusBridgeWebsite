@@ -126,7 +126,7 @@ export default function AddressForm() {
 
       try {
         const data = await verusBridgeContract.export(CReserveTransfer);
-        consol.elog({ data })
+        console.log({ data })
           // .send({from: address, gas: maxGas, value: web3.utils.toWei(token === 'ETH' ? amount : '0.0006', 'ether')});
         addToast({type: "success", description: 'Transaction Success!'})
       } catch (error) {
