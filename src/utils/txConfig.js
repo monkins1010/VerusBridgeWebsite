@@ -15,9 +15,7 @@ const  CROSS_SYSTEM = 0x40                // if this is set there is a systemID 
 const  IMPORT_TO_SOURCE = 0x200           // set when the source currency not destination is the import currency
 const  RESERVE_TO_RESERVE = 0x400         // for arbitrage or transient conversion 2 stage solving (2nd from new fractional to reserves)
 
-let poolavailable = false;
-
-export const getConfigOptions = ({address, destination, amount, token}) => {
+export const getConfigOptions = ({address, destination, poolAvailable, token}) => {
   let destinationtype = {};
   let flagvalue = VALID + CROSS_SYSTEM;
   let secondreserveid = "0x0000000000000000000000000000000000000000"
@@ -37,7 +35,7 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
   }
  
   if(destinationtype == DEST_ID || destinationtype == DEST_PKH ) { //if I or R address chosen then do one way specific stuff          
-      if(poolavailable == "0") { // pool not available
+      if(poolAvailable == "0") { // pool not available
         if(destination != 'vrsctest'){
           alert("Cannot convert yet Bridge.veth not launched"); //add in FLAGS logic for destination    
           return null;
@@ -100,7 +98,7 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
       }
   } else if (
     destinationtype == DEST_ETH 
-    && poolavailable != "0"  
+    && poolAvailable != "0"  
     && token != 'bridge' 
     && (destination != 'vrsctest') 
     && (destination != 'bridge') 
@@ -137,7 +135,7 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
     }
   } else if (
     destinationtype == DEST_ETH 
-    && poolavailable != "0"  
+    && poolAvailable != "0"  
     && token == 'bridge' 
     && (destination != 'vrsctest') 
     && (destination != 'bridge') 
@@ -184,7 +182,7 @@ export const getConfigOptions = ({address, destination, amount, token}) => {
 
   let feecurrency = {};
   let fees = {};
-  if(poolavailable != "0" ){
+  if(poolAvailable != "0" ){
     feecurrency = GLOBAL_ADDRESS.ETH;
     fees = 30000; //0.0003 ETH FEE
   }else{

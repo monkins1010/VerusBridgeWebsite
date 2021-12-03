@@ -17,6 +17,14 @@ export const TOKEN_OPTIONS = [
   }
 ];
 
+const tokenOptionsByPool = [
+  "bridge"
+]
+
+export const getTokenOptions = (poolAvailable) => (
+  poolAvailable === "0" ? TOKEN_OPTIONS.filter(option => !tokenOptionsByPool.includes(option.value)) : TOKEN_OPTIONS
+)
+
 export const DESTINATION_OPTIONS = [
   { value : "vrsctest", label: "To VRSCTEST wallet (no conversion)" },
   { value : "bridge", label: "Convert to Bridge.veth on VRSCTEST" },
@@ -27,4 +35,12 @@ export const DESTINATION_OPTIONS = [
   { value : "swaptoVRSCTEST", label: "Convert to VRSCTEST Token (Bounce back to ETH)" },
   { value : "swaptoUSDC", label: "Convert to USDC Token (Bounce back to ETH)" },
   { value : "swaptoETH", label: "Convert to ETH (Bounce back to ETH)" }
+];
+
+const destionationOptionsByPool = [
+  "swaptoBRIDGE", "swaptoVRSCTEST", 'bridge', 'swaptoUSDC', 'swaptoETH'
 ]
+
+export const getDestinationOptions = (poolAvailable) => (
+  poolAvailable === "0" ? TOKEN_OPTIONS.filter(option => !destionationOptionsByPool.includes(option.value)) : TOKEN_OPTIONS
+)

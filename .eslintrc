@@ -73,6 +73,7 @@
         "components": ["Link"],
         "specialLink": ["to"]
       }
-    ]
+    ],
+    "import/no-cycle": "off"
   }
 }

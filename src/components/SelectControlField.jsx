@@ -28,6 +28,7 @@ const SelectControlField = ({
             <Select
               labelId={labelId}
               label={label}
+              id={name}
               onChange={onChange}
               value={value}
               error={!!error}
@@ -40,8 +41,7 @@ const SelectControlField = ({
                 transformOrigin: {
                   vertical: 'top',
                   horizontal: 'left'
-                },
-                getContentAnchorEl: null
+                }
               }}
             >
               {options.map((option) => (

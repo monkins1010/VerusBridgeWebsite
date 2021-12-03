@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { Alert, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { Box } from '@mui/system';
@@ -9,34 +10,63 @@ import web3 from 'web3';
 
 
 import ERC20_ABI from 'abis/ERC20Abi.json';
+import NOTARIZER_ABI from 'abis/Notarizerabi.json';
 import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
 import VERUS_BRIDGE_ABI from 'abis/VerusBridgeAbi.json';
-import { BRIDGE_CONTRACT_ADD, ETH_ERC20ADD, GLOBAL_ADDRESS, TOKEN_MANAGERE_RC20ADD, USDC_ERC20ADD } from 'constants/contractAddress';
+import { 
+  BRIDGE_CONTRACT_ADD, 
+  ETH_ERC20ADD, 
+  GLOBAL_ADDRESS, 
+  NOTARIZER_CONTRACT_ADD, 
+  TOKEN_MANAGERE_RC20ADD, 
+  USDC_ERC20ADD 
+} from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getMaxAmount } from 'utils/contract';
-import { DESTINATION_OPTIONS, TOKEN_OPTIONS } from 'utils/options';
+import { getDestinationOptions, getTokenOptions } from 'utils/options';
 import { validateAddress } from 'utils/rules';
 import { getConfigOptions } from 'utils/txConfig';
 
 import InputControlField from './InputControlField';
 import SelectControlField from './SelectControlField';
+import { useToast } from './Toast/ToastProvider';
 
 const maxGas = 6000000;
 
 const maxGas2 = 100000;
 
 export default function AddressForm() {
+  const [poolAvailable, setPoolAvailable] = useState(null);
+  const [verusTestHeight, setVerusTestHeight] = useState(null);
+  const { addToast } = useToast();
   const { account } = useWeb3React();
   const verusBridgeContract = useContract(BRIDGE_CONTRACT_ADD, VERUS_BRIDGE_ABI);
   const tokenManInstContract = useContract(TOKEN_MANAGERE_RC20ADD, TOKEN_MANAGER_ABI);
   const USDCContract = useContract(USDC_ERC20ADD, ERC20_ABI);
   const ETHContract = useContract(ETH_ERC20ADD, ERC20_ABI);
-
+  const NotarizerInstContract = useContract(NOTARIZER_CONTRACT_ADD,  NOTARIZER_ABI);
+  
   const { handleSubmit, control, watch } = useForm({
     mode: 'all'
   });
-
   const selectedToken = watch('token');
+
+  const checkBridgeLaunched = async (contract) => {
+    try {
+      const pool = await contract.poolAvailable(GLOBAL_ADDRESS.BRIDGE);
+      setPoolAvailable(pool);
+      const lastProof = await contract.getLastProofRoot();
+      setVerusTestHeight(lastProof.rootheight);
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    if(NotarizerInstContract) {
+      checkBridgeLaunched(NotarizerInstContract);
+    }
+  }, [NotarizerInstContract])
 
   const validateAmount = async (amount) => {
     if( selectedToken === 'USDC') {
@@ -70,12 +100,10 @@ export default function AddressForm() {
     return true;
   }
 
-  
   const onSubmit = async (values) => {
-    
-    const { address, token, amount } = values;
+    const { token, amount, address } = values;
 
-    const result = getConfigOptions(values);
+    const result = getConfigOptions({...values, poolAvailable});
     if(result) {
       const {flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid} = result
       const verusAmount = (amount * 100000000);
@@ -94,15 +122,34 @@ export default function AddressForm() {
       const n = date.toDateString();
       const time = date.toLocaleTimeString();
       console.log("Transaction output: ",`Date: ${n} Time: ${time}`);
-      console.log(CReserveTransfer);
+      console.log({CReserveTransfer});
 
-      await verusBridgeContract.export(CReserveTransfer)
-        .send({from: address, gas: maxGas, value: web3.utils.toWei(token === 'ETH' ? amount : '0.0006', 'ether')});
+      try {
+        const data = await verusBridgeContract.export(CReserveTransfer);
+        consol.elog({ data })
+          // .send({from: address, gas: maxGas, value: web3.utils.toWei(token === 'ETH' ? amount : '0.0006', 'ether')});
+        addToast({type: "success", description: 'Transaction Success!'})
+      } catch (error) {
+        console.log(error)
+        addToast({type: "error", description: 'Transaction Failed!'})
+      }
     }
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit(onSubmit)}>
+      <Alert severity="info" sx={{ mb : 3}}>
+        <Typography>
+          {poolAvailable !== "0" ? "Bridge.veth currency Launched": "Bridge.veth currency not launched"}
+        </Typography>
+        {verusTestHeight && (
+          <Typography>
+            Last Confirmed VerusTest height: {verusTestHeight}
+          </Typography>
+        )}
+      </Alert>
+
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <InputControlField
@@ -122,12 +169,13 @@ export default function AddressForm() {
         <Grid item xs={12}>
           <SelectControlField 
             name="token"
+            id="token"
             label="Token"
             fullWidth
             variant="standard"
             defaultValue=""
             control={control}
-            options={TOKEN_OPTIONS}
+            options={getTokenOptions(poolAvailable)}
             rules={{
               required: 'Address is required'
             }}
@@ -136,12 +184,13 @@ export default function AddressForm() {
         <Grid item xs={12}>
           <SelectControlField 
             name="destination"
+            id="destination"
             label="Destination"
             fullWidth
             defaultValue=""
             variant="standard"
             control={control}
-            options={DESTINATION_OPTIONS}
+            options={getDestinationOptions(poolAvailable)}
             rules={{
               required: 'Destination is required'
             }}
@@ -176,5 +225,6 @@ export default function AddressForm() {
         </Box>
       </Grid>
     </form>
+    </>
   );
 }
