@@ -13,9 +13,8 @@ import Header from '../components/Header';
 function Copyright() {
   return (
     <Typography variant="body2" color="text.secondary" align="center">
-      {'Copyright © '}
       <Link color="inherit" target="_blank" href="https://verus.io/">
-        Verus
+        Verus Foundation
       </Link>{' '}
       {new Date().getFullYear()}
       .
@@ -38,7 +37,6 @@ export default function Checkout() {
           </Typography>
           <AddressForm />
         </Paper>
-        <Copyright />
       </Container>
     </ThemeProvider>
   );

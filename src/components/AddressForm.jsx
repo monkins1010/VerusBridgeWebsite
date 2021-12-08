@@ -6,8 +6,7 @@ import Grid from '@mui/material/Grid';
 import { Box } from '@mui/system';
 import { useWeb3React } from '@web3-react/core';
 import { useForm } from 'react-hook-form';
-import web3 from 'web3';
-
+import web3 from 'web3'
 
 import ERC20_ABI from 'abis/ERC20Abi.json';
 import NOTARIZER_ABI from 'abis/Notarizerabi.json';
@@ -105,7 +104,7 @@ export default function AddressForm() {
 
     const result = getConfigOptions({...values, poolAvailable});
     if(result) {
-      const {flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid} = result
+      const {flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid} = result;
       const verusAmount = (amount * 100000000);
       const CReserveTransfer =  {
         version : 1,
@@ -125,9 +124,8 @@ export default function AddressForm() {
       console.log({CReserveTransfer});
 
       try {
-        const data = await verusBridgeContract.export(CReserveTransfer);
-        console.log({ data })
-          // .send({from: address, gas: maxGas, value: web3.utils.toWei(token === 'ETH' ? amount : '0.0006', 'ether')});
+        await verusBridgeContract.export(CReserveTransfer, {from: address, gas: maxGas, value: web3.utils.toWei(token === 'ETH' ? amount : '0.0006', 'ether')});
+        // console.log({ data })
         addToast({type: "success", description: 'Transaction Success!'})
       } catch (error) {
         console.log(error)

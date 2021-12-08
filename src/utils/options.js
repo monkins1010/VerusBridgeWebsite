@@ -42,5 +42,5 @@ const destionationOptionsByPool = [
 ]
 
 export const getDestinationOptions = (poolAvailable) => (
-  poolAvailable === "0" ? TOKEN_OPTIONS.filter(option => !destionationOptionsByPool.includes(option.value)) : TOKEN_OPTIONS
+  poolAvailable === "0" ? DESTINATION_OPTIONS.filter(option => !destionationOptionsByPool.includes(option.value)) : DESTINATION_OPTIONS
 )
