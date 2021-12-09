@@ -13,12 +13,12 @@ export const TOKEN_OPTIONS = [
   },
   {
     label: 'Bridge.veth',
-    value: 'bridge'
+    value: 'BRIDGE'
   }
 ];
 
 const tokenOptionsByPool = [
-  "bridge"
+  "BRIDGE"
 ]
 
 export const getTokenOptions = (poolAvailable) => (

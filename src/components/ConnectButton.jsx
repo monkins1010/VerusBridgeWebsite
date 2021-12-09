@@ -5,17 +5,19 @@ import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import { NoEthereumProviderError, UserRejectedRequestError } from '@web3-react/injected-connector';
 
 import { ID_NAME_MAPPING } from '../constants/chain';
+import { useToast } from './Toast/ToastProvider';
 
 const ConnectButton = ({ onClick }) => {
   const { account, chainId, error } = useWeb3React();
+  const { addToast } = useToast();
   
   useEffect(() => {
     if (error instanceof NoEthereumProviderError) {
-      console.log({ title: 'Metamask connection error', type: 'TOAST_ERROR', description: 'Ethereum was not provided.' })
+      addToast({ type: 'error', description: 'Ethereum was not provided.' })
     } else if (error instanceof UserRejectedRequestError) {
-      console.log({ title: 'Metamask connection error', type: 'TOAST_ERROR', description: 'User rejected the connection' })
+      addToast({ type: 'error', description: 'User rejected the connection' })
     } else if (error instanceof UnsupportedChainIdError) {
-      console.log({ title: 'Metamask connection error', type: 'TOAST_ERROR', description: 'Metamask is not supporting the chain you are using. Please change your network on your Metamask.' })
+      addToast({ type: 'error', description: 'Metamask is not supporting the chain you are using. Please change your network on your Metamask.' })
     }
   }, [error])
 
