@@ -14,27 +14,25 @@ import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
 import VERUS_BRIDGE_ABI from 'abis/VerusBridgeAbi.json';
 import { 
   BRIDGE_CONTRACT_ADD, 
-  ETH_ERC20ADD, 
   GLOBAL_ADDRESS, 
   NOTARIZER_CONTRACT_ADD, 
-  TOKEN_MANAGERE_RC20ADD, 
-  USDC_ERC20ADD 
+  TOKEN_MANAGERE_RC20ADD 
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
-import { getContract, getMaxAmount } from 'utils/contract';
-import { getDestinationOptions, getTokenOptions } from 'utils/options';
-import { validateAddress } from 'utils/rules';
+import { getContract } from 'utils/contract';
 import { getConfigOptions } from 'utils/txConfig';
 
-import InputControlField from './InputControlField';
-import SelectControlField from './SelectControlField';
-import { useToast } from './Toast/ToastProvider';
+import { useToast } from '../Toast/ToastProvider';
+import AddressField from './AddressField';
+import AmountField from './AmountField';
+import DestinationField from './DestinationField';
+import TokenField from './TokenField';
 
 const maxGas = 6000000;
 const maxGas2 = 100000;
 
-export default function AddressForm() {
-  const [poolAvailable, setPoolAvailable] = useState(null);
+export default function TransactionForm() {
+  const [poolAvailable, setPoolAvailable] = useState("0");
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
@@ -42,14 +40,13 @@ export default function AddressForm() {
   const { account, library } = useWeb3React();
   const verusBridgeContract = useContract(BRIDGE_CONTRACT_ADD, VERUS_BRIDGE_ABI);
   const tokenManInstContract = useContract(TOKEN_MANAGERE_RC20ADD, TOKEN_MANAGER_ABI);
-  const USDCContract = useContract(USDC_ERC20ADD, ERC20_ABI);
-  const ETHContract = useContract(ETH_ERC20ADD, ERC20_ABI);
   const NotarizerInstContract = useContract(NOTARIZER_CONTRACT_ADD,  NOTARIZER_ABI);
   
   const { handleSubmit, control, watch } = useForm({
     mode: 'all'
   });
   const selectedToken = watch('token');
+  const address = watch('address');
 
   const checkBridgeLaunched = async (contract) => {
     try {
@@ -58,6 +55,7 @@ export default function AddressForm() {
       const lastProof = await contract.getLastProofRoot();
       setVerusTestHeight(lastProof.rootheight);
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(err)
     }
   }
@@ -67,46 +65,6 @@ export default function AddressForm() {
       checkBridgeLaunched(NotarizerInstContract);
     }
   }, [NotarizerInstContract, account])
-
-  const validateAmount = async (amount) => {
-    if( selectedToken === 'USDC') {
-      const maxAmount = await getMaxAmount(USDCContract, account);
-      if(maxAmount < amount) {
-        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
-      }
-      return true;
-    } if (selectedToken === 'ETH') {
-      const maxAmount = await getMaxAmount(ETHContract, account);
-      if(maxAmount < amount) {
-        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
-      }
-      return true;
-    } if (selectedToken === 'VRSCTEST') {
-      const VRSCTEST_ADD = await tokenManInstContract.verusToERC20mapping(GLOBAL_ADDRESS.VRSCTEST)
-      const maxAmount = await getMaxAmount(tokenManInstContract, VRSCTEST_ADD);
-      if(maxAmount < amount) {
-        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
-      }
-      return true;
-    } if (selectedToken === 'BRIDGE') {
-      const VRSCTEST_ADD = await tokenManInstContract.verusToERC20mapping(GLOBAL_ADDRESS.BRIDGE)
-      const maxAmount = await getMaxAmount(tokenManInstContract, VRSCTEST_ADD);
-      if(maxAmount < amount) {
-        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
-      }
-      return true;
-    }
-
-    if(amount > 100000) {
-      return 'Amount too large. Try a smaller amount.'
-    }
-
-    if(amount <= 0) {
-      return 'Amount is not valid.'
-    }
-
-    return true;
-  }
 
   const authoriseOneTokenAmount = async (token, amount) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token}) from your Rinkeby balance.`);
@@ -196,76 +154,32 @@ export default function AddressForm() {
 
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <InputControlField
-            name="address"
-            label="Address"
-            fullWidth
-            variant="standard"
-            defaultValue=""
+          <AddressField
             control={control}
-            helperText="I-Address, R-address, or Etherium address to send conversion back to Ethereum"
-            rules={{
-              required: 'Address is required',
-              validate: validateAddress
-            }}
           />
         </Grid>
         <Grid item xs={12}>
-          <SelectControlField 
-            name="token"
-            id="token"
-            label="Token"
-            fullWidth
-            variant="standard"
-            defaultValue=""
+          <TokenField
             control={control}
-            options={getTokenOptions(poolAvailable)}
-            rules={{
-              required: 'Address is required'
-            }}
+            poolAvailable={poolAvailable}
           />
         </Grid>
         <Grid item xs={12}>
-          <SelectControlField 
-            name="destination"
-            id="destination"
-            label="Destination"
-            fullWidth
-            defaultValue=""
-            variant="standard"
+          <DestinationField
             control={control}
-            options={getDestinationOptions(poolAvailable)}
-            rules={{
-              required: 'Destination is required'
-            }}
+            poolAvailable={poolAvailable}
+            address={address}
+            selectedToken={selectedToken}
           />
         </Grid>
         <Grid item xs={12}>
-          <InputControlField
-            name="amount"
-            label="Amount"
-            fullWidth
-            variant="standard"
+          <AmountField
             control={control}
-            type="number"
-            defaultValue="0"
-            min={0}
-            rules={{
-              required: 'Amount is required',
-              min: {
-                value: 0,
-                message: 'Amount should be more than 0.'
-              },
-              max: {
-                value: 100000,
-                message: "Amount too large try a smaller amount"
-              },
-              validate: validateAmount
-            }}
+            selectedToken={selectedToken}
           />
         </Grid>
         <Box mt="30px" textAlign="center" width="100%">
-          <LoadingButton loading={isTxPending} type="submit" variant="contained">Send</LoadingButton>
+          <LoadingButton loading={isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
         </Box>
       </Grid>
     </form>

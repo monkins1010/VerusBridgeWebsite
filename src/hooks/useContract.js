@@ -22,6 +22,7 @@ const useContract = (
         withSignerIfPossible && account ? account : undefined
       );
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get contract', error);
       return null;
     }
