@@ -1,0 +1,9 @@
+.fadeToast {
+  animation: fade 10s;
+  left: -110%;
+}
+
+@keyframes fade {
+  0%, 100% {left: -110%;}
+  5%, 95% {left: 0%;}
+}
