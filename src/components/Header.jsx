@@ -43,7 +43,7 @@ const Header = () => {
           noWrap 
           sx={{flexGrow: 1, marginLeft: '20px'}}
         >
-          Verus
+          (VRSCTEST)
         </Typography>
         <ConnectButton onClick={handleClickConnect} />
         <WalletConnectDialog 

@@ -21,7 +21,7 @@ export default function Checkout() {
       <StyledContainer component="main" maxWidth="sm">
         <Paper variant="outlined" sx={{ px: { xs: 2, md: 3 }, py: {md: 8, xs: 2}, mb:3 }}>
           <Typography component="h1" variant="h4" align="center" sx={{mb:3}}>
-            Verus Currency Swap
+            Verus Ethereum Bridge
           </Typography>
           <TransactionForm />
         </Paper>
