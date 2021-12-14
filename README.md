@@ -1,10 +1,12 @@
-# Getting Started with Create React App
+## Envoronment Variable
+Please create .env file and copy the following code.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+```
+REACT_APP_RPC_URL_RINKEBY=https://rinkeby.infura.io/v3/6e67197573904e1486999a75454b69da
+REACT_APP_RPC_URL_HOMESTEAD=https://mainnet.infura.io/v3/74934b1a6e0046c1b48f42c4ca6a9c58
+```
 
-## Available Scripts
-
-In the project directory, you can run:
+### `yarn install`
 
 ### `yarn start`
 
