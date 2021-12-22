@@ -11,7 +11,7 @@ const AddressField = ({ control }) => (
       variant="standard"
       defaultValue=""
       control={control}
-      helperText="I-Address, R-address, or Etherium address to send conversion back to Ethereum"
+      helperText="I-Address, R-address, or Ethereum address to send conversion back to Ethereum"
       rules={{
         required: 'Address is required',
         validate: validateAddress
