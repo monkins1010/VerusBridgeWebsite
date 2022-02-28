@@ -4,14 +4,14 @@ import MetaMaskOnboarding from '@metamask/onboarding'
 import Web3 from 'web3'
 const BigNumber = require('bignumber.js');
 const bitGoUTXO = require('./bitUTXO')
-const verusBridgeAbi = require('./VerusBridgeAbi.json')
-const ERC20Abi = require('./ERC20Abi.json')
-const TOKENMANAGERABI = require('./TokenManagerAbi.json')
-const NOTARIZERAbi = require('./Notarizerabi.json')
 
-const contracts = {"bridge":"0x12EaC7B6127f301cD36e57Ef38773F6F7fF8240A",
-                   "notarizer":"0xE4aB5B6F7cf329BB6b6354eDe4B43a6a6BFd9f95",
-                   "tokenmanager":"0x0d4eA7889741aBf7A100C97829dbaa8C9c8Ef51D"}  //update these on launch of new contracts
+const NOTARIZERAbi = require('./abi/VerusNotarizer.json');
+const verusBridgeAbi = require('./abi/VerusBridge.json');
+const ERC20Abi = require('./ERC20Abi.json')
+const TOKENMANAGERABI = require('./abi/TokenManager.json')
+const contracts = {"bridge":"0x2B6D09272e6bf55f075481B2Dba0b4BAE9cb32e9",
+"notarizer":"0x7b6a0C6E713DBD2E83A30d96CF3bea9bb5afec7e",
+"tokenmanager":"0xE2b095dA695101cE29491B2E32eE1673F3d66205"}//update these on launch of new contracts
 
 const verusBridgeContractAdd = contracts.bridge;
 const VERUSNOTARIZERCONTRACT = contracts.notarizer;
@@ -37,6 +37,8 @@ const  PRECONVERT = 4
 const  CROSS_SYSTEM = 0x40                // if this is set there is a systemID serialized and deserialized as well for destination
 const  IMPORT_TO_SOURCE = 0x200           // set when the source currency not destination is the import currency
 const  RESERVE_TO_RESERVE = 0x400         // for arbitrage or transient conversion 2 stage solving (2nd from new fractional to reserves)
+const  ETH_FEE_SATS = 300000; //0.003 ETH FEE
+const  ETH_FEE = "0.003"; //0.003 ETH FEE
 
 //Flags for CTransferDesination type
 const  DEST_PKH = 2
@@ -175,6 +177,8 @@ const initialize = async () => {
     }
 
     function isETHAddress (address) {
+
+
       if (!(/^(0x)?[0-9a-f]{40}$/i).test(address)) {
         // check if it has the basic requirements of an address
         return false
@@ -182,12 +186,13 @@ const initialize = async () => {
         // If it's all small caps or all all caps, return true
         return true
       }
+      return web3.utils.isAddress(address);
     }
 
     const authoriseOneTokenAmount = async (token, amount) => {
       
         alert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}: ${token} from your Rinkeby balance.`);
-        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
+        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI.abi, TOKENMANAGERERC20ADD);
         let tokenERCAddress = await tokenManInst.methods.verusToERC20mapping(currencyglobal[token]).call()
          
         const tokenInst = new web3.eth.Contract(ERC20Abi, tokenERCAddress[0]);
@@ -206,11 +211,13 @@ const initialize = async () => {
       const amount = SendETHAmount1.value
       const token = inputGroupSelect01.value
       const destination = inputGroupSelect02.value
-      const verusBridge = new web3.eth.Contract(verusBridgeAbi, verusBridgeContractAdd)
+      const verusBridge = new web3.eth.Contract(verusBridgeAbi.abi, verusBridgeContractAdd)
       let destinationtype = {};
       let flagvalue = VALID + CROSS_SYSTEM;
       let secondreserveid = "0x0000000000000000000000000000000000000000"
       let destinationcurrency = {};
+      let bounceBackFee = Buffer.alloc(8);  //assign a uint64 size in a buffer
+      bounceBackFee.writeUInt32LE(ETH_FEE_SATS); //write LE bounce back fee 
 
       var accounts = await web3.eth.getAccounts();
       var accbal = await web3.eth.getBalance(accounts[0]);  //your metamask eth balance
@@ -258,7 +265,7 @@ const initialize = async () => {
         
       }else if(token == 'VRSCTEST'){
 
-        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
+        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI.abi, TOKENMANAGERERC20ADD);
         let VRSCTESTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.VRSCTEST).call()
         const tokenInst = new web3.eth.Contract(ERC20Abi, VRSCTESTadd[0]); //get the users VRSCTEST token balance
         let balance = await tokenInst.methods.balanceOf(accounts[0]).call()
@@ -272,7 +279,7 @@ const initialize = async () => {
           await authoriseOneTokenAmount("VRSCTEST",parseFloat(amount));
       }else if(token == 'bridge'){
 
-        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI, TOKENMANAGERERC20ADD);
+        const tokenManInst = new web3.eth.Contract(TOKENMANAGERABI.abi, TOKENMANAGERERC20ADD);
         let bridgeTadd = await tokenManInst.methods.verusToERC20mapping(currencyglobal.bridge).call()
 
         const tokenInst = new web3.eth.Contract(ERC20Abi, bridgeTadd[0]); //get the users bridge.veth token balance
@@ -314,7 +321,7 @@ const initialize = async () => {
               return;
             }
             flagvalue = VALID + CROSS_SYSTEM;
-            destinationcurrency = "ETH";
+            destinationcurrency = "VRSCTEST";
           }
           else 
           {
@@ -403,8 +410,9 @@ const initialize = async () => {
               || destination == "swaptoBRIDGE"){
           destinationcurrency = "bridge";
           destinationtype += FLAG_DEST_GATEWAY; //add 128 = FLAG_DEST_GATEWAY
-          //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
-          destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
+
+          //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.0003 ETH in fees uint64LE -
+          destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex'); //"e093040000000000"
 
           if(destination == "swaptoVRSCTEST"){
             secondreserveid = currencyglobal.VRSCTEST;
@@ -437,7 +445,7 @@ const initialize = async () => {
 
           destinationtype += FLAG_DEST_GATEWAY; 
           //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
-          destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + "e093040000000000"
+          destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex'); //"e093040000000000"
 
           if(destination == "swaptoVRSCTEST"){
             destinationcurrency = "VRSCTEST";
@@ -466,7 +474,7 @@ const initialize = async () => {
       let fees = {};
       if(poolavailable != "0" ){
         feecurrency = currencyglobal.ETH;
-        fees = 30000; //0.0003 ETH FEE
+        fees = ETH_FEE_SATS; //0.003 ETH FEE
       }else{
         feecurrency = currencyglobal.VRSCTEST; //pre bridge launch fees must be set as vrsctest
         fees = 20000000  // 0.02 VRSCTEST
@@ -490,9 +498,24 @@ const initialize = async () => {
         var time = date.toLocaleTimeString();
         console.log("Transaction output: ",`Date: ${n} Time: ${time}`);
         console.log(CReserveTransfer);
+        
+        let BN  = web3.utils.BN;
+        let MetaMaskFee = new BN(web3.utils.toWei(ETH_FEE, 'ether'));
 
+        if(destinationtype & FLAG_DEST_GATEWAY) {
+          
+          MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(ETH_FEE, 'ether')));
+
+        }
+
+        if(token == 'ETH') {
+
+          MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
+
+        }
+    
         await verusBridge.methods.export(CReserveTransfer)
-          .send({from: ethereum.selectedAddress, gas: maxGas, value: web3.utils.toWei(token == 'ETH' ? amount : '0.0006', 'ether')});
+          .send({from: ethereum.selectedAddress, gas: maxGas, value: MetaMaskFee.toString()});
 
         alert("Transaction sent"); 
 
@@ -518,7 +541,7 @@ const initialize = async () => {
   const checkBridgeLaunched = async () => {
     try {
 
-      const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi, VERUSNOTARIZERCONTRACT);
+      const NotarizerInst = new web3.eth.Contract(NOTARIZERAbi.abi, VERUSNOTARIZERCONTRACT);
       poolavailable = await NotarizerInst.methods.poolAvailable(currencyglobal.bridge).call();
       let lastProof = await  NotarizerInst.methods.getLastProofRoot().call();
       poollaunchedtext.innerText = (poolavailable != "0"  ? "Bridge.veth currency Launched" : "Bridge.veth currency not launched" ) + "\n Last VerusTest Notary height: " + lastProof.rootheight;
