@@ -9,9 +9,9 @@ const NOTARIZERAbi = require('./abi/VerusNotarizer.json');
 const verusBridgeAbi = require('./abi/VerusBridge.json');
 const ERC20Abi = require('./ERC20Abi.json')
 const TOKENMANAGERABI = require('./abi/TokenManager.json')
-const contracts = {"bridge":"0x2B6D09272e6bf55f075481B2Dba0b4BAE9cb32e9",
-"notarizer":"0x7b6a0C6E713DBD2E83A30d96CF3bea9bb5afec7e",
-"tokenmanager":"0xE2b095dA695101cE29491B2E32eE1673F3d66205"}//update these on launch of new contracts
+const contracts = {"bridge":"0x2C8194d0967343335946fC941FB134EaC005A5A6",
+"notarizer":"0x4BF230290a5102b1492724f8791AF6F0bb07b073",
+"tokenmanager":"0x266ec22d257Fb82d74cAe993023cCDeA6d101De1"}//update these on launch of new contracts
 
 const verusBridgeContractAdd = contracts.bridge;
 const VERUSNOTARIZERCONTRACT = contracts.notarizer;
@@ -213,7 +213,7 @@ const initialize = async () => {
       const destination = inputGroupSelect02.value
       const verusBridge = new web3.eth.Contract(verusBridgeAbi.abi, verusBridgeContractAdd)
       let destinationtype = {};
-      let flagvalue = VALID + CROSS_SYSTEM;
+      let flagvalue = VALID;
       let secondreserveid = "0x0000000000000000000000000000000000000000"
       let destinationcurrency = {};
       let bounceBackFee = Buffer.alloc(8);  //assign a uint64 size in a buffer
@@ -320,7 +320,7 @@ const initialize = async () => {
               alert("Cannot convert yet Bridge.veth not launched"); //add in FLAGS logic for destination    
               return;
             }
-            flagvalue = VALID + CROSS_SYSTEM;
+            flagvalue = VALID ;
             destinationcurrency = "VRSCTEST";
           }
           else 
@@ -328,19 +328,19 @@ const initialize = async () => {
             if(destination == 'vrsctest') 
             {              
               destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
-              flagvalue = VALID + CROSS_SYSTEM; 
+              flagvalue = VALID ; 
             }
             else if(destination == 'bridgeUSDC')
             {
               if(token != 'USDC' && token != "bridge"){
                 destinationcurrency = "bridge";  //bridge open convert from token  to USDC 
                 secondreserveid = currencyglobal.USDC;
-                flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
+                flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE ;   //add convert flag on
               }
               else if( token == "bridge")
               {
                 destinationcurrency = "USDC";
-                flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
+                flagvalue = VALID + CONVERT +  IMPORT_TO_SOURCE;
               }else
               {
                 alert("Cannot convert USDC to USDC. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
@@ -352,12 +352,12 @@ const initialize = async () => {
               if(token != 'VRSCTEST' && token != "bridge"){
                 destinationcurrency = "bridge";  //bridge open convert from token to VRSCTEST
                 secondreserveid = currencyglobal.VRSCTEST;
-                flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
+                flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE ;   //add convert flag on
               }
               else if( token == "bridge")
               {
                 destinationcurrency = "VRSCTEST";
-                flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
+                flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
               }
               else
               {
@@ -371,12 +371,12 @@ const initialize = async () => {
               {
                 destinationcurrency = "bridge";  //bridge open convert from token to ETH
                 secondreserveid = currencyglobal.ETH;
-                flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE ;   //add convert flag on
+                flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE ;   //add convert flag on
               }
               else if( token == "bridge")
               {
                 destinationcurrency = "ETH";
-                flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
+                flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
               }else
               {
                 alert("Cannot convert ETH to ETH. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
@@ -388,7 +388,7 @@ const initialize = async () => {
               destinationcurrency = "bridge";  //bridge open all sends go to bridge.veth
               if(token != 'bridge')
               {
-                flagvalue = VALID + CONVERT + CROSS_SYSTEM ;   //add convert flag on
+                flagvalue = VALID + CONVERT ;   //add convert flag on
               }
               else
               {
@@ -416,18 +416,18 @@ const initialize = async () => {
 
           if(destination == "swaptoVRSCTEST"){
             secondreserveid = currencyglobal.VRSCTEST;
-            flagvalue = VALID + CONVERT + CROSS_SYSTEM + RESERVE_TO_RESERVE;
+            flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE;
           }
           if(destination == "swaptoUSDC"){
             secondreserveid = currencyglobal.USDC;
-            flagvalue = VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE;
+            flagvalue = VALID + CONVERT +  RESERVE_TO_RESERVE;
           }
           if(destination == "swaptoBRIDGE"){
-            flagvalue = VALID + CONVERT + CROSS_SYSTEM ;
+            flagvalue = VALID + CONVERT  ;
           }
           if(destination == "swaptoETH"){
             secondreserveid = currencyglobal.ETH;
-            flagvalue = VALID + CONVERT + CROSS_SYSTEM +  RESERVE_TO_RESERVE ;
+            flagvalue = VALID + CONVERT  +  RESERVE_TO_RESERVE ;
           }
         }else{
           alert("Cannot swap tokens to and from the same coin.  Or cannot go one way to an ETH address"); //add in FLAGS logic for destination
@@ -449,15 +449,15 @@ const initialize = async () => {
 
           if(destination == "swaptoVRSCTEST"){
             destinationcurrency = "VRSCTEST";
-            flagvalue = VALID + CONVERT + CROSS_SYSTEM + IMPORT_TO_SOURCE;
+            flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
           }
           if(destination == "swaptoUSDC"){
             destinationcurrency = "USDC";
-            flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
+            flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
           }
           if(destination == "swaptoETH"){
             destinationcurrency = "ETH";
-            flagvalue = VALID + CONVERT + CROSS_SYSTEM +  IMPORT_TO_SOURCE;
+            flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
           }
     
       } else if(destinationtype == DEST_ETH  && (destination == 'vrsctest') || (destination == 'bridge') )  {
@@ -477,7 +477,7 @@ const initialize = async () => {
         fees = ETH_FEE_SATS; //0.003 ETH FEE
       }else{
         feecurrency = currencyglobal.VRSCTEST; //pre bridge launch fees must be set as vrsctest
-        fees = 20000000  // 0.02 VRSCTEST
+        fees = 2000000  // 0.02 VRSCTEST
       }
       
 
@@ -490,7 +490,7 @@ const initialize = async () => {
           fees : fees,
           destination : {destinationtype, destinationaddress}, //destination address currecny is going to
           destcurrencyid : currencyglobal[destinationcurrency],   // destination currency is veth on direct. bridge.veth on bounceback
-          destsystemid : currencyglobal.VRSCTEST,     // destination system going to can only be VRSCTEST
+          destsystemid : "0x0000000000000000000000000000000000000000",     // destination system going to can only be VRSCTEST
           secondreserveid : secondreserveid    //used as return currency type on bounce back
           }
         var date = new Date();
