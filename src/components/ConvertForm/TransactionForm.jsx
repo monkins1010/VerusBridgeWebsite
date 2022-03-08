@@ -12,11 +12,12 @@ import ERC20_ABI from 'abis/ERC20Abi.json';
 import NOTARIZER_ABI from 'abis/Notarizerabi.json';
 import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
 import VERUS_BRIDGE_ABI from 'abis/VerusBridgeAbi.json';
-import { 
-  BRIDGE_CONTRACT_ADD, 
-  GLOBAL_ADDRESS, 
-  NOTARIZER_CONTRACT_ADD, 
-  TOKEN_MANAGERE_RC20ADD 
+import {
+  BRIDGE_CONTRACT_ADD,
+  GLOBAL_ADDRESS,
+  NOTARIZER_CONTRACT_ADD,
+  TOKEN_MANAGERE_RC20ADD,
+  ETH_FEES
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -30,6 +31,7 @@ import TokenField from './TokenField';
 
 const maxGas = 6000000;
 const maxGas2 = 100000;
+const FLAG_DEST_GATEWAY = 128
 
 export default function TransactionForm() {
   const [poolAvailable, setPoolAvailable] = useState("0");
@@ -40,8 +42,8 @@ export default function TransactionForm() {
   const { account, library } = useWeb3React();
   const verusBridgeContract = useContract(BRIDGE_CONTRACT_ADD, VERUS_BRIDGE_ABI);
   const tokenManInstContract = useContract(TOKEN_MANAGERE_RC20ADD, TOKEN_MANAGER_ABI);
-  const NotarizerInstContract = useContract(NOTARIZER_CONTRACT_ADD,  NOTARIZER_ABI);
-  
+  const NotarizerInstContract = useContract(NOTARIZER_CONTRACT_ADD, NOTARIZER_ABI);
+
   const { handleSubmit, control, watch } = useForm({
     mode: 'all'
   });
@@ -61,7 +63,7 @@ export default function TransactionForm() {
   }
 
   useEffect(() => {
-    if(NotarizerInstContract && account) {
+    if (NotarizerInstContract && account) {
       checkBridgeLaunched(NotarizerInstContract);
     }
   }, [NotarizerInstContract, account])
@@ -71,9 +73,10 @@ export default function TransactionForm() {
     const tokenERCAddress = await tokenManInstContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
     const tokenInstContract = getContract(tokenERCAddress[0], ERC20_ABI, library, account)
     const decimals = await tokenInstContract.decimals();
-    const bigAmount = parseInt(amount.toString(), 10) * (10 ** decimals);
+    const bigAmount = new web3.utils.BN(amount).mul(new web3.utils.BN(10 ** decimals)).toString();
+    // const bigAmount = parseInt(amount.toString(10), 10) * (10 ** decimals);
 
-    await tokenInstContract.increaseAllowance(BRIDGE_CONTRACT_ADD, bigAmount, {from: account, gasLimit: maxGas2})
+    await tokenInstContract.increaseAllowance(BRIDGE_CONTRACT_ADD, bigAmount, { from: account, gasLimit: maxGas2 })
 
     setAlert(`
       Your Rinkeby account has authorised the bridge to spend ${token} token, the amount: ${amount}. 
@@ -87,44 +90,55 @@ export default function TransactionForm() {
     setIsTxPending(true);
 
     try {
-      if(['USDC', 'VRSCTEST', 'BRIDGE'].includes(token)) {
+      if (['USDC', 'VRSCTEST', 'BRIDGE'].includes(token)) {
         await authoriseOneTokenAmount(token, parseFloat(amount));
       }
 
-      const result = getConfigOptions({...values, poolAvailable});
-      
-      if(result) {
-        const {flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid} = result;
+      const result = getConfigOptions({ ...values, poolAvailable });
+
+      if (result) {
+        const { flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid } = result;
         const verusAmount = (amount * 100000000);
-        const CReserveTransfer =  {
-          version : 1,
-          currencyvalue : {currency: GLOBAL_ADDRESS[token] , amount: verusAmount.toFixed(0)}, // currency sending from ethereum
-          flags : flagvalue,
-          feecurrencyid : feecurrency, // fee is vrsctest pre bridge launch, veth or others post.
+        const CReserveTransfer = {
+          version: 1,
+          currencyvalue: { currency: GLOBAL_ADDRESS[token], amount: verusAmount.toFixed(0) }, // currency sending from ethereum
+          flags: flagvalue,
+          feecurrencyid: feecurrency, // fee is vrsctest pre bridge launch, veth or others post.
           fees,
-          destination : {destinationtype, destinationaddress}, // destination address currecny is going to
-          destcurrencyid : GLOBAL_ADDRESS[destinationcurrency],   // destination currency is veth on direct. bridge.veth on bounceback
-          destsystemid : GLOBAL_ADDRESS.VRSCTEST,     // destination system going to can only be VRSCTEST
+          destination: { destinationtype, destinationaddress }, // destination address currecny is going to
+          destcurrencyid: GLOBAL_ADDRESS[destinationcurrency],   // destination currency is veth on direct. bridge.veth on bounceback
+          destsystemid: "0x0000000000000000000000000000000000000000",     // destination system not used 
           secondreserveid    // used as return currency type on bounce back
         }
 
+        const { BN } = web3.utils;
+        let MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
+        // eslint-disable-next-line
+        if (destinationtype & FLAG_DEST_GATEWAY) {
+          MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether')));
+        }
+
+        if (token === 'ETH') {
+          MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
+        }
+
         const txResult = await verusBridgeContract.export(
-          CReserveTransfer, 
-          {from: account, gasLimit: maxGas, value: web3.utils.toWei(token === 'ETH' ? amount : '0.0006', 'ether')}
+          CReserveTransfer,
+          { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
         );
         await txResult.wait();
 
-        addToast({type: "success", description: 'Transaction Success!'});
+        addToast({ type: "success", description: 'Transaction Success!' });
         setAlert(null);
         setIsTxPending(false);
       } else {
         throw new Error('something went wrong');
       }
     } catch (error) {
-      if(error.message) {
-        addToast({type: "error", description: error.message })
+      if (error.message) {
+        addToast({ type: "error", description: error.message })
       } else {
-        addToast({type: "error", description: 'Transaction Failed!'})
+        addToast({ type: "error", description: 'Transaction Failed!' })
       }
       setAlert(null);
       setIsTxPending(false);
@@ -133,56 +147,61 @@ export default function TransactionForm() {
 
   return (
     <>
-    <form onSubmit={handleSubmit(onSubmit)}>
-      {alert && 
-        <Alert severity="warning" sx={{ mb : 3}}>
-          <Typography>
-            {alert}
-          </Typography>
-        </Alert>
-      }
-      <Alert severity="info" sx={{ mb : 3}}>
-        <Typography>
-          {poolAvailable !== "0" ? "Bridge.veth currency Launched.": "Bridge.veth currency not launched."}
-        </Typography>
-        {verusTestHeight && (
-          <Typography>
-            Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
-          </Typography>
-        )}
-      </Alert>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <AddressField
-            control={control}
-          />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {alert &&
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <Typography>
+              {alert}
+            </Typography>
+          </Alert>
+        }
+        {verusTestHeight ? (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography>
+              {poolAvailable !== "0" ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
+            </Typography>
+            <Typography>
+              Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
+            </Typography>
+          </Alert>
+        ) :
+          (<Alert severity="info" sx={{ mb: 3 }}>
+            <Typography>
+              <b>Wallet not connected</b>
+            </Typography>
+          </Alert>)
+        }
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <AddressField
+              control={control}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TokenField
+              control={control}
+              poolAvailable={poolAvailable}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <DestinationField
+              control={control}
+              poolAvailable={poolAvailable}
+              address={address}
+              selectedToken={selectedToken}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <AmountField
+              control={control}
+              selectedToken={selectedToken}
+            />
+          </Grid>
+          <Box mt="30px" textAlign="center" width="100%">
+            <LoadingButton loading={isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
+          </Box>
         </Grid>
-        <Grid item xs={12}>
-          <TokenField
-            control={control}
-            poolAvailable={poolAvailable}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <DestinationField
-            control={control}
-            poolAvailable={poolAvailable}
-            address={address}
-            selectedToken={selectedToken}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <AmountField
-            control={control}
-            selectedToken={selectedToken}
-          />
-        </Grid>
-        <Box mt="30px" textAlign="center" width="100%">
-          <LoadingButton loading={isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
-        </Box>
-      </Grid>
-    </form>
+      </form>
     </>
   );
 }
