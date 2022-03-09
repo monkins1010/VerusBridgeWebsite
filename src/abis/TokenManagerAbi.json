@@ -1,6 +1,44 @@
 [
     {
-      "inputs": [],
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "verusSerializerAddress",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "iaddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "eth_contract",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "mapped",
+              "type": "bool"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ticker",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct TokenManager.deployTokens[]",
+          "name": "tokensToLaunch",
+          "type": "tuple[]"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "constructor"
     },
@@ -20,47 +58,37 @@
     {
       "inputs": [
         {
-          "internalType": "address",
+          "internalType": "uint256",
           "name": "",
-          "type": "address"
+          "type": "uint256"
         }
       ],
-      "name": "destinationToAddress",
+      "name": "tokenList",
       "outputs": [
         {
           "internalType": "address",
-          "name": "",
+          "name": "iaddress",
           "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
+        },
         {
           "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "vERC20Tokens",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "destinationCurrencyID",
+          "name": "eth_contract",
           "type": "address"
         },
         {
           "internalType": "bool",
-          "name": "VerusOwned",
+          "name": "mapped",
           "type": "bool"
         },
         {
-          "internalType": "bool",
-          "name": "isRegistered",
-          "type": "bool"
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "ticker",
+          "type": "string"
         }
       ],
       "stateMutability": "view",
@@ -79,7 +107,7 @@
       "outputs": [
         {
           "internalType": "address",
-          "name": "destinationCurrencyID",
+          "name": "erc20ContractAddress",
           "type": "address"
         },
         {
@@ -91,6 +119,47 @@
           "internalType": "bool",
           "name": "isRegistered",
           "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "getTokenList",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "iaddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "eth_contract",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "mapped",
+              "type": "bool"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ticker",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct TokenManager.deployTokens[]",
+          "name": "",
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -139,7 +208,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_contractAddress",
+          "name": "_iaddress",
           "type": "address"
         },
         {
@@ -157,7 +226,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_destCurrencyID",
+          "name": "_iaddress",
           "type": "address"
         },
         {
@@ -180,80 +249,21 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_contractAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_account",
+          "name": "hosted",
           "type": "address"
         }
       ],
-      "name": "balanceOf",
+      "name": "ERC20Registered",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "bool",
           "name": "",
-          "type": "uint256"
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
       "type": "function",
       "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_contractAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_owner",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_spender",
-          "type": "address"
-        }
-      ],
-      "name": "allowance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_ERC20contractAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_verusAddress",
-          "type": "address"
-        }
-      ],
-      "name": "addExistingToken",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
     },
     {
       "inputs": [
@@ -278,22 +288,59 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_destinationCurrencyID",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "_tokenName",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_symbol",
-          "type": "string"
+          "components": [
+            {
+              "internalType": "address",
+              "name": "parent",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "launchSystemID",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "systemID",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "nativeCurrencyID",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct VerusObjects.CcurrencyDefinition",
+          "name": "_ccd",
+          "type": "tuple"
         }
       ],
-      "name": "deployNewToken",
+      "name": "getIAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "_serializedCcd",
+          "type": "bytes"
+        }
+      ],
+      "name": "deployToken",
       "outputs": [
         {
           "internalType": "address",
@@ -303,45 +350,5 @@
       ],
       "stateMutability": "nonpayable",
       "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_contractAddress",
-          "type": "address"
-        }
-      ],
-      "name": "isToken",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_contractAddress",
-          "type": "address"
-        }
-      ],
-      "name": "isVerusOwned",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
     }
   ]

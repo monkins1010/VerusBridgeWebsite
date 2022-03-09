@@ -16,7 +16,7 @@ import {
   BRIDGE_CONTRACT_ADD,
   GLOBAL_ADDRESS,
   NOTARIZER_CONTRACT_ADD,
-  TOKEN_MANAGERE_RC20ADD,
+  TOKEN_MANAGER_ERC20,
   ETH_FEES
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
@@ -34,14 +34,14 @@ const maxGas2 = 100000;
 const FLAG_DEST_GATEWAY = 128
 
 export default function TransactionForm() {
-  const [poolAvailable, setPoolAvailable] = useState("0");
+  const [poolAvailable, setPoolAvailable] = useState(0);
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
   const verusBridgeContract = useContract(BRIDGE_CONTRACT_ADD, VERUS_BRIDGE_ABI);
-  const tokenManInstContract = useContract(TOKEN_MANAGERE_RC20ADD, TOKEN_MANAGER_ABI);
+  const tokenManInstContract = useContract(TOKEN_MANAGER_ERC20, TOKEN_MANAGER_ABI);
   const NotarizerInstContract = useContract(NOTARIZER_CONTRACT_ADD, NOTARIZER_ABI);
 
   const { handleSubmit, control, watch } = useForm({
@@ -126,7 +126,7 @@ export default function TransactionForm() {
           CReserveTransfer,
           { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
         );
-        await txResult.wait();
+        const waitResult = await txResult.wait();
 
         addToast({ type: "success", description: 'Transaction Success!' });
         setAlert(null);
@@ -155,10 +155,10 @@ export default function TransactionForm() {
             </Typography>
           </Alert>
         }
-        {verusTestHeight ? (
+        {account ? (
           <Alert severity="info" sx={{ mb: 3 }}>
             <Typography>
-              {poolAvailable !== "0" ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
+              {poolAvailable !== 0 ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
             </Typography>
             <Typography>
               Last Confirmed VerusTest height: <b>{verusTestHeight}</b>

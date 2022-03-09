@@ -31,7 +31,7 @@ const TOKEN_MAPPING = {
 };
 
 export const getTokenOptions = (poolAvailable) => (
-  poolAvailable === "0" ? TOKEN_OPTIONS.filter(option => !tokenOptionsByPool.includes(option.value)) : TOKEN_OPTIONS
+  poolAvailable === 0 ? TOKEN_OPTIONS.filter(option => !tokenOptionsByPool.includes(option.value)) : TOKEN_OPTIONS
 )
 
 export const getDestinations = (token) => ([
@@ -52,7 +52,7 @@ const destionationOptionsByPool = [
 
 export const getDestinationOptions = (poolAvailable, address, selectedToken) => {
   
-  const options = poolAvailable === "0" 
+  const options = poolAvailable === 0
     ? getDestinations(selectedToken).filter(option => !destionationOptionsByPool.includes(option.value)) 
     : getDestinations(selectedToken)
   
@@ -67,7 +67,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken) => 
 
   if(isiAddress(address) || isRAddress(address)) {
     const vscOptions = options.filter(option => ['vrsctest', 'bridgeBRIDGE', 'bridgeUSDC', 'bridgeVRSCTEST', 'bridgeETH'].includes(option.value)); 
-    if(poolAvailable === '0') {
+    if(poolAvailable === 0) {
       return vscOptions.filter(option => option.value === 'vrsctest')
     } else {
       return vscOptions.filter(option => option.value !== `bridge${selectedToken}`);

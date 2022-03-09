@@ -37,7 +37,7 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
   }
  
   if(destinationtype === DEST_ID || destinationtype === DEST_PKH ) { //if I or R address chosen then do one way specific stuff          
-      if(poolAvailable === "0") { // pool not available
+      if(poolAvailable === 0) { // pool not available
         if(destination === 'vrsctest'){
           flagvalue = VALID ;
           destinationcurrency = "VRSCTEST";
@@ -101,7 +101,7 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
       }
   } else if (
     destinationtype === DEST_ETH 
-    && poolAvailable !== "0"  
+    && poolAvailable !== 0  
     && token !== 'BRIDGE'  
   ) {  // if ethereuem address and pool is available 
       destinationcurrency = "BRIDGE";
@@ -127,7 +127,7 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
       }
   } else if (
     destinationtype === DEST_ETH 
-    && poolAvailable !== "0"  
+    && poolAvailable !== 0  
     && token === 'BRIDGE' 
   ) {  // if ethereuem address and pool is available 
       destinationtype += FLAG_DEST_GATEWAY; 
@@ -154,7 +154,7 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
 
   let feecurrency = {};
   let fees = {};
-  if(poolAvailable !== "0" ){
+  if(poolAvailable !== 0 ){
     feecurrency = GLOBAL_ADDRESS.ETH;
     fees = ETH_FEES.SATS; //0.003 ETH FEE
   }else{
