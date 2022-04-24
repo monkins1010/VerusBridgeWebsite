@@ -6,18 +6,18 @@ import Grid from '@mui/material/Grid';
 import { Box } from '@mui/system';
 import { useWeb3React } from '@web3-react/core';
 import { useForm } from 'react-hook-form';
-import web3 from 'web3'
+import web3 from 'web3';
 
 import ERC20_ABI from 'abis/ERC20Abi.json';
-import NOTARIZER_ABI from 'abis/Notarizerabi.json';
-import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
-import VERUS_BRIDGE_ABI from 'abis/VerusBridgeAbi.json';
+import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
+import VERUS_BRIDGE_STORAGE_ABI from 'abis/VerusBridgeStorageAbi.json';
+import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
 import {
-  BRIDGE_CONTRACT_ADD,
+  BRIDGE_MASTER_ADD,
   GLOBAL_ADDRESS,
-  NOTARIZER_CONTRACT_ADD,
-  TOKEN_MANAGER_ERC20,
-  ETH_FEES
+  BRIDGE_STORAGE_ADD,
+  ETH_FEES,
+  UPGRADE_ADD
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -29,20 +29,22 @@ import AmountField from './AmountField';
 import DestinationField from './DestinationField';
 import TokenField from './TokenField';
 
+
 const maxGas = 6000000;
 const maxGas2 = 100000;
-const FLAG_DEST_GATEWAY = 128
+const FLAG_DEST_GATEWAY = 128;
+const BRIDGE_STORAGE_ENUM = 8;
 
 export default function TransactionForm() {
-  const [poolAvailable, setPoolAvailable] = useState(0);
+  const [poolAvailable, setPoolAvailable] = useState(false);
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
-  const verusBridgeContract = useContract(BRIDGE_CONTRACT_ADD, VERUS_BRIDGE_ABI);
-  const tokenManInstContract = useContract(TOKEN_MANAGER_ERC20, TOKEN_MANAGER_ABI);
-  const NotarizerInstContract = useContract(NOTARIZER_CONTRACT_ADD, NOTARIZER_ABI);
+  const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
+  const verusBridgeStorageContract = useContract(BRIDGE_STORAGE_ADD, VERUS_BRIDGE_STORAGE_ABI);
+  const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
 
   const { handleSubmit, control, watch } = useForm({
     mode: 'all'
@@ -52,7 +54,7 @@ export default function TransactionForm() {
 
   const checkBridgeLaunched = async (contract) => {
     try {
-      const pool = await contract.poolAvailable(GLOBAL_ADDRESS.BRIDGE);
+      const pool = await contract.isPoolAvailable();
       setPoolAvailable(pool);
       const lastProof = await contract.getLastProofRoot();
       setVerusTestHeight(lastProof.rootheight);
@@ -63,20 +65,22 @@ export default function TransactionForm() {
   }
 
   useEffect(() => {
-    if (NotarizerInstContract && account) {
-      checkBridgeLaunched(NotarizerInstContract);
+    if (verusBridgeMasterContract && account) {
+      checkBridgeLaunched(verusBridgeMasterContract);
     }
-  }, [NotarizerInstContract, account])
+  }, [verusBridgeMasterContract, account])
 
   const authoriseOneTokenAmount = async (token, amount) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token}) from your Rinkeby balance.`);
-    const tokenERCAddress = await tokenManInstContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
-    const tokenInstContract = getContract(tokenERCAddress[0], ERC20_ABI, library, account)
+    const tokenMappingInfo = await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
+    const tokenInstContract = getContract(tokenMappingInfo.erc20ContractAddress, ERC20_ABI, library, account)
     const decimals = await tokenInstContract.decimals();
     const bigAmount = new web3.utils.BN(amount).mul(new web3.utils.BN(10 ** decimals)).toString();
     // const bigAmount = parseInt(amount.toString(10), 10) * (10 ** decimals);
 
-    await tokenInstContract.increaseAllowance(BRIDGE_CONTRACT_ADD, bigAmount, { from: account, gasLimit: maxGas2 })
+    const tokenManagerAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
+
+    await tokenInstContract.increaseAllowance(tokenManagerAddress, bigAmount, { from: account, gasLimit: maxGas2 })
 
     setAlert(`
       Your Rinkeby account has authorised the bridge to spend ${token} token, the amount: ${amount}. 
@@ -122,11 +126,11 @@ export default function TransactionForm() {
           MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
         }
 
-        const txResult = await verusBridgeContract.export(
+        const txResult = await verusBridgeMasterContract.export(
           CReserveTransfer,
           { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
         );
-        const waitResult = await txResult.wait();
+        await txResult.wait();
 
         addToast({ type: "success", description: 'Transaction Success!' });
         setAlert(null);
@@ -158,7 +162,7 @@ export default function TransactionForm() {
         {account ? (
           <Alert severity="info" sx={{ mb: 3 }}>
             <Typography>
-              {poolAvailable !== 0 ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
+              {poolAvailable ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
             </Typography>
             <Typography>
               Last Confirmed VerusTest height: <b>{verusTestHeight}</b>

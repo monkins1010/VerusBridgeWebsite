@@ -5,15 +5,20 @@ import Web3 from 'web3';
 
 import ERC20_ABI from 'abis/ERC20Abi.json';
 import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
+import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
+import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
 import InputControlField from 'components/InputControlField'
-import { GLOBAL_ADDRESS, TOKEN_MANAGER_ERC20, USDC_ERC20ADD } from 'constants/contractAddress';
+import { GLOBAL_ADDRESS, BRIDGE_STORAGE_ADD, USDC_ERC20ADD, BRIDGE_MASTER_ADD, UPGRADE_ADD } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getMaxAmount } from 'utils/contract';
 
 const AmountField = ({ control, selectedToken }) => {
-  const tokenManInstContract = useContract(TOKEN_MANAGER_ERC20, TOKEN_MANAGER_ABI);
+  const verusBridgeStorageContract = useContract(BRIDGE_STORAGE_ADD, TOKEN_MANAGER_ABI);
+  const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
+  const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
   const USDCContract = useContract(USDC_ERC20ADD, ERC20_ABI);
   const { account } = useWeb3React();
+  const TOKEN_MANAGER_ENUM = 0;
 
   const validate = async (amount) => {
     if (amount > 100000) {
@@ -45,8 +50,10 @@ const AmountField = ({ control, selectedToken }) => {
     }
 
     if (['VRSCTEST', 'BRIDGE'].includes(selectedToken)) {
-      const VRSCTEST_ADD = await tokenManInstContract.verusToERC20mapping(GLOBAL_ADDRESS[selectedToken])
-      const maxAmount = await getMaxAmount(tokenManInstContract, VRSCTEST_ADD);
+      const MAPPED_DATA = await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[selectedToken])
+      const tokenManagerAddress = await verusUpgradeContract.contracts(TOKEN_MANAGER_ENUM);
+
+      const maxAmount = await getMaxAmount(tokenManagerAddress, MAPPED_DATA.erc20ContractAddress);
       if (maxAmount < amount) {
         return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
       }
