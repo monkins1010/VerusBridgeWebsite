@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import web3 from 'web3';
 
 import ERC20_ABI from 'abis/ERC20Abi.json';
+import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
 import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
 import VERUS_BRIDGE_STORAGE_ABI from 'abis/VerusBridgeStorageAbi.json';
 import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
@@ -17,10 +18,12 @@ import {
   GLOBAL_ADDRESS,
   BRIDGE_STORAGE_ADD,
   ETH_FEES,
-  UPGRADE_ADD
+  UPGRADE_ADD,
+  TOKEN_MANAGER_ADD
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
+import { getTokenOptions } from 'utils/options'
 import { getConfigOptions } from 'utils/txConfig';
 
 import { useToast } from '../Toast/ToastProvider';
@@ -40,11 +43,13 @@ export default function TransactionForm() {
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
+  const [verusTokens, setVerusTokens] = useState(['']);
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
   const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
   const verusBridgeStorageContract = useContract(BRIDGE_STORAGE_ADD, VERUS_BRIDGE_STORAGE_ABI);
   const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
+  const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
 
   const { handleSubmit, control, watch } = useForm({
     mode: 'all'
@@ -64,16 +69,33 @@ export default function TransactionForm() {
     }
   }
 
+  const getTokens = async () => {
+
+    const tokens = await tokenManagerContract.getTokenList();
+    const TOKEN_OPTIONS = tokens.map(e => ({ label: e.name, value: e.ticker, iaddress: e.iaddress, erc20address: e.erc20ContractAddress }))
+    return TOKEN_OPTIONS
+  }
+
   useEffect(() => {
     if (verusBridgeMasterContract && account) {
       checkBridgeLaunched(verusBridgeMasterContract);
     }
   }, [verusBridgeMasterContract, account])
 
+  useEffect(async () => {
+    if (tokenManagerContract && account) {
+      const tokens = await getTokens();
+      // REMOVE BELOW DEBUG
+      // tokens.push({ label: "chriscoin", value: "CRS", iaddress: "0xc3ee4b592fd3ebd53ba757ae2daf484b20d75ae4", erc20address: "0xc3994c5cbddf7ce38b8a2ec2830335fa8f3eea6a" })
+      setVerusTokens(tokens);
+    }
+  }, [tokenManagerContract, account])
+
   const authoriseOneTokenAmount = async (token, amount) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token}) from your Rinkeby balance.`);
-    const tokenMappingInfo = await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
-    const tokenInstContract = getContract(tokenMappingInfo.erc20ContractAddress, ERC20_ABI, library, account)
+
+    const tokenERC = verusTokens.filter(add => add.value === token)[0].erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
+    const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)
     const decimals = await tokenInstContract.decimals();
     const bigAmount = new web3.utils.BN(amount).mul(new web3.utils.BN(10 ** decimals)).toString();
     // const bigAmount = parseInt(amount.toString(10), 10) * (10 ** decimals);
@@ -94,7 +116,7 @@ export default function TransactionForm() {
     setIsTxPending(true);
 
     try {
-      if (['USDC', 'VRSCTEST', 'BRIDGE'].includes(token)) {
+      if (!['ETH'].includes(token)) {
         await authoriseOneTokenAmount(token, parseFloat(amount));
       }
 
@@ -103,9 +125,10 @@ export default function TransactionForm() {
       if (result) {
         const { flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid } = result;
         const verusAmount = (amount * 100000000);
+        const currencyIaddress = verusTokens.filter(add => add.value === token)[0].iaddress;
         const CReserveTransfer = {
           version: 1,
-          currencyvalue: { currency: GLOBAL_ADDRESS[token], amount: verusAmount.toFixed(0) }, // currency sending from ethereum
+          currencyvalue: { currency: currencyIaddress, amount: verusAmount.toFixed(0) }, // currency sending from ethereum
           flags: flagvalue,
           feecurrencyid: feecurrency, // fee is vrsctest pre bridge launch, veth or others post.
           fees,

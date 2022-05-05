@@ -16,19 +16,6 @@
       "type": "constructor"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "tokenAddress",
-          "type": "address"
-        }
-      ],
-      "name": "TokenCreated",
-      "type": "event"
-    },
-    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -52,26 +39,6 @@
           "internalType": "uint32",
           "name": "blockHeight",
           "type": "uint32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "claimableFees",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -181,24 +148,9 @@
           "type": "uint8"
         },
         {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "ticker",
-          "type": "string"
-        },
-        {
           "internalType": "uint256",
           "name": "tokenIndex",
           "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "launchSystemID",
-          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -214,19 +166,6 @@
         }
       ],
       "name": "setContracts",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_feesAmount",
-          "type": "uint256"
-        }
-      ],
-      "name": "addToFeesHeld",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -273,24 +212,6 @@
           "type": "bool"
         }
       ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_feeRecipient",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_ethAmount",
-          "type": "uint256"
-        }
-      ],
-      "name": "setClaimableFees",
-      "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -476,24 +397,9 @@
               "type": "uint8"
             },
             {
-              "internalType": "string",
-              "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "ticker",
-              "type": "string"
-            },
-            {
               "internalType": "uint256",
               "name": "tokenIndex",
               "type": "uint256"
-            },
-            {
-              "internalType": "address",
-              "name": "launchSystemID",
-              "type": "address"
             }
           ],
           "internalType": "struct VerusObjects.mappedToken",
@@ -525,24 +431,9 @@
               "type": "uint8"
             },
             {
-              "internalType": "string",
-              "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "ticker",
-              "type": "string"
-            },
-            {
               "internalType": "uint256",
               "name": "tokenIndex",
               "type": "uint256"
-            },
-            {
-              "internalType": "address",
-              "name": "launchSystemID",
-              "type": "address"
             }
           ],
           "internalType": "struct VerusObjects.mappedToken",
@@ -832,55 +723,34 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_destination",
-          "type": "address"
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "currencyAndAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "destinationAndFlags",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "nativeCurrency",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct VerusObjects.PackedSend[]",
+          "name": "trans",
+          "type": "tuple[]"
         },
         {
-          "internalType": "uint256",
-          "name": "processedTokenAmount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint32",
-          "name": "flags",
-          "type": "uint32"
-        },
-        {
-          "internalType": "contract Token",
-          "name": "token",
-          "type": "address"
+          "internalType": "uint8[]",
+          "name": "transferLocations",
+          "type": "uint8[]"
         }
       ],
-      "name": "mintOrTransferToken",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "sender",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "receiver",
-          "type": "address"
-        },
-        {
-          "internalType": "contract ERC721",
-          "name": "token",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "NFTID",
-          "type": "uint256"
-        }
-      ],
-      "name": "transferFromERC721",
+      "name": "importTransactions",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -898,9 +768,9 @@
           "type": "address"
         },
         {
-          "internalType": "uint32",
-          "name": "flags",
-          "type": "uint32"
+          "internalType": "bool",
+          "name": "burn",
+          "type": "bool"
         },
         {
           "internalType": "address",
@@ -912,5 +782,30 @@
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "a",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "decimals",
+          "type": "uint8"
+        }
+      ],
+      "name": "convertFromVerusNumber",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function",
+      "constant": true
     }
   ]

@@ -40,45 +40,45 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
       if(!poolAvailable) { // pool not available
         if(destination === 'vrsctest'){
           flagvalue = VALID ;
-          destinationcurrency = "VRSCTEST";
+          destinationcurrency = 'VRSC';
         } else {
           alert("Cannot convert yet Bridge.veth not launched"); //add in FLAGS logic for destination    
           return null;
         }
       } else {
         if (destination === 'vrsctest') {              
-          destinationcurrency = "BRIDGE";  //bridge open all sends go to bridge.veth
+          destinationcurrency = 'BETH';  //bridge open all sends go to bridge.veth
           flagvalue = VALID ; 
         } else if(destination === 'bridgeUSDC') {
-          if(token !== 'USDC' && token !== "BRIDGE") {
-            destinationcurrency = "BRIDGE";  //bridge open convert from token  to USDC 
+          if(token !== 'USDC' && token !== 'BETH') {
+            destinationcurrency = 'BETH';  //bridge open convert from token  to USDC 
             secondreserveid = GLOBAL_ADDRESS.USDC;
             flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE ;   //add convert flag on
-          } else if(token === "BRIDGE") {
+          } else if(token === 'BETH') {
             destinationcurrency = "USDC";
             flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
           } else {
             alert("Cannot convert USDC to USDC. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
             return null;
           }
-        } else if (destination === 'bridgeVRSCTEST') {
-          if(token !== 'VRSCTEST' && token !== "BRIDGE"){
-            destinationcurrency = "BRIDGE";  //bridge open convert from token to VRSCTEST
-            secondreserveid = GLOBAL_ADDRESS.VRSCTEST;
+        } else if (destination === 'bridgeVRSC') {
+          if(token !== 'VRSC' && token !== 'BETH'){
+            destinationcurrency = 'BETH';  //bridge open convert from token to VRSCTEST
+            secondreserveid = GLOBAL_ADDRESS.VRSC;
             flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE ;   //add convert flag on
-          } else if( token === "BRIDGE") {
-            destinationcurrency = "VRSCTEST";
+          } else if( token === 'BETH') {
+            destinationcurrency = 'VRSC';
             flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
           } else {
             alert("Cannot convert VRSCTEST to VRSCTEST. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
             return null;
           }
         } else if(destination === 'bridgeETH') {
-          if(token !== 'ETH' && token !== "BRIDGE") {
-            destinationcurrency = "BRIDGE";  //bridge open convert from token to ETH
+          if(token !== 'ETH' && token !== 'BETH') {
+            destinationcurrency = 'BETH';  //bridge open convert from token to ETH
             secondreserveid = GLOBAL_ADDRESS.ETH;
             flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE ;   //add convert flag on
-          } else if( token === "BRIDGE") {
+          } else if( token === 'BETH') {
             destinationcurrency = "ETH";
             flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
           } else {
@@ -87,8 +87,8 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
           }
         } else if(destination === 'bridgeBRIDGE') {  
           
-          destinationcurrency = "BRIDGE";  //bridge open all sends go to bridge.veth
-          if(token !== 'BRIDGE') {
+          destinationcurrency = 'BETH';  //bridge open all sends go to bridge.veth
+          if(token !== 'BETH') {
             flagvalue = VALID + CONVERT  ;   //add convert flag on
           } else {
             alert("Cannot convert bridge to bridge. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
@@ -102,16 +102,16 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
   } else if (
     destinationtype === DEST_ETH 
     && poolAvailable  
-    && token !== 'BRIDGE'  
+    && token !== 'BETH'  
   ) {  // if ethereuem address and pool is available 
-      destinationcurrency = "BRIDGE";
+      destinationcurrency = 'BETH';
       destinationtype += FLAG_DEST_GATEWAY; //add 128 = FLAG_DEST_GATEWAY
       bounceBackFee.writeUInt32LE(ETH_FEES.SATS);
       //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
       destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex');
 
-      if(destination === "swaptoVRSCTEST"){
-        secondreserveid = GLOBAL_ADDRESS.VRSCTEST;
+      if(destination === "swaptoVRSC"){
+        secondreserveid = GLOBAL_ADDRESS.VRSC;
         flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE;
       }
       if(destination === "swaptoUSDC"){
@@ -128,15 +128,15 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
   } else if (
     destinationtype === DEST_ETH 
     && poolAvailable  
-    && token === 'BRIDGE' 
+    && token === 'BETH' 
   ) {  // if ethereuem address and pool is available 
       destinationtype += FLAG_DEST_GATEWAY; 
       bounceBackFee.writeUInt32LE(ETH_FEES.SATS);
       //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
       destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex');
 
-      if(destination === "swaptoVRSCTEST"){
-        destinationcurrency = "VRSCTEST";
+      if(destination === "swaptoVRSC"){
+        destinationcurrency = 'VRSC';
         flagvalue = VALID + CONVERT  + IMPORT_TO_SOURCE;
       }
       if(destination === "swaptoUSDC"){
@@ -158,7 +158,7 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
     feecurrency = GLOBAL_ADDRESS.ETH;
     fees = ETH_FEES.SATS; //0.003 ETH FEE
   }else{
-    feecurrency = GLOBAL_ADDRESS.VRSCTEST; //pre bridge launch fees must be set as vrsctest
+    feecurrency = GLOBAL_ADDRESS.VRSC; //pre bridge launch fees must be set as vrsctest
     fees = 2000000  // 0.02 VRSCTEST
   }
 

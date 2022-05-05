@@ -4,17 +4,15 @@ import { useWeb3React } from '@web3-react/core';
 import Web3 from 'web3';
 
 import ERC20_ABI from 'abis/ERC20Abi.json';
-import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
-import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
+import VERUS_BRIDGE_STORAGE_ABI from 'abis/VerusBridgeStorageAbi.json';
 import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
 import InputControlField from 'components/InputControlField'
-import { GLOBAL_ADDRESS, BRIDGE_STORAGE_ADD, USDC_ERC20ADD, BRIDGE_MASTER_ADD, UPGRADE_ADD } from 'constants/contractAddress';
+import { GLOBAL_ADDRESS, BRIDGE_STORAGE_ADD, USDC_ERC20ADD, UPGRADE_ADD } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getMaxAmount } from 'utils/contract';
 
 const AmountField = ({ control, selectedToken }) => {
-  const verusBridgeStorageContract = useContract(BRIDGE_STORAGE_ADD, TOKEN_MANAGER_ABI);
-  const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
+  const verusBridgeStorageContract = useContract(BRIDGE_STORAGE_ADD, VERUS_BRIDGE_STORAGE_ABI);
   const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
   const USDCContract = useContract(USDC_ERC20ADD, ERC20_ABI);
   const { account } = useWeb3React();
@@ -49,7 +47,7 @@ const AmountField = ({ control, selectedToken }) => {
       return true;
     }
 
-    if (['VRSCTEST', 'BRIDGE'].includes(selectedToken)) {
+    if (['USDC'].includes(selectedToken)) {
       const MAPPED_DATA = await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[selectedToken])
       const tokenManagerAddress = await verusUpgradeContract.contracts(TOKEN_MANAGER_ENUM);
 
