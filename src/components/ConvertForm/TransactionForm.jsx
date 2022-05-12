@@ -100,9 +100,9 @@ export default function TransactionForm() {
     const bigAmount = new web3.utils.BN(amount).mul(new web3.utils.BN(10 ** decimals)).toString();
     // const bigAmount = parseInt(amount.toString(10), 10) * (10 ** decimals);
 
-    const tokenManagerAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
+    const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
 
-    await tokenInstContract.increaseAllowance(tokenManagerAddress, bigAmount, { from: account, gasLimit: maxGas2 })
+    await tokenInstContract.increaseAllowance(bridgeStorageAddress, bigAmount, { from: account, gasLimit: maxGas2 })
 
     setAlert(`
       Your Rinkeby account has authorised the bridge to spend ${token} token, the amount: ${amount}. 

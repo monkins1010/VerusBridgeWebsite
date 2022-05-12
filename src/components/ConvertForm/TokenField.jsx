@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useWeb3React } from '@web3-react/core';
 
 import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
-import SelectControlField from 'components/SelectControlField'
+import AutocompleteControlField from 'components/AutocompleteControlField'
 import { TOKEN_MANAGER_ADD } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getTokenOptions } from 'utils/options'
@@ -35,7 +35,7 @@ const TokenField = ({ control, poolAvailable }) => {
   }, [tokenManagerContract, account])
 
 
-  return (<SelectControlField
+  return (<AutocompleteControlField
     name="token"
     id="token"
     label="Token"
