@@ -96,9 +96,11 @@ export default function TransactionForm() {
 
     const tokenERC = verusTokens.filter(add => add.value === token)[0].erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
     const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)
-    const decimals = await tokenInstContract.decimals();
-    const bigAmount = new web3.utils.BN(amount).mul(new web3.utils.BN(10 ** decimals)).toString();
-    // const bigAmount = parseInt(amount.toString(10), 10) * (10 ** decimals);
+    const decimals = web3.utils.toBN(await tokenInstContract.decimals());
+    const ten = web3.utils.toBN(10);
+    const multiplier = ten ** decimals;
+    let bigAmount = web3.utils.toBN(amount);// ;
+    bigAmount = bigAmount.mul(web3.utils.toBN(multiplier)).toString();
 
     const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
 
