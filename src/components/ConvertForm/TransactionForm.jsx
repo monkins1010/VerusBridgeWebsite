@@ -104,7 +104,7 @@ export default function TransactionForm() {
 
     const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
 
-    await tokenInstContract.increaseAllowance(bridgeStorageAddress, bigAmount, { from: account, gasLimit: maxGas2 })
+    await tokenInstContract.approve(bridgeStorageAddress, bigAmount, { from: account, gasLimit: maxGas2 })
 
     setAlert(`
       Your Rinkeby account has authorised the bridge to spend ${token} token, the amount: ${amount}. 
