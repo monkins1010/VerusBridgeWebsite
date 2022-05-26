@@ -1,10 +1,11 @@
 // private testnetwork address
-export const BRIDGE_MASTER_ADD = "0x3117B9817BA4A7C64Ed04bDEe5d578bD3100F7D3";
-export const BRIDGE_STORAGE_ADD = "0x495B858d64A249A9E97512F1BEa0150343A506E9";
-export const UPGRADE_ADD = "0x3f908408A6Cb483151367f86E21f718f2ec42Eec";
-export const TOKEN_MANAGER_ADD = "0xF292130AE9fb934339a19C5Fa658BDc0b61Ac5ba";
+export const BRIDGE_MASTER_ADD = "0xE4a1C494AfBFe64909Cf1FB49C9bb8dFb195620a";
+export const BRIDGE_STORAGE_ADD = "0xE59276C2aA4F6A2c2395ad571f0007ebf1d8A4B4";
+export const UPGRADE_ADD = "0x0afDBb0a3fd86eeB6c07151fd41e497756E3292D";
+export const TOKEN_MANAGER_ADD = "0x4aCa0b20453b35c9c2d4e32e5Cf012563A579601";
 
-export const USDC_ERC20ADD = "0xeb8f08a975ab53e34d8a0330e0d34de942c95926";  // USDC token is pre-existing
+export const USDC_ERC20ADDRINK = "0xeb8f08a975ab53e34d8a0330e0d34de942c95926";  // USDC token is pre-existing
+export const USDC_ERC20ADD = "0x98339D8C260052B7ad81c28c16C0b98420f2B46a";  // USDC token is pre-existing goerli
 export const ETH_ERC20ADD = "0x5ef378642a309485fd0f27850ec7f0550104f530"
 
 export const GLOBAL_ADDRESS = { // vrsctest hex 'id' names of currencies
