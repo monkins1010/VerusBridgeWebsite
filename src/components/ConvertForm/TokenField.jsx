@@ -18,8 +18,8 @@ const TokenField = ({ control, poolAvailable }) => {
   const getTokens = async () => {
 
     const tokens = await tokenManagerContract.getTokenList();
-    const TOKEN_OPTIONS2 = tokens.map(e => ({ label: e.name, value: e.ticker }))
-    return TOKEN_OPTIONS2
+    const tokenList = tokens.map(e => ({ label: e.name, value: e.iaddress, flags: e.flags }))
+    return tokenList
   }
 
   useEffect(async () => {

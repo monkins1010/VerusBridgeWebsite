@@ -1,13 +1,15 @@
 import React from 'react'
 
 import SelectControlField from 'components/SelectControlField'
+import { GLOBAL_ADDRESS } from 'constants/contractAddress';
 import { getDestinationOptions } from 'utils/options'
 
 const DestinationField = ({ control, poolAvailable, address, selectedToken }) => {
 
+  const { value, name } = selectedToken || {};
   const validate = () => {
 
-    if (!['USDC', 'VRSC', 'BETH', 'ETH'].includes(selectedToken))
+    if (![GLOBAL_ADDRESS.USDC, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(value))
       return "Selected token is not part of the Converter Currency"
     return "Destination is required"
   }
@@ -21,7 +23,7 @@ const DestinationField = ({ control, poolAvailable, address, selectedToken }) =>
       defaultValue=""
       variant="standard"
       control={control}
-      options={getDestinationOptions(poolAvailable, address, selectedToken)}
+      options={getDestinationOptions(poolAvailable, address, value, name)}
       rules={{
         required: validate()
 

@@ -1,37 +1,9 @@
 import { isETHAddress, isiAddress, isRAddress } from "./rules";
-
-export const TOKEN_OPTIONS = [
-  {
-    label: 'ETH',
-    value: 'ETH'
-   },
-  {
-    label: 'USDC',
-    value: 'USDC'
-  },
-  {
-    label: 'VRSC',
-    value: 'VRSC'
-  },
-  {
-    label: 'Bridge.vETH',
-    value: 'BETH'
-  }
-];
-
-const tokenOptionsByPool = [
-  'BETH'
-];
-
-const TOKEN_MAPPING = {
-  'ETH': 'vETH',
-  'USDC': 'USDC.vETH',
-  'VRSC': 'VRSC',
-  'BETH': 'Bridge.vETH',
-};
+import { FLAGS } from 'constants/contractAddress';
+import { GLOBAL_ADDRESS } from 'constants/contractAddress';
 
 export const getTokenOptions = (poolAvailable, tokens) => (
-  !poolAvailable ? tokens.filter(option => !tokenOptionsByPool.includes(option.value)) : tokens
+  !poolAvailable ? tokens.filter(option => parseInt(option.flags) < 10 ) : tokens
 )
 
 export const getDestinations = (token) => ([
@@ -50,20 +22,19 @@ const destionationOptionsByPool = [
   "swaptoBRIDGE", "swaptoVRSC", 'bridgeBRIDGE', 'swaptoUSDC', 'swaptoETH'
 ]
 
-
-export const getDestinationOptions = (poolAvailable, address, selectedToken) => {
+export const getDestinationOptions = (poolAvailable, address, selectedToken, tokenName) => {
   
   const options = !poolAvailable
-    ? getDestinations(selectedToken).filter(option => !destionationOptionsByPool.includes(option.value)) 
-    : getDestinations(selectedToken)
+    ? getDestinations(tokenName).filter(option => !destionationOptionsByPool.includes(option.value)) 
+    : getDestinations(tokenName)
   
-  const addedToken = !['USDC', 'VRSC', 'BETH', 'ETH'].includes(selectedToken);
+  const addedToken = ![GLOBAL_ADDRESS.USDC, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(selectedToken);
 
   if (isETHAddress(address)) {
-    const ethOptions = options.filter(option => !['vrsctest', 'bridgeBRIDGE', 'bridgeUSDC', 'bridgeVRSC', 'bridgeETH'].includes(option.value)); 
+    const ethOptions = options.filter(option => !['vrsctest', 'bridgeBRIDGE', 'bridgeUSDC', 'bridgeVRSC', 'bridgeETH', 'bridgeVRSCTEST'].includes(option.value)); 
     if(addedToken) 
     {
-      return []
+      return [] //if its a mapped added token dont offer bounce back
     } 
     if(selectedToken) {
       return ethOptions.filter(option => option.value !== `swapto${selectedToken}`);

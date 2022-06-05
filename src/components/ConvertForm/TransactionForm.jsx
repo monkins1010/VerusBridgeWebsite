@@ -92,9 +92,9 @@ export default function TransactionForm() {
   }, [tokenManagerContract, account])
 
   const authoriseOneTokenAmount = async (token, amount) => {
-    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token}) from your Rinkeby balance.`);
+    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Rinkeby balance.`);
 
-    const tokenERC = verusTokens.filter(add => add.value === token)[0].erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
+    const tokenERC = verusTokens.filter(add => add.iaddress === token.value)[0].erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
     const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)
     const decimals = web3.utils.toBN(await tokenInstContract.decimals());
     const ten = web3.utils.toBN(10);
@@ -107,7 +107,7 @@ export default function TransactionForm() {
     await tokenInstContract.approve(bridgeStorageAddress, bigAmount, { from: account, gasLimit: maxGas2 })
 
     setAlert(`
-      Your Rinkeby account has authorised the bridge to spend ${token} token, the amount: ${amount}. 
+      Your Goerli account has authorised the bridge to spend ${token.name} token, the amount: ${amount}. 
       \n Next, after this window please check the amount in Meta mask is what you wish to send.`
     );
   }
@@ -118,7 +118,7 @@ export default function TransactionForm() {
     setIsTxPending(true);
 
     try {
-      if (!['ETH'].includes(token)) {
+      if (token?.value !== GLOBAL_ADDRESS.ETH) {
         await authoriseOneTokenAmount(token, parseFloat(amount));
       }
 
@@ -127,7 +127,7 @@ export default function TransactionForm() {
       if (result) {
         const { flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid } = result;
         const verusAmount = (amount * 100000000);
-        const currencyIaddress = verusTokens.filter(add => add.value === token)[0].iaddress;
+        const currencyIaddress = token.value;
         const CReserveTransfer = {
           version: 1,
           currencyvalue: { currency: currencyIaddress, amount: verusAmount.toFixed(0) }, // currency sending from ethereum
@@ -135,7 +135,7 @@ export default function TransactionForm() {
           feecurrencyid: feecurrency, // fee is vrsctest pre bridge launch, veth or others post.
           fees,
           destination: { destinationtype, destinationaddress }, // destination address currecny is going to
-          destcurrencyid: GLOBAL_ADDRESS[destinationcurrency],   // destination currency is veth on direct. bridge.veth on bounceback
+          destcurrencyid: destinationcurrency,   // destination currency is veth on direct. bridge.veth on bounceback
           destsystemid: "0x0000000000000000000000000000000000000000",     // destination system not used 
           secondreserveid    // used as return currency type on bounce back
         }
@@ -147,7 +147,7 @@ export default function TransactionForm() {
           MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether')));
         }
 
-        if (token === 'ETH') {
+        if (token.value === GLOBAL_ADDRESS.ETH) {
           MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
         }
 
@@ -207,10 +207,10 @@ export default function TransactionForm() {
             />
           </Grid>
           <Grid item xs={12}>
-            <TokenField
+            {verusTestHeight > 0 && (<TokenField
               control={control}
               poolAvailable={poolAvailable}
-            />
+            />)}
           </Grid>
           <Grid item xs={12}>
             <DestinationField

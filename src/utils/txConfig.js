@@ -40,46 +40,49 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
       if(!poolAvailable) { // pool not available
         if(destination === 'vrsctest'){
           flagvalue = VALID ;
-          destinationcurrency = 'VRSC';
+          destinationcurrency = GLOBAL_ADDRESS.VRSC;
         } else {
           alert("Cannot convert yet Bridge.veth not launched"); //add in FLAGS logic for destination    
           return null;
         }
       } else {
-        if (destination === 'vrsctest') {              
-          destinationcurrency = 'BETH';  //bridge open all sends go to bridge.veth
-          flagvalue = VALID ; 
+        if (destination === 'vrsctest') { 
+          if ([GLOBAL_ADDRESS.USDC, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(token.value))
+            destinationcurrency = GLOBAL_ADDRESS.BETH; //bridge open all sends go to bridge.veth
+          else
+            destinationcurrency = GLOBAL_ADDRESS.VRSC; //if not part of the bridge currency            
+         flagvalue = VALID ; 
         } else if(destination === 'bridgeUSDC') {
-          if(token !== 'USDC' && token !== 'BETH') {
-            destinationcurrency = 'BETH';  //bridge open convert from token  to USDC 
+          if(token.value !== GLOBAL_ADDRESS.USDC && token.value !== GLOBAL_ADDRESS.BETH) {
+            destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token  to USDC 
             secondreserveid = GLOBAL_ADDRESS.USDC;
             flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE ;   //add convert flag on
-          } else if(token === 'BETH') {
-            destinationcurrency = "USDC";
+          } else if(token.value === GLOBAL_ADDRESS.BETH) {
+            destinationcurrency = GLOBAL_ADDRESS.USDC;
             flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
           } else {
             alert("Cannot convert USDC to USDC. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
             return null;
           }
         } else if (destination === 'bridgeVRSC') {
-          if(token !== 'VRSC' && token !== 'BETH'){
-            destinationcurrency = 'BETH';  //bridge open convert from token to VRSCTEST
+          if(token.value !== GLOBAL_ADDRESS.VRSC && token.value !== GLOBAL_ADDRESS.BETH){
+            destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token to VRSCTEST
             secondreserveid = GLOBAL_ADDRESS.VRSC;
             flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE ;   //add convert flag on
-          } else if( token === 'BETH') {
-            destinationcurrency = 'VRSC';
+          } else if( token.value === GLOBAL_ADDRESS.BETH) {
+            destinationcurrency = GLOBAL_ADDRESS.VRSC;
             flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
           } else {
             alert("Cannot convert VRSCTEST to VRSCTEST. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
             return null;
           }
         } else if(destination === 'bridgeETH') {
-          if(token !== 'ETH' && token !== 'BETH') {
-            destinationcurrency = 'BETH';  //bridge open convert from token to ETH
+          if(token.value !== GLOBAL_ADDRESS.ETH && token.value !== GLOBAL_ADDRESS.BETH) {
+            destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token to ETH
             secondreserveid = GLOBAL_ADDRESS.ETH;
             flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE ;   //add convert flag on
-          } else if( token === 'BETH') {
-            destinationcurrency = "ETH";
+          } else if( token.value === GLOBAL_ADDRESS.BETH) {
+            destinationcurrency = GLOBAL_ADDRESS.ETH;
             flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
           } else {
             alert("Cannot convert ETH to ETH. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
@@ -87,8 +90,8 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
           }
         } else if(destination === 'bridgeBRIDGE') {  
           
-          destinationcurrency = 'BETH';  //bridge open all sends go to bridge.veth
-          if(token !== 'BETH') {
+          destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open all sends go to bridge.veth
+          if(token.value !== GLOBAL_ADDRESS.BETH) {
             flagvalue = VALID + CONVERT  ;   //add convert flag on
           } else {
             alert("Cannot convert bridge to bridge. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
@@ -102,9 +105,9 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
   } else if (
     destinationtype === DEST_ETH 
     && poolAvailable  
-    && token !== 'BETH'  
+    && token.value !== GLOBAL_ADDRESS.BETH  
   ) {  // if ethereuem address and pool is available 
-      destinationcurrency = 'BETH';
+      destinationcurrency = GLOBAL_ADDRESS.BETH;
       destinationtype += FLAG_DEST_GATEWAY; //add 128 = FLAG_DEST_GATEWAY
       bounceBackFee.writeUInt32LE(ETH_FEES.SATS);
       //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
@@ -128,7 +131,7 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
   } else if (
     destinationtype === DEST_ETH 
     && poolAvailable  
-    && token === 'BETH' 
+    && token.value === GLOBAL_ADDRESS.BETH 
   ) {  // if ethereuem address and pool is available 
       destinationtype += FLAG_DEST_GATEWAY; 
       bounceBackFee.writeUInt32LE(ETH_FEES.SATS);
@@ -136,17 +139,17 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
       destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex');
 
       if(destination === "swaptoVRSC"){
-        destinationcurrency = 'VRSC';
+        destinationcurrency = GLOBAL_ADDRESS.VRSC;
         flagvalue = VALID + CONVERT  + IMPORT_TO_SOURCE;
       }
       if(destination === "swaptoUSDC"){
-        destinationcurrency = "USDC";
+        destinationcurrency = GLOBAL_ADDRESS.USDC;
         flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
       }
       if(destination === "swaptoETH"){
-        destinationcurrency = "ETH";
+        destinationcurrency = GLOBAL_ADDRESS.ETH;
         flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
-      }
+      }"ETH"
   } else {
     alert("Bridge.veth not launched yet, send only direct to i or R until launch complete"); //add in FLAGS logic for destination
     return null;

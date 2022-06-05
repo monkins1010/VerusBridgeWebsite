@@ -18,6 +18,8 @@ const AmountField = ({ control, selectedToken }) => {
   const { account } = useWeb3React();
   const TOKEN_MANAGER_ENUM = 0;
 
+  const { value, name } = selectedToken || {};
+
   const validate = async (amount) => {
     if (amount > 100000) {
       return 'Amount too large. Try a smaller amount.'
@@ -27,33 +29,33 @@ const AmountField = ({ control, selectedToken }) => {
       return 'Amount is not valid.'
     }
 
-    if (selectedToken === 'ETH') {
+    if (value === GLOBAL_ADDRESS.ETH) {
       const web3 = new Web3(window.ethereum);
       window.ethereum.enable();
       let accbal = await web3.eth.getBalance(account);
       accbal = web3.utils.fromWei(accbal);
       accbal = parseFloat(accbal);
       if (accbal < amount) {
-        return `Amount is not available in your wallet. ${accbal} ${selectedToken}`
+        return `Amount is not available in your wallet. ${accbal} ${name}`
       }
       return true;
     }
 
-    if (selectedToken === 'USDC') {
+    if (value === GLOBAL_ADDRESS.USDC) {
       const maxAmount = await getMaxAmount(USDCContract, account);
       if (maxAmount < amount) {
-        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
+        return `Amount is not available in your wallet. ${maxAmount} ${name}`
       }
       return true;
     }
 
-    if (['USDC'].includes(selectedToken)) {
-      const MAPPED_DATA = await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[selectedToken])
+    if (value === GLOBAL_ADDRESS.USDC) {
+      const MAPPED_DATA = await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[name])
       const tokenManagerAddress = await verusUpgradeContract.contracts(TOKEN_MANAGER_ENUM);
 
       const maxAmount = await getMaxAmount(tokenManagerAddress, MAPPED_DATA.erc20ContractAddress);
       if (maxAmount < amount) {
-        return `Amount is not available in your wallet. ${maxAmount} ${selectedToken}`
+        return `Amount is not available in your wallet. ${maxAmount} ${name}`
       }
       return true;
     }
