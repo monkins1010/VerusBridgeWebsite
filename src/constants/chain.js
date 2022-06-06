@@ -1,6 +1,6 @@
 export const ID_NAME_MAPPING = {
   4: {
-    title: "Rinkby Network",
+    title: "Rinkeby Network",
     name: "BSCMAIN"
   },
    5: {
