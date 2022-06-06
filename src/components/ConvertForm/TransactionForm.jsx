@@ -92,7 +92,7 @@ export default function TransactionForm() {
   }, [tokenManagerContract, account])
 
   const authoriseOneTokenAmount = async (token, amount) => {
-    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Rinkeby balance.`);
+    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Goerli balance.`);
 
     const tokenERC = verusTokens.filter(add => add.iaddress === token.value)[0].erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
     const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)

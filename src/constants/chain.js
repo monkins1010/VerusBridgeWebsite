@@ -14,10 +14,6 @@ export const ID_NAME_MAPPING = {
 };
 
 export const NAME_ID_MAPPING = {
-  RINKEBY: {
-    title: "Rinkby Network",
-    id: 4
-  },
   GOERLI: {
      title: "Goerli Network",
      id: 5
