@@ -47,10 +47,7 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
         }
       } else {
         if (destination === 'vrsctest') { 
-          if ([GLOBAL_ADDRESS.USDC, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(token.value))
-            destinationcurrency = GLOBAL_ADDRESS.BETH; //bridge open all sends go to bridge.veth
-          else
-            destinationcurrency = GLOBAL_ADDRESS.VRSC; //if not part of the bridge currency            
+         destinationcurrency = GLOBAL_ADDRESS.BETH; //bridge open all sends go to bridge.veth         
          flagvalue = VALID ; 
         } else if(destination === 'bridgeUSDC') {
           if(token.value !== GLOBAL_ADDRESS.USDC && token.value !== GLOBAL_ADDRESS.BETH) {
