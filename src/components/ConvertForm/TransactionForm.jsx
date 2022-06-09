@@ -97,14 +97,31 @@ export default function TransactionForm() {
     const tokenERC = verusTokens.filter(add => add.iaddress === token.value)[0].erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
     const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)
     const decimals = web3.utils.toBN(await tokenInstContract.decimals());
-    const ten = web3.utils.toBN(10);
-    const multiplier = ten ** decimals;
-    let bigAmount = web3.utils.toBN(amount);// ;
-    bigAmount = bigAmount.mul(web3.utils.toBN(multiplier)).toString();
+
+    const ten = new web3.utils.BN(10);
+    const base = ten.pow(new web3.utils.BN(decimals));
+    let comps = amount.split('.');
+    if (comps.length > 2) { throw new Error('Too many decimal points'); }
+
+    let whole = comps[0], fraction = comps[1];
+
+    if (!whole) { whole = '0'; }
+    if (!fraction) { fraction = '0'; }
+    if (fraction.length > decimals) {
+      throw new Error('Too many decimal places');
+    }
+
+    while (fraction.length < decimals) {
+      fraction += '0';
+    }
+
+    whole = new web3.utils.BN(whole);
+    fraction = new web3.utils.BN(fraction);
+    let bigAmount = (whole.mul(base)).add(fraction);
 
     const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
 
-    await tokenInstContract.approve(bridgeStorageAddress, bigAmount, { from: account, gasLimit: maxGas2 })
+    await tokenInstContract.approve(bridgeStorageAddress, bigAmount.toString(), { from: account, gasLimit: maxGas2 })
 
     setAlert(`
       Your Goerli account has authorised the bridge to spend ${token.name} token, the amount: ${amount}. 
@@ -119,7 +136,7 @@ export default function TransactionForm() {
 
     try {
       if (token?.value !== GLOBAL_ADDRESS.ETH) {
-        await authoriseOneTokenAmount(token, parseFloat(amount));
+        await authoriseOneTokenAmount(token, amount);
       }
 
       const result = getConfigOptions({ ...values, poolAvailable });
@@ -150,7 +167,7 @@ export default function TransactionForm() {
         if (token.value === GLOBAL_ADDRESS.ETH) {
           MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
         }
-
+        const temp2 = MetaMaskFee.toString();
         const txResult = await verusBridgeMasterContract.export(
           CReserveTransfer,
           { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
@@ -207,10 +224,10 @@ export default function TransactionForm() {
             />
           </Grid>
           <Grid item xs={12}>
-            {verusTestHeight > 0 && (<TokenField
+            <TokenField
               control={control}
               poolAvailable={poolAvailable}
-            />)}
+            />
           </Grid>
           <Grid item xs={12}>
             <DestinationField
