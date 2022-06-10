@@ -11,7 +11,7 @@ export const getDestinations = (token, addr) => ([
   { value : "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST" , iaddress: "0xffEce948b8A38bBcC813411D2597f7f8485a0689"},
   { value : "bridgeUSDC", label: "Convert to USDC on VRSCTEST", iaddress: "0xF0A1263056c30E221F0F851C36b767ffF2544f7F" },
   { value : "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
-  { value : "bridge.vETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" },
+  { value : "bridgeETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" },
   { value : "swaptoBRIDGE", label: "Convert to Bridge.vETH Token (Bounce back to ETH)", iaddress: "0xffEce948b8A38bBcC813411D2597f7f8485a0689" },
   { value : "swaptoVRSC", label: "Convert to VRSCTEST Token (Bounce back to ETH)", iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
   { value : "swaptoUSDC", label: "Convert to USDC Token (Bounce back to ETH)", iaddress: "0xF0A1263056c30E221F0F851C36b767ffF2544f7F" },
@@ -59,7 +59,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
       { value : "vrsctest", label: 'USDC ON VRSCTEST', iaddress: "0xF0A1263056c30E221F0F851C36b767ffF2544f7F"  },
       { value : "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST" , iaddress: "0xffEce948b8A38bBcC813411D2597f7f8485a0689"},
       { value : "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
-      { value : "bridge.vETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" }
+      { value : "bridgeETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" }
     ]
     }
     else if (selectedToken == GLOBAL_ADDRESS.VRSC){
@@ -67,7 +67,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
       { value : "vrsctest", label: 'VRSC ON VRSCTEST', iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d"  },
       { value : "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST" , iaddress: "0xffEce948b8A38bBcC813411D2597f7f8485a0689"},
       { value : "bridgeUSDC", label: "Convert to USDC on VRSCTEST", iaddress: "0xF0A1263056c30E221F0F851C36b767ffF2544f7F" },
-      { value : "bridge.vETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" }
+      { value : "bridgeETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" }
     ]
     }
     else if (selectedToken == GLOBAL_ADDRESS.BETH){
@@ -75,7 +75,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
       { value : "vrsctest", label: 'Bridge.vETH ON VRSCTEST', iaddress: "0xffEce948b8A38bBcC813411D2597f7f8485a0689"  },
       { value : "bridgeUSDC", label: "Convert to USDC on VRSCTEST", iaddress: "0xF0A1263056c30E221F0F851C36b767ffF2544f7F" },
       { value : "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
-      { value : "bridge.vETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" }
+      { value : "bridgeETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" }
     ]
     }
     else if (selectedToken == GLOBAL_ADDRESS.ETH){
