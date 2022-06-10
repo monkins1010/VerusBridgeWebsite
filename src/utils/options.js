@@ -53,6 +53,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
     } //else {
      // return vscOptions.filter(option => option.iaddress !== selectedToken);
    // }
+   return vscOptions
   }
 
   return options;
