@@ -85,7 +85,23 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
             alert("Cannot convert ETH to ETH. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
             return null;
           }
-        } else if(destination === 'bridgeBRIDGE') {  
+        } else if(destination === 'bridgeVRSCTEST') {
+          if(token.value !== GLOBAL_ADDRESS.VRSC && token.value !== GLOBAL_ADDRESS.BETH) {
+            destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token to ETH
+            secondreserveid = GLOBAL_ADDRESS.VRSC;
+            flagvalue = VALID + CONVERT  + RESERVE_TO_RESERVE ;   //add convert flag on
+          } else if( token.value === GLOBAL_ADDRESS.BETH) {
+            destinationcurrency = GLOBAL_ADDRESS.VRSC;
+            flagvalue = VALID + CONVERT  +  IMPORT_TO_SOURCE;
+          } else {
+            alert("Cannot convert VRSCTEST to VRSCTEST. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+            return null;
+          }
+        }
+        
+        
+        
+        else if(destination === 'bridgeBRIDGE') {  
           
           destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open all sends go to bridge.veth
           if(token.value !== GLOBAL_ADDRESS.BETH) {
