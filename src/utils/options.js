@@ -37,7 +37,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
       return [] //if its a mapped added token dont offer bounce back
     } 
     if(selectedToken) {
-      return ethOptions.filter(option => option.iaddress !== `swapto${selectedToken}`);
+      return ethOptions.filter(option => option.iaddress !== selectedToken);
     } 
     else
     {
