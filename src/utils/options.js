@@ -6,8 +6,8 @@ export const getTokenOptions = (poolAvailable, tokens) => (
   !poolAvailable ? tokens.filter(option => parseInt(option.flags) < 10 ) : tokens
 )
 
-export const getDestinations = (token) => ([
-  { value : "vrsctest", label: `${token ?? 'VRSCTEST'} on VRSCTEST`, iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
+export const getDestinations = (token, addr) => ([
+  { value : "vrsctest", label: `${token ?? 'VRSCTEST'} on VRSCTEST`, iaddress: addr  },
   { value : "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST" , iaddress: "0xffEce948b8A38bBcC813411D2597f7f8485a0689"},
   { value : "bridgeUSDC", label: "Convert to USDC on VRSCTEST", iaddress: "0xF0A1263056c30E221F0F851C36b767ffF2544f7F" },
   { value : "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
@@ -25,8 +25,8 @@ const destionationOptionsByPool = [
 export const getDestinationOptions = (poolAvailable, address, selectedToken, tokenName) => {
   
   const options = !poolAvailable
-    ? getDestinations(tokenName).filter(option => !destionationOptionsByPool.includes(option.value)) 
-    : getDestinations(tokenName)
+    ? getDestinations(tokenName, selectedToken).filter(option => !destionationOptionsByPool.includes(option.value)) 
+    : getDestinations(tokenName, selectedToken)
   
   const addedToken = ![GLOBAL_ADDRESS.USDC, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(selectedToken);
 
@@ -47,9 +47,10 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
 
   if(isiAddress(address) || isRAddress(address)) {
     const vscOptions = options.filter(option => ['vrsctest', 'bridgeBRIDGE', 'bridgeUSDC', 'bridgeVRSC', 'bridgeETH'].includes(option.value)); 
+    
     if(!poolAvailable || addedToken) {
       return vscOptions.filter(option => option.value === 'vrsctest')
-    } else {
+    } else if (){
       return vscOptions.filter(option => option.iaddress !== selectedToken);
     }
   }
