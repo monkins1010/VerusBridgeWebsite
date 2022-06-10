@@ -50,7 +50,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
     
     if(!poolAvailable || addedToken) {
       return vscOptions.filter(option => option.value === 'vrsctest')
-    } else if (){
+    } else {
       return vscOptions.filter(option => option.iaddress !== selectedToken);
     }
   }
