@@ -7,15 +7,15 @@ export const getTokenOptions = (poolAvailable, tokens) => (
 )
 
 export const getDestinations = (token) => ([
-  { value : "vrsctest", label: `${token ?? 'VRSCTEST'} on VRSCTEST` },
-  { value : "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST" },
-  { value : "bridgeUSDC", label: "Convert to USDC on VRSCTEST" },
-  { value : "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST" },
-  { value : "bridgeETH", label: "Convert to ETH on VRSCTEST" },
-  { value : "swaptoBRIDGE", label: "Convert to Bridge.vETH Token (Bounce back to ETH)" },
-  { value : "swaptoVRSC", label: "Convert to VRSCTEST Token (Bounce back to ETH)" },
-  { value : "swaptoUSDC", label: "Convert to USDC Token (Bounce back to ETH)" },
-  { value : "swaptoETH", label: "Convert to ETH (Bounce back to ETH)" }
+  { value : "vrsctest", label: `${token ?? 'VRSCTEST'} on VRSCTEST`, iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
+  { value : "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST" , iaddress: "0xffEce948b8A38bBcC813411D2597f7f8485a0689"},
+  { value : "bridgeUSDC", label: "Convert to USDC on VRSCTEST", iaddress: "0xF0A1263056c30E221F0F851C36b767ffF2544f7F" },
+  { value : "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
+  { value : "bridgeETH", label: "Convert to ETH on VRSCTEST", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" },
+  { value : "swaptoBRIDGE", label: "Convert to Bridge.vETH Token (Bounce back to ETH)", iaddress: "0xffEce948b8A38bBcC813411D2597f7f8485a0689" },
+  { value : "swaptoVRSC", label: "Convert to VRSCTEST Token (Bounce back to ETH)", iaddress: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d" },
+  { value : "swaptoUSDC", label: "Convert to USDC Token (Bounce back to ETH)", iaddress: "0xF0A1263056c30E221F0F851C36b767ffF2544f7F" },
+  { value : "swaptoETH", label: "Convert to ETH (Bounce back to ETH)", iaddress: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00" }
 ]);
 
 const destionationOptionsByPool = [
@@ -37,7 +37,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
       return [] //if its a mapped added token dont offer bounce back
     } 
     if(selectedToken) {
-      return ethOptions.filter(option => option.value !== `swapto${selectedToken}`);
+      return ethOptions.filter(option => option.iaddress !== `swapto${selectedToken}`);
     } 
     else
     {

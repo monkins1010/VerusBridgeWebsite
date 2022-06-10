@@ -157,6 +157,10 @@ export default function TransactionForm() {
           secondreserveid    // used as return currency type on bounce back
         }
 
+        if (currencyIaddress === secondreserveid) {
+          throw new Error('Cannot bounceback to same currency');
+        }
+
         const { BN } = web3.utils;
         let MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
         // eslint-disable-next-line
