@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
+import { FormControl, FormHelperText } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { Controller } from 'react-hook-form';
@@ -19,14 +19,12 @@ const SelectControlField = ({
     const labelId = `${name}-label`;
     return (
         <FormControl {...props}>
-
-
             <Controller
                 name={name}
                 control={control}
                 defaultValue={defaultValue}
                 rules={rules}
-                render={({ field: { onChange, value }, fieldState: { error } }) => (
+                render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
                         <Autocomplete
                             labelId={labelId}

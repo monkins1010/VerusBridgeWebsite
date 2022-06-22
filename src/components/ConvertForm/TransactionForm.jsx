@@ -11,19 +11,16 @@ import web3 from 'web3';
 import ERC20_ABI from 'abis/ERC20Abi.json';
 import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
 import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
-import VERUS_BRIDGE_STORAGE_ABI from 'abis/VerusBridgeStorageAbi.json';
 import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
 import {
   BRIDGE_MASTER_ADD,
   GLOBAL_ADDRESS,
-  BRIDGE_STORAGE_ADD,
   ETH_FEES,
   UPGRADE_ADD,
   TOKEN_MANAGER_ADD
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
-import { getTokenOptions } from 'utils/options'
 import { getConfigOptions } from 'utils/txConfig';
 
 import { useToast } from '../Toast/ToastProvider';
@@ -47,7 +44,6 @@ export default function TransactionForm() {
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
   const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
-  const verusBridgeStorageContract = useContract(BRIDGE_STORAGE_ADD, VERUS_BRIDGE_STORAGE_ABI);
   const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
   const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
 
@@ -100,10 +96,11 @@ export default function TransactionForm() {
 
     const ten = new web3.utils.BN(10);
     const base = ten.pow(new web3.utils.BN(decimals));
-    let comps = amount.split('.');
+    const comps = amount.split('.');
     if (comps.length > 2) { throw new Error('Too many decimal points'); }
 
-    let whole = comps[0], fraction = comps[1];
+    let whole = comps[0];
+    let fraction = comps[1];
 
     if (!whole) { whole = '0'; }
     if (!fraction) { fraction = '0'; }
@@ -117,7 +114,7 @@ export default function TransactionForm() {
 
     whole = new web3.utils.BN(whole);
     fraction = new web3.utils.BN(fraction);
-    let bigAmount = (whole.mul(base)).add(fraction);
+    const bigAmount = (whole.mul(base)).add(fraction);
 
     const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
 
@@ -171,7 +168,7 @@ export default function TransactionForm() {
         if (token.value === GLOBAL_ADDRESS.ETH) {
           MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
         }
-        const temp2 = MetaMaskFee.toString();
+
         const txResult = await verusBridgeMasterContract.export(
           CReserveTransfer,
           { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }

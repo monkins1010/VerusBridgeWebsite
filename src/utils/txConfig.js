@@ -98,9 +98,6 @@ export const getConfigOptions = ({address, destination, poolAvailable, token}) =
             return null;
           }
         }
-        
-        
-        
         else if(destination === 'bridgeBRIDGE') {  
           
           destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open all sends go to bridge.veth
