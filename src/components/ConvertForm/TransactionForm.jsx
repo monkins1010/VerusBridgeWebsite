@@ -7,6 +7,7 @@ import { Box } from '@mui/system';
 import { useWeb3React } from '@web3-react/core';
 import { useForm } from 'react-hook-form';
 import web3 from 'web3';
+import abi from 'web3-eth-abi';
 
 import ERC20_ABI from 'abis/ERC20Abi.json';
 import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
@@ -28,6 +29,7 @@ import AddressField from './AddressField';
 import AmountField from './AmountField';
 import DestinationField from './DestinationField';
 import TokenField from './TokenField';
+
 
 
 const maxGas = 6000000;
@@ -58,7 +60,23 @@ export default function TransactionForm() {
       const pool = await contract.isPoolAvailable();
       setPoolAvailable(pool);
       const lastProof = await contract.getLastProofRoot();
-      setVerusTestHeight(lastProof.rootheight);
+      let ETHLastProofRoot = {};
+      if (lastProof.length > 130) {
+        const decodePattern = ['int16', 'int16', 'address', 'uint32', 'bytes32', 'bytes32', 'bytes32']
+
+        const decodedParams = abi.decodeParameters(decodePattern, `0x${lastProof.slice(578)}`)
+
+        ETHLastProofRoot = {
+          "version": decodedParams[0],
+          "cprtype": decodedParams[1],
+          "systemid": decodedParams[2],
+          "rootheight": decodedParams[3],
+          "stateroot": decodedParams[4],
+          "blockhash": decodedParams[5],
+          "compactpower": decodedParams[6]
+        }
+        setVerusTestHeight(ETHLastProofRoot.rootheight)
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
@@ -149,7 +167,7 @@ export default function TransactionForm() {
           feecurrencyid: feecurrency, // fee is vrsctest pre bridge launch, veth or others post.
           fees,
           destination: { destinationtype, destinationaddress }, // destination address currecny is going to
-          destcurrencyid: destinationcurrency,   // destination currency is veth on direct. bridge.veth on bounceback
+          destcurrencyid: destinationcurrency,   // destination currency is vrsc on direct. bridge.veth on bounceback
           destsystemid: "0x0000000000000000000000000000000000000000",     // destination system not used 
           secondreserveid    // used as return currency type on bounce back
         }
