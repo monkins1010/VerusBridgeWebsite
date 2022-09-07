@@ -243,10 +243,10 @@ export default function TransactionForm() {
             />
           </Grid>
           <Grid item xs={12}>
-            {verusTestHeight > 0 && (<TokenField
+            <TokenField
               control={control}
               poolAvailable={poolAvailable}
-            />)}
+            />
           </Grid>
           <Grid item xs={12}>
             <DestinationField
