@@ -33,7 +33,7 @@ const SelectControlField = ({
                             options={options}
                             {...selectProps}
                             onChange={(e, data) => onChange({ value: data?.value, name: data?.label })}
-                            renderInput={(params) => <TextField {...params} label="Token" />}
+                            renderInput={(params) => <TextField {...params} label={label} />}
                         />
                         {error && <FormHelperText error>{error.message}</FormHelperText>}
                     </>

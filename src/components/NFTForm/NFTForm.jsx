@@ -26,12 +26,8 @@ import { getContract } from 'utils/contract';
 import { getConfigOptions } from 'utils/txConfig';
 
 import { useToast } from '../Toast/ToastProvider';
-import AddressField from './AddressField';
-import AmountField from './AmountField';
-import DestinationField from './DestinationField';
-import TokenField from './TokenField';
-
-
+import AddressField from './NFTAddressField';
+import NFTField from './NFTField';
 
 const maxGas = 6000000;
 const maxGas2 = 100000;
@@ -40,8 +36,7 @@ const BRIDGE_STORAGE_ENUM = 8;
 const NOTARIZER_STORAGE_ENUM = 9;
 const NOTARIZER_ENUM = 4;
 
-
-export default function TransactionForm() {
+export default function NFTForm() {
   const [poolAvailable, setPoolAvailable] = useState(false);
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
@@ -53,11 +48,9 @@ export default function TransactionForm() {
   const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
   const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
 
-  const { handleSubmit, control, watch } = useForm({
+  const { handleSubmit, control } = useForm({
     mode: 'all'
   });
-  const selectedToken = watch('token');
-  const address = watch('address');
 
   const checkBridgeLaunched = async (contract) => {
     try {
@@ -170,20 +163,8 @@ export default function TransactionForm() {
           secondreserveid    // used as return currency type on bounce back
         }
 
-        if (currencyIaddress === secondreserveid) {
-          throw new Error('Cannot bounceback to same currency');
-        }
-
         const { BN } = web3.utils;
-        let MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
-        // eslint-disable-next-line
-        if (destinationtype & FLAG_DEST_GATEWAY) {
-          MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether')));
-        }
-
-        if (token.value === GLOBAL_ADDRESS.ETH) {
-          MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
-        }
+        const MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
 
         const txResult = await verusBridgeMasterContract.export(
           CReserveTransfer,
@@ -241,23 +222,9 @@ export default function TransactionForm() {
             />
           </Grid>
           <Grid item xs={12}>
-            {verusTestHeight > 0 && (<TokenField
+            <NFTField
               control={control}
               poolAvailable={poolAvailable}
-            />)}
-          </Grid>
-          <Grid item xs={12}>
-            <DestinationField
-              control={control}
-              poolAvailable={poolAvailable}
-              address={address}
-              selectedToken={selectedToken}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <AmountField
-              control={control}
-              selectedToken={selectedToken}
             />
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">

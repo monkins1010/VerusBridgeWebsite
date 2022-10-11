@@ -15,11 +15,6 @@
           "internalType": "address",
           "name": "verusSerializerAddress",
           "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "verusBridgeMasterAddress",
-          "type": "address"
         }
       ],
       "stateMutability": "nonpayable",
@@ -29,11 +24,16 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "contractAddress",
+          "name": "serializerAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "verusBridgeAddress",
           "type": "address"
         }
       ],
-      "name": "setContract",
+      "name": "setContracts",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -64,6 +64,16 @@
               "internalType": "uint256",
               "name": "tokenIndex",
               "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenID",
+              "type": "uint256"
             }
           ],
           "internalType": "struct VerusObjects.mappedToken",
@@ -72,8 +82,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -110,6 +119,11 @@
               "internalType": "string",
               "name": "ticker",
               "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenID",
+              "type": "uint256"
             }
           ],
           "internalType": "struct VerusObjects.setupToken[]",
@@ -118,8 +132,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -138,8 +151,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -185,37 +197,44 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
         {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "currencyAndAmount",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "destinationAndFlags",
-              "type": "uint256"
-            },
-            {
-              "internalType": "address",
-              "name": "nativeCurrency",
-              "type": "address"
-            }
-          ],
-          "internalType": "struct VerusObjects.PackedSend",
-          "name": "_tx",
-          "type": "tuple"
+          "internalType": "address",
+          "name": "cont",
+          "type": "address"
         }
       ],
-      "name": "deployToken",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "name": "getName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "cont",
+          "type": "address"
+        }
+      ],
+      "name": "getNFTName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -251,6 +270,11 @@
               "internalType": "string",
               "name": "ticker",
               "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenID",
+              "type": "uint256"
             }
           ],
           "internalType": "struct VerusObjects.setupToken[]",
@@ -258,47 +282,8 @@
           "type": "tuple[]"
         }
       ],
-      "name": "launchTokens",
+      "name": "launchContractTokens",
       "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_iaddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "ethContractAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "ticker",
-          "type": "string"
-        },
-        {
-          "internalType": "uint8",
-          "name": "flags",
-          "type": "uint8"
-        }
-      ],
-      "name": "recordToken",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -324,8 +309,7 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -349,44 +333,19 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
         {
-          "components": [
-            {
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "currencyAndAmount",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "destinationAndFlags",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "nativeCurrency",
-                  "type": "address"
-                }
-              ],
-              "internalType": "struct VerusObjects.PackedSend[]",
-              "name": "transfers",
-              "type": "tuple[]"
-            },
-            {
-              "internalType": "uint32",
-              "name": "counter",
-              "type": "uint32"
-            }
-          ],
-          "internalType": "struct VerusObjects.DeserializedObject",
-          "name": "transfers",
-          "type": "tuple"
+          "internalType": "bytes",
+          "name": "serializedTransfers",
+          "type": "bytes"
+        },
+        {
+          "internalType": "uint8",
+          "name": "numberOfTransfers",
+          "type": "uint8"
         }
       ],
       "name": "processTransactions",

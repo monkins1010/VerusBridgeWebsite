@@ -10,4 +10,12 @@ export const validateAddress = (address) => {
     return 'Address is not valid'
   }
 }
-  
+
+export const validateNFTAddress = (address) => {
+  if (isiAddress(address) || isRAddress(address)) {
+    true
+  } else {
+    return 'Address is not valid'
+  }
+}
+

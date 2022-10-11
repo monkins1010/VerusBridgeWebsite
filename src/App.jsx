@@ -4,7 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 import ToastProvider from 'components/Toast/ToastProvider';
 
-import Checkout from './pages/Checkout';
+import Tabs from "./components/TabComponent/Tabs";
 import Web3ConnectionProvider from './providers/Web3ConnectionProvider';
 import WrappedWeb3ReactProvider from './providers/WrappedWeb3ReactProvider';
 
@@ -22,7 +22,7 @@ function App() {
       <WrappedWeb3ReactProvider>
         <Web3ConnectionProvider>
           <ToastProvider>
-            <Checkout />
+            <Tabs />
           </ToastProvider>
         </Web3ConnectionProvider>
       </WrappedWeb3ReactProvider>

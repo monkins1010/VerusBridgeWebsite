@@ -5,6 +5,19 @@
       "type": "constructor"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "name": "contractUpdated",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -21,8 +34,50 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "pendingContracts",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "pendingContractsSignatures",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "notaryID",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "upgradeType",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [
@@ -62,18 +117,269 @@
               "type": "address[]"
             },
             {
+              "internalType": "uint8",
+              "name": "upgradeType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "salt",
+              "type": "bytes32"
+            },
+            {
               "internalType": "address",
-              "name": "notaryAddress",
+              "name": "notarizerID",
               "type": "address"
             }
           ],
-          "internalType": "struct VerusObjects.upgradeContracts[]",
+          "internalType": "struct VerusObjects.upgradeInfo",
           "name": "_newContractPackage",
-          "type": "tuple[]"
+          "type": "tuple"
         }
       ],
       "name": "upgradeContracts",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "be",
+          "type": "bytes"
+        },
+        {
+          "internalType": "uint8",
+          "name": "vs",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "rs",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "ss",
+          "type": "bytes32"
+        }
+      ],
+      "name": "recoverString",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "_vs",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "_rs",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "_ss",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "notaryID",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "salt",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct VerusObjects.revokeInfo",
+          "name": "_revokePacket",
+          "type": "tuple"
+        }
+      ],
+      "name": "revoke",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "_vs",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "_rs",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "_ss",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address[]",
+              "name": "contracts",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint8",
+              "name": "upgradeType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "salt",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "notarizerID",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct VerusObjects.upgradeInfo",
+          "name": "_newContractPackage",
+          "type": "tuple"
+        }
+      ],
+      "name": "recover",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "_vs",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "_rs",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "_ss",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address[]",
+              "name": "contracts",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint8",
+              "name": "upgradeType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "salt",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "notarizerID",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct VerusObjects.upgradeInfo",
+          "name": "_newContractPackage",
+          "type": "tuple"
+        }
+      ],
+      "name": "checkMultiSigContracts",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "input",
+          "type": "bytes"
+        }
+      ],
+      "name": "bytesToString",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "output",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "notaryAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "upgradeType",
+          "type": "uint8"
+        }
+      ],
+      "name": "setPendingUpgrade",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -109,8 +415,7 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -123,7 +428,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     }
   ]

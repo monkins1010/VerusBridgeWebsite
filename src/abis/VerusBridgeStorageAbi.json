@@ -1,15 +1,10 @@
-[
+ [
     {
       "inputs": [
         {
           "internalType": "address",
           "name": "upgradeContractAddress",
           "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_poolSize",
-          "type": "uint256"
         }
       ],
       "stateMutability": "nonpayable",
@@ -42,22 +37,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [],
-      "name": "firstBlock",
-      "outputs": [
-        {
-          "internalType": "uint32",
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -70,22 +50,54 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
-      "inputs": [],
-      "name": "lastTxImportHeight",
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "lastImportInfo",
       "outputs": [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
+          "internalType": "bytes32",
+          "name": "hashOfTransfers",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "exporttxid",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "exporttxoutnum",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "height",
+          "type": "uint32"
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastTxIdImport",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [
@@ -104,8 +116,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -124,8 +135,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -151,11 +161,20 @@
           "internalType": "uint256",
           "name": "tokenIndex",
           "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenID",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -173,12 +192,22 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "_ethAmount",
-          "type": "uint256"
+          "internalType": "bytes32",
+          "name": "processedTXID",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "hashofTXs",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint128",
+          "name": "CCEheightsandTXNum",
+          "type": "uint128"
         }
       ],
-      "name": "addToEthHeld",
+      "name": "setLastImport",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -186,25 +215,12 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "_ethAmount",
-          "type": "uint256"
+          "internalType": "uint32",
+          "name": "height",
+          "type": "uint32"
         }
       ],
-      "name": "subtractFromEthHeld",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "subtractPoolSize",
+      "name": "isLastCCEInOrder",
       "outputs": [
         {
           "internalType": "bool",
@@ -212,7 +228,7 @@
           "type": "bool"
         }
       ],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -257,9 +273,9 @@
               "type": "address"
             },
             {
-              "internalType": "uint256",
+              "internalType": "uint64",
               "name": "fees",
-              "type": "uint256"
+              "type": "uint64"
             },
             {
               "components": [
@@ -321,6 +337,11 @@
           "internalType": "bytes32",
           "name": "prevTxidHash",
           "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_block",
+          "type": "uint256"
         }
       ],
       "name": "setReadyExportTxid",
@@ -345,33 +366,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "processedTXID",
-          "type": "bytes32"
-        }
-      ],
-      "name": "setProcessedTxids",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "importHeight",
-          "type": "uint256"
-        }
-      ],
-      "name": "setlastTxImportHeight",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -400,6 +394,16 @@
               "internalType": "uint256",
               "name": "tokenIndex",
               "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenID",
+              "type": "uint256"
             }
           ],
           "internalType": "struct VerusObjects.mappedToken",
@@ -408,8 +412,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -434,6 +437,16 @@
               "internalType": "uint256",
               "name": "tokenIndex",
               "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenID",
+              "type": "uint256"
             }
           ],
           "internalType": "struct VerusObjects.mappedToken",
@@ -441,7 +454,7 @@
           "type": "tuple"
         }
       ],
-      "name": "RecordverusToERC20mapping",
+      "name": "RecordTokenmapping",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -508,9 +521,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "uint256",
+                  "internalType": "uint64",
                   "name": "fees",
-                  "type": "uint256"
+                  "type": "uint64"
                 },
                 {
                   "components": [
@@ -556,8 +569,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -570,20 +582,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "iaddress",
-          "type": "address"
-        }
-      ],
-      "name": "pushTokenList",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -603,8 +601,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -643,9 +640,9 @@
               "type": "address"
             },
             {
-              "internalType": "uint256",
+              "internalType": "uint64",
               "name": "fees",
-              "type": "uint256"
+              "type": "uint64"
             },
             {
               "components": [
@@ -688,8 +685,7 @@
       "name": "checkiaddresses",
       "outputs": [],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -702,11 +698,6 @@
           "internalType": "string",
           "name": "ticker",
           "type": "string"
-        },
-        {
-          "internalType": "address",
-          "name": "_iaddress",
-          "type": "address"
         }
       ],
       "name": "emitNewToken",
@@ -733,21 +724,11 @@
               "internalType": "uint256",
               "name": "destinationAndFlags",
               "type": "uint256"
-            },
-            {
-              "internalType": "address",
-              "name": "nativeCurrency",
-              "type": "address"
             }
           ],
           "internalType": "struct VerusObjects.PackedSend[]",
           "name": "trans",
           "type": "tuple[]"
-        },
-        {
-          "internalType": "uint8[]",
-          "name": "transferLocations",
-          "type": "uint8[]"
         }
       ],
       "name": "importTransactions",
@@ -805,7 +786,6 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function",
-      "constant": true
+      "type": "function"
     }
   ]
