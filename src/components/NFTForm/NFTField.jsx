@@ -11,12 +11,14 @@ const NFTField = ({ control }) => {
   const [verusNFTS, setVerusNFTS] = useState(['']);
   const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
   const { account } = useWeb3React();
+  const TOKEN_ETH_NFT_DEFINITION = 128;
 
   const getNFTs = async () => {
 
     const tokens = await tokenManagerContract.getTokenList();
-    const tokenList = tokens.map(e => ({ label: e.name, value: e.iaddress, flags: e.flags }))
-    return tokenList
+    // eslint-disable-next-line
+    const TOKEN_OPTIONS = tokens.map(e => ({ label: e.name, value: e.tokenID, iaddress: e.iaddress, erc20address: e.erc20ContractAddress, flags: e.flags })).filter(nft => nft.flags & TOKEN_ETH_NFT_DEFINITION)
+    return TOKEN_OPTIONS
   }
 
   useEffect(async () => {
@@ -27,7 +29,6 @@ const NFTField = ({ control }) => {
       setVerusNFTS(nfts);
     }
   }, [tokenManagerContract, account])
-
 
   return (<AutocompleteControlField
     name="nft"

@@ -14,11 +14,12 @@ const TokenField = ({ control, poolAvailable }) => {
   const [verusTokens, setVerusTokens] = useState(['']);
   const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
   const { account } = useWeb3React();
-
+  const TOKEN_ETH_NFT_DEFINITION = 128;
   const getTokens = async () => {
 
     const tokens = await tokenManagerContract.getTokenList();
-    const tokenList = tokens.map(e => ({ label: e.name, value: e.iaddress, flags: e.flags }))
+    // eslint-disable-next-line
+    const tokenList = tokens.map(e => ({ label: e.name, value: e.iaddress, flags: e.flags })).filter(token => !(token.flags & TOKEN_ETH_NFT_DEFINITION) && token.label)
     return tokenList
   }
 

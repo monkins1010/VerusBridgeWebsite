@@ -19,3 +19,13 @@ export const validateNFTAddress = (address) => {
   }
 }
 
+export const NFTAddressType = (address) => {
+  if (isiAddress(address))
+    return "04";
+  else if (isRAddress(address))
+    return "02";
+  else
+    return 'Address is not valid'
+
+}
+
