@@ -33,6 +33,7 @@ const maxGas2 = 100000;
 const BRIDGE_STORAGE_ENUM = 8;
 const NOTARIZER_STORAGE_ENUM = 9;
 const NOTARIZER_ENUM = 4;
+const BRIDGE_ENUM = 5;
 
 export default function NFTForm() {
   const [poolAvailable, setPoolAvailable] = useState(false);
@@ -85,9 +86,11 @@ export default function NFTForm() {
 
     const tokenID = `0x${web3.utils.padLeft(nft.value.toHexString().slice(2), 64)}`
 
-    const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
+    // const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
+    const bridgeAddress = await verusUpgradeContract.contracts(BRIDGE_ENUM);
 
-    await NFTInstContract.approve(bridgeStorageAddress, tokenID, { from: account, gasLimit: maxGas2 })
+    // await NFTInstContract.approve(bridgeStorageAddress, tokenID, { from: account, gasLimit: maxGas2 })
+    await NFTInstContract.approve(bridgeAddress, tokenID, { from: account, gasLimit: maxGas2 })
 
     setAlert(`
       Your Goerli account has authorised the bridge to transfer your NFT.`

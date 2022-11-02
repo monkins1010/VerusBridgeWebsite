@@ -69,11 +69,9 @@ export default function TransactionForm() {
       const pool = await contract.isPoolAvailable();
       setPoolAvailable(pool);
       const forksData = await notarizerContract.bestForks(0);
-      const hashPos = 66;
-      const hash = `0x${forksData.substring(hashPos, hashPos + 64).match(/[a-fA-F0-9]{2}/g).reverse().join('')}`
-      const returnedNotarization = await notarizerStorageContract.getNotarization(hash);
-
-      setVerusTestHeight(returnedNotarization.proofroots[1].rootheight)
+      const heightPos = 202;
+      const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 4)}`, 16);
+      setVerusTestHeight(1 || heightHex);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
