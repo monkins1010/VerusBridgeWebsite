@@ -62,16 +62,14 @@ export default function TransactionForm() {
   const checkBridgeLaunched = async (contract) => {
     try {
       const notarizerAddress = await verusUpgradeContract.contracts(NOTARIZER_ENUM);
-      const notarizerStorageAddress = await verusUpgradeContract.contracts(NOTARIZER_STORAGE_ENUM);
       const notarizerContract = getContract(notarizerAddress, NOTARIZER_ABI, library, account);
-      const notarizerStorageContract = getContract(notarizerStorageAddress, NOTARIZER_STORAGE_ABI, library, account);
 
       const pool = await contract.isPoolAvailable();
       setPoolAvailable(pool);
       const forksData = await notarizerContract.bestForks(0);
       const heightPos = 202;
       const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 4)}`, 16);
-      setVerusTestHeight(1 || heightHex);
+      setVerusTestHeight(heightHex && 1);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
@@ -95,8 +93,6 @@ export default function TransactionForm() {
   useEffect(async () => {
     if (tokenManagerContract && account) {
       const tokens = await getTokens();
-      // REMOVE BELOW DEBUG
-      // tokens.push({ label: "chriscoin", value: "CRS", iaddress: "0xc3ee4b592fd3ebd53ba757ae2daf484b20d75ae4", erc20address: "0xc3994c5cbddf7ce38b8a2ec2830335fa8f3eea6a" })
       setVerusTokens(tokens);
     }
   }, [tokenManagerContract, account])
