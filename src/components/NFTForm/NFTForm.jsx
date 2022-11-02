@@ -52,18 +52,14 @@ export default function NFTForm() {
   const checkBridgeLaunched = async (contract) => {
     try {
       const notarizerAddress = await verusUpgradeContract.contracts(NOTARIZER_ENUM);
-      const notarizerStorageAddress = await verusUpgradeContract.contracts(NOTARIZER_STORAGE_ENUM);
       const notarizerContract = getContract(notarizerAddress, NOTARIZER_ABI, library, account);
-      const notarizerStorageContract = getContract(notarizerStorageAddress, NOTARIZER_STORAGE_ABI, library, account);
 
       const pool = await contract.isPoolAvailable();
       setPoolAvailable(pool);
       const forksData = await notarizerContract.bestForks(0);
-      const hashPos = 66;
-      const hash = `0x${forksData.substring(hashPos, hashPos + 64).match(/[a-fA-F0-9]{2}/g).reverse().join('')}`
-      const returnedNotarization = await notarizerStorageContract.getNotarization(hash);
-
-      setVerusTestHeight(returnedNotarization.proofroots[1].rootheight)
+      const heightPos = 202;
+      const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 4)}`, 16);
+      setVerusTestHeight(heightHex || 1);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)

@@ -69,7 +69,7 @@ export default function TransactionForm() {
       const forksData = await notarizerContract.bestForks(0);
       const heightPos = 202;
       const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 4)}`, 16);
-      setVerusTestHeight(heightHex && 1);
+      setVerusTestHeight(heightHex || 1);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
