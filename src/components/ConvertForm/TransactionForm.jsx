@@ -10,7 +10,6 @@ import web3 from 'web3';
 
 import ERC20_ABI from 'abis/ERC20Abi.json';
 import NOTARIZER_ABI from 'abis/NotarizerAbi.json';
-import NOTARIZER_STORAGE_ABI from 'abis/NotarizerStorageAbi.json';
 import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
 import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
 import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
@@ -31,15 +30,11 @@ import AmountField from './AmountField';
 import DestinationField from './DestinationField';
 import TokenField from './TokenField';
 
-
-
 const maxGas = 6000000;
 const maxGas2 = 100000;
 const FLAG_DEST_GATEWAY = 128;
 const BRIDGE_STORAGE_ENUM = 8;
-const NOTARIZER_STORAGE_ENUM = 9;
 const NOTARIZER_ENUM = 4;
-
 
 export default function TransactionForm() {
   const [poolAvailable, setPoolAvailable] = useState(false);

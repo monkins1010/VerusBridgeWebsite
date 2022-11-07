@@ -10,7 +10,6 @@ import web3 from 'web3';
 
 import ERC721_ABI from 'abis/ERC721Abi.json';
 import NOTARIZER_ABI from 'abis/NotarizerAbi.json';
-import NOTARIZER_STORAGE_ABI from 'abis/NotarizerStorageAbi.json';
 import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
 import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
 import {
@@ -30,8 +29,6 @@ import NFTField from './NFTField';
 
 const maxGas = 6000000;
 const maxGas2 = 100000;
-const BRIDGE_STORAGE_ENUM = 8;
-const NOTARIZER_STORAGE_ENUM = 9;
 const NOTARIZER_ENUM = 4;
 const BRIDGE_ENUM = 5;
 
