@@ -95,7 +95,7 @@ export default function TransactionForm() {
   const authoriseOneTokenAmount = async (token, amount) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Goerli balance.`);
 
-    const tokenERC = verusTokens.filter(add => add.iaddress === token.value)[0].erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
+    const tokenERC = verusTokens.find(add => add.iaddress === token.value).erc20address;
     const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)
     const decimals = web3.utils.toBN(await tokenInstContract.decimals());
 
@@ -250,7 +250,7 @@ export default function TransactionForm() {
             />
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">
-            <LoadingButton loading={isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
+            <LoadingButton loading={isTxPending || !verusTokens} type="submit" color="primary" variant="contained">Send</LoadingButton>
           </Box>
         </Grid>
       </form>
