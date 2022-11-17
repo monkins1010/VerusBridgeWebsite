@@ -250,7 +250,7 @@ export default function TransactionForm() {
             />
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">
-            <LoadingButton loading={isTxPending || !verusTokens} type="submit" color="primary" variant="contained">Send</LoadingButton>
+            <LoadingButton loading={isTxPending} disabled={!verusTokens} type="submit" color="primary" variant="contained">Send</LoadingButton>
           </Box>
         </Grid>
       </form>
