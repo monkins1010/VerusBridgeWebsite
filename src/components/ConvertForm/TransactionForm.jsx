@@ -66,7 +66,7 @@ export default function TransactionForm() {
     const gasPriceInWei = web3.utils.hexToNumber(transaction.gasPrice._hex);
     const gasPriceInWeiBN = new web3.utils.BN(gasPriceInWei);
     const inWEISTRING = gasPriceInWeiBN.toString();
-    const gasPlusBuffer = gasPriceInWeiBN.mul(new web3.utils.BN('120')).div(new web3.utils.BN('10')) // add 20%
+    const gasPlusBuffer = gasPriceInWeiBN.mul(new web3.utils.BN('12')).div(new web3.utils.BN('10')) // add 20%
 
     if (gasPlusBuffer.lt(new web3.utils.BN("10000000000"))) {
       return { SATSCOST: "1000000", GWEIPRICE: 10, WEICOST: "10000000000000000", ETHCOST: "0.01" };
