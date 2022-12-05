@@ -193,7 +193,7 @@ export default function TransactionForm() {
         let MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
         // eslint-disable-next-line
         if (destinationtype & FLAG_DEST_GATEWAY) {
-          MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(GASPrice.WEICOST, 'ether'))); // bounceback fee
+          MetaMaskFee = MetaMaskFee.add(new BN(GASPrice.WEICOST)); // bounceback fee
         }
 
         if (token.value === GLOBAL_ADDRESS.ETH) {
