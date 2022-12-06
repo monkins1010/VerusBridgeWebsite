@@ -16,7 +16,9 @@ export const GLOBAL_ADDRESS = { // vrsctest hex 'id' names of currencies
 
 export const ETH_FEES = {
   SATS: 300000, // 0.003 ETH FEE SATS (8 decimal places)
-  ETH: "0.003" // 0.003 ETH FEE
+  ETH: "0.003", // 0.003 ETH FEE
+  GAS_TRANSACTIONIMPORTFEE: "1000000", // Transactionimportfee as defined in vETH: as (TX GAS AMOUNT)
+  MINIMUM_GAS_PRICE_WEI: "10000000000" // Minimum WEI price as defined in contract. (10 GWEI)
 }
 
 export const FLAGS = {
