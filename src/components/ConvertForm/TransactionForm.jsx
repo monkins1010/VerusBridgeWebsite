@@ -241,10 +241,6 @@ export default function TransactionForm() {
             <Typography>
               Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
             </Typography>
-            {GASPrice && destination && destination.slice(0, 4) === "swap" && <Typography>
-              Current GAS Fee for ETH Bounceback: <br /> <b>{GASPrice.ETHCOST} ETH</b><br />
-              {" Using GAS Price of: "} <br /> <b> {GASPrice.GWEIPRICE} {" GWEI"}</b>
-            </Typography>}
           </Alert>
         ) :
           (<Alert severity="info" sx={{ mb: 3 }}>
