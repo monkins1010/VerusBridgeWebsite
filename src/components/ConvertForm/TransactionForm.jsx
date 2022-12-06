@@ -42,6 +42,7 @@ export default function TransactionForm() {
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
   const [verusTokens, setVerusTokens] = useState(['']);
+  const [GASPrice, setGASPrice] = useState("");
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
   const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
@@ -53,13 +54,39 @@ export default function TransactionForm() {
   });
   const selectedToken = watch('token');
   const address = watch('address');
+  const destination = watch('destination');
+
+  const getArticlesFromApi = async () => {
+
+    const latestBlock = await library.getBlockNumber();
+    const block = await library.getBlock(latestBlock - 10);
+    const transaction = await library.getTransaction(block.transactions[Math.ceil(block.transactions.length / 2)]);
+
+    // eslint-disable-next-line
+    const gasPriceInWei = web3.utils.hexToNumber(transaction.gasPrice._hex);
+    const gasPriceInWeiBN = new web3.utils.BN(gasPriceInWei);
+    const inWEISTRING = gasPriceInWeiBN.toString();
+    const gasPlusBuffer = gasPriceInWeiBN.mul(new web3.utils.BN('12')).div(new web3.utils.BN('10')) // add 20%
+
+    if (gasPlusBuffer.lt(new web3.utils.BN("10000000000"))) {
+      return { SATSCOST: "1000000", GWEIPRICE: 10, WEICOST: "10000000000000000", ETHCOST: "0.01" };
+    }
+
+    const gasInSats = gasPlusBuffer.div(new web3.utils.BN("10000")).toString();  // as contract is 1,000,000 GAS convert WEi to SATS
+    return { SATSCOST: gasInSats, GWEIPRICE: web3.utils.fromWei(gasPlusBuffer, 'gwei'), WEICOST: gasPlusBuffer.toString(), ETHCOST: web3.utils.fromWei(gasPlusBuffer.mul(new web3.utils.BN('1000000')), 'ether') };
+
+  };
+
 
   const checkBridgeLaunched = async (contract) => {
     try {
       const notarizerAddress = await verusUpgradeContract.contracts(NOTARIZER_ENUM);
       const notarizerContract = getContract(notarizerAddress, NOTARIZER_ABI, library, account);
-
+      const GASPrices = await getArticlesFromApi();
       const pool = await contract.isPoolAvailable();
+
+      setGASPrice(GASPrices);
+
       setPoolAvailable(pool);
       const forksData = await notarizerContract.bestForks(0);
       const heightPos = 202;
@@ -95,7 +122,7 @@ export default function TransactionForm() {
   const authoriseOneTokenAmount = async (token, amount) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Goerli balance.`);
 
-    const tokenERC = verusTokens.filter(add => add.iaddress === token.value)[0].erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
+    const tokenERC = verusTokens.find(add => add.iaddress === token.value).erc20address;
     const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)
     const decimals = web3.utils.toBN(await tokenInstContract.decimals());
 
@@ -140,8 +167,7 @@ export default function TransactionForm() {
       if (token?.value !== GLOBAL_ADDRESS.ETH) {
         await authoriseOneTokenAmount(token, amount);
       }
-
-      const result = getConfigOptions({ ...values, poolAvailable });
+      const result = getConfigOptions({ ...values, poolAvailable, GASPrice });
 
       if (result) {
         const { flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid } = result;
@@ -167,7 +193,7 @@ export default function TransactionForm() {
         let MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
         // eslint-disable-next-line
         if (destinationtype & FLAG_DEST_GATEWAY) {
-          MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether')));
+          MetaMaskFee = MetaMaskFee.add(new BN(GASPrice.WEICOST)); // bounceback fee
         }
 
         if (token.value === GLOBAL_ADDRESS.ETH) {
@@ -215,6 +241,10 @@ export default function TransactionForm() {
             <Typography>
               Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
             </Typography>
+            {GASPrice && destination && destination.slice(0, 4) === "swap" && <Typography>
+              Current GAS Fee for ETH Bounceback: <br /> <b>{GASPrice.ETHCOST} ETH</b><br />
+              {" Using GAS Price of: "} <br /> <b> {GASPrice.GWEIPRICE} {" GWEI"}</b>
+            </Typography>}
           </Alert>
         ) :
           (<Alert severity="info" sx={{ mb: 3 }}>
@@ -250,7 +280,7 @@ export default function TransactionForm() {
             />
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">
-            <LoadingButton loading={isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
+            <LoadingButton loading={isTxPending} disabled={!verusTokens} type="submit" color="primary" variant="contained">Send</LoadingButton>
           </Box>
         </Grid>
       </form>
