@@ -35,6 +35,7 @@ const maxGas2 = 100000;
 const FLAG_DEST_GATEWAY = 128;
 const BRIDGE_STORAGE_ENUM = 8;
 const NOTARIZER_ENUM = 4;
+const { GAS_TRANSACTIONIMPORTFEE, MINIMUM_GAS_PRICE_WEI } = ETH_FEES;
 
 export default function TransactionForm() {
   const [poolAvailable, setPoolAvailable] = useState(false);
@@ -54,7 +55,6 @@ export default function TransactionForm() {
   });
   const selectedToken = watch('token');
   const address = watch('address');
-  const destination = watch('destination');
 
   const getArticlesFromApi = async () => {
 
@@ -65,15 +65,22 @@ export default function TransactionForm() {
     // eslint-disable-next-line
     const gasPriceInWei = web3.utils.hexToNumber(transaction.gasPrice._hex);
     const gasPriceInWeiBN = new web3.utils.BN(gasPriceInWei);
-    const inWEISTRING = gasPriceInWeiBN.toString();
-    const gasPlusBuffer = gasPriceInWeiBN.mul(new web3.utils.BN('12')).div(new web3.utils.BN('10')) // add 20%
+    const gasPriceInWEIString = gasPriceInWeiBN.toString();
+    // eslint-disable-next-line no-console
+    console.log("gasprice ", gasPriceInWEIString);
+    const gasPricePlusBuffer = gasPriceInWeiBN.mul(new web3.utils.BN('12')).div(new web3.utils.BN('10')) // add 20%
 
-    if (gasPlusBuffer.lt(new web3.utils.BN("10000000000"))) {
-      return { SATSCOST: "1000000", GWEIPRICE: 10, WEICOST: "10000000000000000", ETHCOST: "0.01" };
+    if (gasPricePlusBuffer.lt(new web3.utils.BN(MINIMUM_GAS_PRICE_WEI))) {
+
+      const minimumSATSFee = new web3.utils.BN(GAS_TRANSACTIONIMPORTFEE).toString();
+      const minimumWEIFee = new web3.utils.BN(MINIMUM_GAS_PRICE_WEI).mul(new web3.utils.BN(GAS_TRANSACTIONIMPORTFEE)).toString();
+      return { SATSCOST: minimumSATSFee, WEICOST: minimumWEIFee };
     }
 
-    const gasInSats = gasPlusBuffer.div(new web3.utils.BN("10000")).toString();  // as contract is 1,000,000 GAS convert WEi to SATS
-    return { SATSCOST: gasInSats, GWEIPRICE: web3.utils.fromWei(gasPlusBuffer, 'gwei'), WEICOST: gasPlusBuffer.toString(), ETHCOST: web3.utils.fromWei(gasPlusBuffer.mul(new web3.utils.BN('1000000')), 'ether') };
+    const gasInSats = gasPricePlusBuffer.mul(new web3.utils.BN(GAS_TRANSACTIONIMPORTFEE)).div(new web3.utils.BN("10000000000")).toString();  // divide WEI by 10,000,000,000 to get into sats
+    const weiPrice = gasPricePlusBuffer.mul(new web3.utils.BN(GAS_TRANSACTIONIMPORTFEE)).toString();
+
+    return { SATSCOST: gasInSats, WEICOST: weiPrice };
 
   };
 
@@ -241,10 +248,6 @@ export default function TransactionForm() {
             <Typography>
               Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
             </Typography>
-            {GASPrice && destination && destination.slice(0, 4) === "swap" && <Typography>
-              Current GAS Fee for ETH Bounceback: <br /> <b>{GASPrice.ETHCOST} ETH</b><br />
-              {" Using GAS Price of: "} <br /> <b> {GASPrice.GWEIPRICE} {" GWEI"}</b>
-            </Typography>}
           </Alert>
         ) :
           (<Alert severity="info" sx={{ mb: 3 }}>
