@@ -22,6 +22,7 @@ import {
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
+import { signTypedDataV4 } from 'utils/sign';
 import { getConfigOptions } from 'utils/txConfig';
 
 import { useToast } from '../Toast/ToastProvider';
@@ -45,7 +46,7 @@ export default function TransactionForm() {
   const [verusTokens, setVerusTokens] = useState(['']);
   const [GASPrice, setGASPrice] = useState("");
   const { addToast } = useToast();
-  const { account, library } = useWeb3React();
+  const { account, library, chainId } = useWeb3React();
   const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
   const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
   const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
@@ -55,6 +56,7 @@ export default function TransactionForm() {
   });
   const selectedToken = watch('token');
   const address = watch('address');
+  const token = watch('token');
 
   const getArticlesFromApi = async () => {
 
@@ -170,6 +172,8 @@ export default function TransactionForm() {
     setAlert(null);
     setIsTxPending(true);
 
+    // await signTypedDataV4(account, chainId, web3.utils);
+
     try {
       if (token?.value !== GLOBAL_ADDRESS.ETH) {
         await authoriseOneTokenAmount(token, amount);
@@ -283,7 +287,7 @@ export default function TransactionForm() {
             />
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">
-            <LoadingButton loading={isTxPending} disabled={!verusTokens} type="submit" color="primary" variant="contained">Send</LoadingButton>
+            <LoadingButton loading={isTxPending} disabled={!verusTokens || !token?.value} type="submit" color="primary" variant="contained">Send</LoadingButton>
           </Box>
         </Grid>
       </form>
