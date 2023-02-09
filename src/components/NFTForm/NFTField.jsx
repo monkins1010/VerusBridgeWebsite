@@ -12,12 +12,14 @@ const NFTField = ({ control }) => {
   const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
   const { account } = useWeb3React();
   const TOKEN_ETH_NFT_DEFINITION = 128;
-
+  const MAPPING_VERUS_OWNED = 2
   const getNFTs = async () => {
 
-    const tokens = await tokenManagerContract.getTokenList();
+    const tokens = await tokenManagerContract.getTokenList(0, 0);
     // eslint-disable-next-line
-    const TOKEN_OPTIONS = tokens.map(e => ({ label: e.name, value: e.tokenID, iaddress: e.iaddress, erc20address: e.erc20ContractAddress, flags: e.flags })).filter(nft => nft.flags & TOKEN_ETH_NFT_DEFINITION)
+    const TOKEN_OPTIONS = tokens.map(e => ({ label: e.flags & MAPPING_VERUS_OWNED ? `${e.name}.VerusNFT` : e.name, value: e.tokenID, iaddress: e.iaddress, erc20address: e.erc20ContractAddress, flags: e.flags })).filter(nft => nft.flags & TOKEN_ETH_NFT_DEFINITION)
+    TOKEN_OPTIONS[0].label = `VerusNFTs are at (${TOKEN_OPTIONS[0].erc20address})`
+
     return TOKEN_OPTIONS
   }
 

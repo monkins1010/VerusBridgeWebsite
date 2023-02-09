@@ -53,9 +53,9 @@ export default function NFTForm() {
 
       const pool = await contract.isPoolAvailable();
       setPoolAvailable(pool);
-      const forksData = await notarizerContract.bestForks(0);
-      const heightPos = 202;
-      const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 4)}`, 16);
+      const forksData = await notarizerContract.decodeNotarization(0);
+      const heightPos = 2;
+      const heightHex = parseInt(`0x${forksData[0].proposerPacked.substring(heightPos, heightPos + 8)}`, 16);
       setVerusTestHeight(heightHex || 1);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -72,7 +72,7 @@ export default function NFTForm() {
 
 
   const authoriseNFT = async (nft) => {
-    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to transfer {${nft.name}) from your wallet.`);
+    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to transfer (${nft.name}) from your wallet.`);
 
     const tokenERC = nft.erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
     const NFTInstContract = getContract(tokenERC, ERC721_ABI, library, account)
@@ -83,8 +83,13 @@ export default function NFTForm() {
     const bridgeAddress = await verusUpgradeContract.contracts(BRIDGE_ENUM);
 
     // await NFTInstContract.approve(bridgeStorageAddress, tokenID, { from: account, gasLimit: maxGas2 })
-    await NFTInstContract.approve(bridgeAddress, tokenID, { from: account, gasLimit: maxGas2 })
+    const approve = await NFTInstContract.approve(bridgeAddress, tokenID, { from: account, gasLimit: maxGas2 })
+    setAlert(`Authorising, please wait... (${nft.name})`);
+    const reply = await approve.wait();
 
+    if (reply.status === 0) {
+      throw new Error("Authorising NFT spend Failed, Do you own the NFT?")
+    }
     setAlert(`
       Your Goerli account has authorised the bridge to transfer your NFT.`
     );
@@ -155,7 +160,7 @@ export default function NFTForm() {
               {poolAvailable ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
             </Typography>
             <Typography>
-              Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
+              Last Confirmed VerusTest height: <b>{verusTestHeight > 1 ? verusTestHeight : "-"}</b>
             </Typography>
           </Alert>
         ) :

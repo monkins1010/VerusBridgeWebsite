@@ -14,10 +14,10 @@ const SelectControlField = ({
   options = [],
   ...props
 }) => {
-  const labelId = `${name}-label`;
+  const labelid = `${name}-label`;
   return (
     <FormControl {...props}>
-      <InputLabel id={labelId}>{label}</InputLabel>
+      <InputLabel id={labelid}>{label}</InputLabel>
       <Controller
         name={name}
         control={control}
@@ -26,7 +26,7 @@ const SelectControlField = ({
         render={({ field: { onChange, value }, fieldState: { error } }) => (
           <>
             <Select
-              labelId={labelId}
+              labelid={labelid}
               label={label}
               id={name}
               onChange={onChange}

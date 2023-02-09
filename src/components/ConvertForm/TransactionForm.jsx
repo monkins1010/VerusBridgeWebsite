@@ -22,7 +22,6 @@ import {
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
-import { signTypedDataV4 } from 'utils/sign';
 import { getConfigOptions } from 'utils/txConfig';
 
 import { useToast } from '../Toast/ToastProvider';
@@ -46,7 +45,7 @@ export default function TransactionForm() {
   const [verusTokens, setVerusTokens] = useState(['']);
   const [GASPrice, setGASPrice] = useState("");
   const { addToast } = useToast();
-  const { account, library, chainId } = useWeb3React();
+  const { account, library } = useWeb3React();
   const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
   const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
   const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
@@ -97,9 +96,9 @@ export default function TransactionForm() {
       setGASPrice(GASPrices);
 
       setPoolAvailable(pool);
-      const forksData = await notarizerContract.bestForks(0);
-      const heightPos = 202;
-      const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 4)}`, 16);
+      const forksData = await notarizerContract.decodeNotarization(0);
+      const heightPos = 2;
+      const heightHex = parseInt(`0x${forksData[0].proposerPacked.substring(heightPos, heightPos + 8)}`, 16);
       setVerusTestHeight(heightHex || 1);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -110,7 +109,7 @@ export default function TransactionForm() {
 
   const getTokens = async () => {
 
-    const tokens = await tokenManagerContract.getTokenList();
+    const tokens = await tokenManagerContract.getTokenList(0, 0);
     const TOKEN_OPTIONS = tokens.map(e => ({ label: e.name, value: e.ticker, iaddress: e.iaddress, erc20address: e.erc20ContractAddress }))
     return TOKEN_OPTIONS
   }
@@ -159,8 +158,14 @@ export default function TransactionForm() {
 
     const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
 
-    await tokenInstContract.approve(bridgeStorageAddress, bigAmount.toString(), { from: account, gasLimit: maxGas2 })
+    const approve = await tokenInstContract.approve(bridgeStorageAddress, bigAmount.toString(), { from: account, gasLimit: maxGas2 })
 
+    setAlert(`Authorising ERC20 Token, please wait...`);
+    const reply = await approve.wait();
+
+    if (reply.status === 0) {
+      throw new Error("Authorising ERC20 Token Spend Failed, please check your balance.")
+    }
     setAlert(`
       Your Goerli account has authorised the bridge to spend ${token.name} token, the amount: ${amount}. 
       \n Next, after this window please check the amount in Meta mask is what you wish to send.`
@@ -172,7 +177,6 @@ export default function TransactionForm() {
     setAlert(null);
     setIsTxPending(true);
 
-    // await signTypedDataV4(account, chainId, web3.utils);
 
     try {
       if (token?.value !== GLOBAL_ADDRESS.ETH) {
@@ -250,7 +254,7 @@ export default function TransactionForm() {
               {poolAvailable ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
             </Typography>
             <Typography>
-              Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
+              Last Confirmed VerusTest height: <b>{verusTestHeight > 1 ? verusTestHeight : "-"}</b>
             </Typography>
           </Alert>
         ) :
@@ -287,7 +291,7 @@ export default function TransactionForm() {
             />
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">
-            <LoadingButton loading={isTxPending} disabled={!verusTokens || !token?.value} type="submit" color="primary" variant="contained">Send</LoadingButton>
+            <LoadingButton loading={isTxPending} disabled={!verusTokens || !token?.value || isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
           </Box>
         </Grid>
       </form>
