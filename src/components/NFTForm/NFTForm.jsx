@@ -107,7 +107,7 @@ export default function NFTForm() {
       const addressType = NFTAddressType(address);
       const hexID = convertVerusAddressToEthAddress(address);
 
-      const formattedDesination = `0x${addressType}${hexID.slice(2)}${nft.erc20address.slice(2)}${tokenID.slice(2)}`
+      const formattedDesination = `0x${addressType}${hexID.slice(2)}${tokenID.slice(2)}`
 
       const CReserveTransfer = {
         version: 1,
