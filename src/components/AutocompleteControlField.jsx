@@ -16,7 +16,7 @@ const SelectControlField = ({
     options = [],
     ...props
 }) => {
-    const labelId = `${name}-label`;
+    const labelid = `${name}-label`;
     return (
         <FormControl {...props}>
             <Controller
@@ -27,12 +27,12 @@ const SelectControlField = ({
                 render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
                         <Autocomplete
-                            labelId={labelId}
+                            labelid={labelid}
                             disablePortal
                             id={name}
                             options={options}
                             {...selectProps}
-                            onChange={(e, data) => onChange({ value: data?.value, name: data?.label, erc20address: data.erc20address, iaddress: data.iaddress })}
+                            onChange={(e, data) => onChange({ value: data?.value, name: data?.label, erc20address: data?.erc20address, iaddress: data?.iaddress })}
                             renderInput={(params) => <TextField {...params} label={label} />}
                         />
                         {error && <FormHelperText error>{error.message}</FormHelperText>}

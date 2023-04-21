@@ -1,8 +1,5 @@
 // private testnetwork address
-export const BRIDGE_MASTER_ADD = "0x6dB6121abcb75031f60044Ef40CC6Aa5cAae0fE5";
-export const BRIDGE_STORAGE_ADD = "0x94639a81E6C2121c76b5fdD6C0345DF83870454E";
-export const UPGRADE_ADD = "0x896CCDf5157a6B43e311b0fB49f4de6Ab67E614E";
-export const TOKEN_MANAGER_ADD = "0xA7d32C9aeAe96bDF72e7E47F28Af44bFcC3c16b5";
+export const DELEGATOR_ADD = "0x68BfFe8cEa37DCA4d582C3d1f714aFbB7238167b";
 
 export const USDC_ERC20ADD = "0x98339D8C260052B7ad81c28c16C0b98420f2B46a";  // USDC token is pre-existing goerli
 export const ETH_ERC20ADD = "0x5ef378642a309485fd0f27850ec7f0550104f530"
@@ -18,7 +15,8 @@ export const ETH_FEES = {
   SATS: 300000, // 0.003 ETH FEE SATS (8 decimal places)
   ETH: "0.003", // 0.003 ETH FEE
   GAS_TRANSACTIONIMPORTFEE: "1000000", // Transactionimportfee as defined in vETH: as (TX GAS AMOUNT)
-  MINIMUM_GAS_PRICE_WEI: "10000000000" // Minimum WEI price as defined in contract. (10 GWEI)
+  MINIMUM_GAS_PRICE_WEI: "10000000000", // Minimum WEI price as defined in contract. (10 GWEI)
+  VRSC_SATS_FEE: 2000000
 }
 
 export const FLAGS = {

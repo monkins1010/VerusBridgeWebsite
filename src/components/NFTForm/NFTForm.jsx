@@ -8,14 +8,11 @@ import { useWeb3React } from '@web3-react/core';
 import { useForm } from 'react-hook-form';
 import web3 from 'web3';
 
+import DELEGATOR_ABI from 'abis/DelegatorAbi.json';
 import ERC721_ABI from 'abis/ERC721Abi.json';
-import NOTARIZER_ABI from 'abis/NotarizerAbi.json';
-import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
-import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
 import {
-  BRIDGE_MASTER_ADD,
+  DELEGATOR_ADD,
   ETH_FEES,
-  UPGRADE_ADD,
   GLOBAL_ADDRESS
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
@@ -29,8 +26,6 @@ import NFTField from './NFTField';
 
 const maxGas = 6000000;
 const maxGas2 = 100000;
-const NOTARIZER_ENUM = 4;
-const BRIDGE_ENUM = 5;
 
 export default function NFTForm() {
   const [poolAvailable, setPoolAvailable] = useState(false);
@@ -39,8 +34,8 @@ export default function NFTForm() {
   const [verusTestHeight, setVerusTestHeight] = useState(null);
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
-  const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
-  const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
+  const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
+
 
   const { handleSubmit, control } = useForm({
     mode: 'all'
@@ -48,14 +43,12 @@ export default function NFTForm() {
 
   const checkBridgeLaunched = async (contract) => {
     try {
-      const notarizerAddress = await verusUpgradeContract.contracts(NOTARIZER_ENUM);
-      const notarizerContract = getContract(notarizerAddress, NOTARIZER_ABI, library, account);
 
-      const pool = await contract.isPoolAvailable();
+      const pool = await contract.callStatic.poolAvailable();
       setPoolAvailable(pool);
-      const forksData = await notarizerContract.bestForks(0);
-      const heightPos = 202;
-      const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 4)}`, 16);
+      const forksData = await delegatorContract.callStatic.bestForks(0);
+      const heightPos = 194;
+      const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 8)}`, 16);
       setVerusTestHeight(heightHex || 1);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -65,26 +58,29 @@ export default function NFTForm() {
   }
 
   useEffect(() => {
-    if (verusBridgeMasterContract && account && verusUpgradeContract) {
-      checkBridgeLaunched(verusBridgeMasterContract);
+    if (delegatorContract && account) {
+      checkBridgeLaunched(delegatorContract);
     }
-  }, [verusBridgeMasterContract, verusUpgradeContract, account])
+  }, [delegatorContract, account])
 
 
   const authoriseNFT = async (nft) => {
-    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to transfer {${nft.name}) from your wallet.`);
+    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to transfer (${nft.name}) from your wallet.`);
 
-    const tokenERC = nft.erc20address // await verusBridgeStorageContract.verusToERC20mapping(GLOBAL_ADDRESS[token])
+    const tokenERC = nft.erc20address // await verusBridgeStorageContract.getERCMapping(GLOBAL_ADDRESS[token])
     const NFTInstContract = getContract(tokenERC, ERC721_ABI, library, account)
 
     const tokenID = `0x${web3.utils.padLeft(nft.value.toHexString().slice(2), 64)}`
 
-    // const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
-    const bridgeAddress = await verusUpgradeContract.contracts(BRIDGE_ENUM);
 
     // await NFTInstContract.approve(bridgeStorageAddress, tokenID, { from: account, gasLimit: maxGas2 })
-    await NFTInstContract.approve(bridgeAddress, tokenID, { from: account, gasLimit: maxGas2 })
+    const approve = await NFTInstContract.approve(DELEGATOR_ADD, tokenID, { from: account, gasLimit: maxGas2 })
+    setAlert(`Authorising, please wait... (${nft.name})`);
+    const reply = await approve.wait();
 
+    if (reply.status === 0) {
+      throw new Error("Authorising NFT spend Failed, Do you own the NFT?")
+    }
     setAlert(`
       Your Goerli account has authorised the bridge to transfer your NFT.`
     );
@@ -102,7 +98,7 @@ export default function NFTForm() {
       const addressType = NFTAddressType(address);
       const hexID = convertVerusAddressToEthAddress(address);
 
-      const formattedDesination = `0x${addressType}${hexID.slice(2)}${nft.erc20address.slice(2)}${tokenID.slice(2)}`
+      const formattedDesination = `0x${addressType}${hexID.slice(2)}${tokenID.slice(2)}`
 
       const CReserveTransfer = {
         version: 1,
@@ -119,7 +115,7 @@ export default function NFTForm() {
       const { BN } = web3.utils;
       const MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
 
-      const txResult = await verusBridgeMasterContract.export(
+      const txResult = await DELEGATOR_ADD.export(
         CReserveTransfer,
         { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
       );
@@ -155,7 +151,7 @@ export default function NFTForm() {
               {poolAvailable ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
             </Typography>
             <Typography>
-              Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
+              Last Confirmed VerusTest height: <b>{verusTestHeight > 1 ? verusTestHeight : "-"}</b>
             </Typography>
           </Alert>
         ) :

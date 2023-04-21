@@ -8,17 +8,12 @@ import { useWeb3React } from '@web3-react/core';
 import { useForm } from 'react-hook-form';
 import web3 from 'web3';
 
+import DELEGATOR_ABI from 'abis/DelegatorAbi.json';
 import ERC20_ABI from 'abis/ERC20Abi.json';
-import NOTARIZER_ABI from 'abis/NotarizerAbi.json';
-import TOKEN_MANAGER_ABI from 'abis/TokenManagerAbi.json';
-import VERUS_BRIDGE_MASTER_ABI from 'abis/VerusBridgeMasterAbi.json';
-import VERUS_UPGRADE_ABI from 'abis/VerusUpgradeAbi.json';
 import {
-  BRIDGE_MASTER_ADD,
+  DELEGATOR_ADD,
   GLOBAL_ADDRESS,
-  ETH_FEES,
-  UPGRADE_ADD,
-  TOKEN_MANAGER_ADD
+  ETH_FEES
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -33,8 +28,6 @@ import TokenField from './TokenField';
 const maxGas = 6000000;
 const maxGas2 = 100000;
 const FLAG_DEST_GATEWAY = 128;
-const BRIDGE_STORAGE_ENUM = 8;
-const NOTARIZER_ENUM = 4;
 const { GAS_TRANSACTIONIMPORTFEE, MINIMUM_GAS_PRICE_WEI } = ETH_FEES;
 
 export default function TransactionForm() {
@@ -46,15 +39,15 @@ export default function TransactionForm() {
   const [GASPrice, setGASPrice] = useState("");
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
-  const verusBridgeMasterContract = useContract(BRIDGE_MASTER_ADD, VERUS_BRIDGE_MASTER_ABI);
-  const verusUpgradeContract = useContract(UPGRADE_ADD, VERUS_UPGRADE_ABI);
-  const tokenManagerContract = useContract(TOKEN_MANAGER_ADD, TOKEN_MANAGER_ABI);
+  const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
+
 
   const { handleSubmit, control, watch } = useForm({
     mode: 'all'
   });
   const selectedToken = watch('token');
   const address = watch('address');
+  const token = watch('token');
 
   const getArticlesFromApi = async () => {
 
@@ -83,21 +76,15 @@ export default function TransactionForm() {
     return { SATSCOST: gasInSats, WEICOST: weiPrice };
 
   };
-
-
   const checkBridgeLaunched = async (contract) => {
     try {
-      const notarizerAddress = await verusUpgradeContract.contracts(NOTARIZER_ENUM);
-      const notarizerContract = getContract(notarizerAddress, NOTARIZER_ABI, library, account);
       const GASPrices = await getArticlesFromApi();
-      const pool = await contract.isPoolAvailable();
-
+      const pool = await contract.callStatic.poolAvailable();
       setGASPrice(GASPrices);
-
       setPoolAvailable(pool);
-      const forksData = await notarizerContract.bestForks(0);
-      const heightPos = 202;
-      const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 4)}`, 16);
+      const forksData = await delegatorContract.callStatic.bestForks(0);
+      const heightPos = 194;
+      const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 8)}`, 16);
       setVerusTestHeight(heightHex || 1);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -108,23 +95,23 @@ export default function TransactionForm() {
 
   const getTokens = async () => {
 
-    const tokens = await tokenManagerContract.getTokenList();
+    const tokens = await delegatorContract.callStatic.getTokenList(0, 0);
     const TOKEN_OPTIONS = tokens.map(e => ({ label: e.name, value: e.ticker, iaddress: e.iaddress, erc20address: e.erc20ContractAddress }))
     return TOKEN_OPTIONS
   }
 
   useEffect(() => {
-    if (verusBridgeMasterContract && account && verusUpgradeContract) {
-      checkBridgeLaunched(verusBridgeMasterContract);
+    if (delegatorContract && account) {
+      checkBridgeLaunched(delegatorContract);
     }
-  }, [verusBridgeMasterContract, verusUpgradeContract, account])
+  }, [delegatorContract, account])
 
   useEffect(async () => {
-    if (tokenManagerContract && account) {
+    if (delegatorContract && account) {
       const tokens = await getTokens();
       setVerusTokens(tokens);
     }
-  }, [tokenManagerContract, account])
+  }, [delegatorContract, account])
 
   const authoriseOneTokenAmount = async (token, amount) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Goerli balance.`);
@@ -155,10 +142,14 @@ export default function TransactionForm() {
     fraction = new web3.utils.BN(fraction);
     const bigAmount = (whole.mul(base)).add(fraction);
 
-    const bridgeStorageAddress = await verusUpgradeContract.contracts(BRIDGE_STORAGE_ENUM);
+    const approve = await tokenInstContract.approve(DELEGATOR_ADD, bigAmount.toString(), { from: account, gasLimit: maxGas2 })
 
-    await tokenInstContract.approve(bridgeStorageAddress, bigAmount.toString(), { from: account, gasLimit: maxGas2 })
+    setAlert(`Authorising ERC20 Token, please wait...`);
+    const reply = await approve.wait();
 
+    if (reply.status === 0) {
+      throw new Error("Authorising ERC20 Token Spend Failed, please check your balance.")
+    }
     setAlert(`
       Your Goerli account has authorised the bridge to spend ${token.name} token, the amount: ${amount}. 
       \n Next, after this window please check the amount in Meta mask is what you wish to send.`
@@ -169,6 +160,7 @@ export default function TransactionForm() {
     const { token, amount } = values;
     setAlert(null);
     setIsTxPending(true);
+
 
     try {
       if (token?.value !== GLOBAL_ADDRESS.ETH) {
@@ -207,7 +199,7 @@ export default function TransactionForm() {
           MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
         }
 
-        const txResult = await verusBridgeMasterContract.export(
+        const txResult = await delegatorContract.export(
           CReserveTransfer,
           { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
         );
@@ -246,7 +238,7 @@ export default function TransactionForm() {
               {poolAvailable ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
             </Typography>
             <Typography>
-              Last Confirmed VerusTest height: <b>{verusTestHeight}</b>
+              Last Confirmed VerusTest height: <b>{verusTestHeight > 1 ? verusTestHeight : "-"}</b>
             </Typography>
           </Alert>
         ) :
@@ -283,7 +275,7 @@ export default function TransactionForm() {
             />
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">
-            <LoadingButton loading={isTxPending} disabled={!verusTokens} type="submit" color="primary" variant="contained">Send</LoadingButton>
+            <LoadingButton loading={isTxPending} disabled={!verusTokens || !token?.value || isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
           </Box>
         </Grid>
       </form>

@@ -8,6 +8,7 @@
     "@ethersproject/constants": "^5.5.0",
     "@ethersproject/contracts": "^5.5.0",
     "@ethersproject/providers": "^5.5.0",
+    "@metamask/eth-sig-util": "^5.0.2",
     "@mui/icons-material": "^5.2.0",
     "@mui/lab": "^5.0.0-alpha.58",
     "@mui/material": "^5.2.1",
