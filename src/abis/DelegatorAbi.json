@@ -505,6 +505,91 @@
     {
       "inputs": [
         {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "version",
+              "type": "uint32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "currency",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "amount",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct VerusObjects.CCurrencyValueMap",
+              "name": "currencyvalue",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint32",
+              "name": "flags",
+              "type": "uint32"
+            },
+            {
+              "internalType": "address",
+              "name": "feecurrencyid",
+              "type": "address"
+            },
+            {
+              "internalType": "uint64",
+              "name": "fees",
+              "type": "uint64"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "destinationtype",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "destinationaddress",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct VerusObjectsCommon.CTransferDestination",
+              "name": "destination",
+              "type": "tuple"
+            },
+            {
+              "internalType": "address",
+              "name": "destcurrencyid",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "destsystemid",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "secondreserveid",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct VerusObjects.CReserveTransfer",
+          "name": "_transfer",
+          "type": "tuple"
+        }
+      ],
+      "name": "export",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function",
+      "payable": true
+    },
+    {
+      "inputs": [
+        {
           "internalType": "bytes",
           "name": "data",
           "type": "bytes"

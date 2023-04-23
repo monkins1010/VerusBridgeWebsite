@@ -1,5 +1,5 @@
 // private testnetwork address
-export const DELEGATOR_ADD = "0x68BfFe8cEa37DCA4d582C3d1f714aFbB7238167b";
+export const DELEGATOR_ADD = "0x11D58be5be2473027cACFfD5559fBB835b65B636";
 
 export const USDC_ERC20ADD = "0x98339D8C260052B7ad81c28c16C0b98420f2B46a";  // USDC token is pre-existing goerli
 export const ETH_ERC20ADD = "0x5ef378642a309485fd0f27850ec7f0550104f530"
