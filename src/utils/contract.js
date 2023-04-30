@@ -38,10 +38,10 @@ export function getContract(
   return new Contract(address, ABI, getProviderOrSigner(library, account));
 }
 
-export const getMaxAmount = async (USDCContract, account) => {
-  const usdcPrice = await USDCContract.balanceOf(account);
-  const decimals = await USDCContract.decimals();
-  const usdcBalance = parseInt(usdcPrice.toString(), 10) / (10 ** decimals);
+export const getMaxAmount = async (DAIContract, account) => {
+  const DAIPrice = await DAIContract.balanceOf(account);
+  const decimals = await DAIContract.decimals();
+  const DAIBalance = parseInt(DAIPrice.toString(), 10) / (10 ** decimals);
 
-  return usdcBalance;
+  return DAIBalance;
 }
