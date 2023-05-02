@@ -9,7 +9,7 @@ const DestinationField = ({ control, poolAvailable, address, selectedToken }) =>
   const { value, name } = selectedToken || {};
   const validate = () => {
 
-    if (![GLOBAL_ADDRESS.USDC, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(value))
+    if (![GLOBAL_ADDRESS.DAI, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(value))
       return "Selected token is not part of the Converter Currency"
     return "Destination is required"
   }

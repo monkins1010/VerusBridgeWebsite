@@ -49,16 +49,16 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
       if (destination === 'vrsctest') {
         destinationcurrency = GLOBAL_ADDRESS.BETH; //bridge open all sends go to bridge.veth         
         flagvalue = VALID;
-      } else if (destination === 'bridgeUSDC') {
-        if (token.value !== GLOBAL_ADDRESS.USDC && token.value !== GLOBAL_ADDRESS.BETH) {
-          destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token  to USDC 
-          secondreserveid = GLOBAL_ADDRESS.USDC;
+      } else if (destination === 'bridgeDAI') {
+        if (token.value !== GLOBAL_ADDRESS.DAI && token.value !== GLOBAL_ADDRESS.BETH) {
+          destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token  to DAI 
+          secondreserveid = GLOBAL_ADDRESS.DAI;
           flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;   //add convert flag on
         } else if (token.value === GLOBAL_ADDRESS.BETH) {
-          destinationcurrency = GLOBAL_ADDRESS.USDC;
+          destinationcurrency = GLOBAL_ADDRESS.DAI;
           flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
         } else {
-          alert("Cannot convert USDC to USDC. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+          alert("Cannot convert DAI to DAI. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
           return null;
         }
       } else if (destination === 'bridgeVRSC') {
@@ -129,8 +129,8 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
       secondreserveid = GLOBAL_ADDRESS.VRSC;
       flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;
     }
-    if (destination === "swaptoUSDC") {
-      secondreserveid = GLOBAL_ADDRESS.USDC;
+    if (destination === "swaptoDAI") {
+      secondreserveid = GLOBAL_ADDRESS.DAI;
       flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;
     }
     if (destination === "swaptoBRIDGE") {
@@ -163,8 +163,8 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
       destinationcurrency = GLOBAL_ADDRESS.VRSC;
       flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
     }
-    if (destination === "swaptoUSDC") {
-      destinationcurrency = GLOBAL_ADDRESS.USDC;
+    if (destination === "swaptoDAI") {
+      destinationcurrency = GLOBAL_ADDRESS.DAI;
       flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
     }
     if (destination === "swaptoETH") {
