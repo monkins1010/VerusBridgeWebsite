@@ -48,7 +48,7 @@ export default function ClaimForm() {
 
     const checkFees = async (address) => {
 
-        const formattedAddress = `0x0c14${web3.utils.padLeft(address.slice(2), 60)}`
+        const formattedAddress = `0x${web3.utils.padLeft(`0c14${address.slice(2)}`, 64)}`
         const feesSats = await delegatorContract.callStatic.claimableFees(formattedAddress);
         const fees = uint64ToVerusFloat(feesSats);
         addToast({ type: "success", description: `You have ${fees} ETH to claim` });
