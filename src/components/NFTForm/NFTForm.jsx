@@ -115,7 +115,7 @@ export default function NFTForm() {
       const { BN } = web3.utils;
       const MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
 
-      const txResult = await DELEGATOR_ADD.export(
+      const txResult = await delegatorContract.export(
         CReserveTransfer,
         { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
       );
