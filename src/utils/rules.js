@@ -29,3 +29,11 @@ export const NFTAddressType = (address) => {
 
 }
 
+export const validateETHAddress = (address) => {
+  if (isETHAddress(address)) {
+    true
+  } else {
+    return 'Address is not valid'
+  }
+}
+
