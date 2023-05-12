@@ -199,11 +199,24 @@ export default function TransactionForm() {
           MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
         }
 
+        const timeoutDuration = 60000; // 60 seconds
+
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error("Transaction timeout exceeded."));
+          }, timeoutDuration);
+        });
+
         const txResult = await delegatorContract.export(
           CReserveTransfer,
           { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
         );
-        await txResult.wait();
+
+        const promiseRace = await Promise.race([txResult.wait(), timeoutPromise]);
+
+        if (promiseRace instanceof Error) {
+          throw new Error('TRansaction timed out');
+        }
 
         addToast({ type: "success", description: 'Transaction Success!' });
         setAlert(null);
