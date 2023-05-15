@@ -36,12 +36,15 @@ const ToastProvider = ({ children }) => {
     [setToasts]
   );
 
+  const removeAllToasts = () => { setToasts([]) };
+
   return (
     <ToastContext.Provider
       value={{
         toasts,
         addToast,
-        removeToast
+        removeToast,
+        removeAllToasts
       }}>
       <ToastContainer toasts={toasts} />
       {children}
