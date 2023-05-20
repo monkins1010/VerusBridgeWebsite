@@ -5,7 +5,7 @@ export const isETHAddress = (address) => (/^(0x)?[0-9a-fA-F]{40}$/).test(address
 
 export const validateAddress = (address) => {
   if (isiAddress(address) || isRAddress(address) || isETHAddress(address)) {
-    true
+    return true
   } else {
     return 'Address is not valid'
   }
@@ -13,7 +13,7 @@ export const validateAddress = (address) => {
 
 export const validateNFTAddress = (address) => {
   if (isiAddress(address) || isRAddress(address)) {
-    true
+    return true
   } else {
     return 'Address is not valid'
   }
@@ -31,7 +31,7 @@ export const NFTAddressType = (address) => {
 
 export const validateETHAddress = (address) => {
   if (isETHAddress(address)) {
-    true
+    return true
   } else {
     return 'Address is not valid'
   }
