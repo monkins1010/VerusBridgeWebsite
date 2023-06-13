@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@bitgo/utxo-lib": "git+https://github.com/VerusCoin/BitGoJS.git#utxo-lib-verus",
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.6.0",
     "@ethersproject/constants": "^5.5.0",
@@ -19,6 +20,7 @@
     "@web3-react/injected-connector": "^6.0.7",
     "@web3-react/network-connector": "^6.1.9",
     "bignumber.js": "^9.0.1",
+    "bitcoin-ops": "git+https://github.com/VerusCoin/bitcoin-ops.git",
     "ethers": "^5.5.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
+import { ECPair, networks } from '@bitgo/utxo-lib';
 import { LoadingButton } from '@mui/lab';
 import { Alert, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Box } from '@mui/system';
 import { useWeb3React } from '@web3-react/core';
+import { utils } from 'ethers'
 import { useForm } from 'react-hook-form';
 import web3 from 'web3';
 
@@ -19,11 +21,11 @@ import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
 import { getConfigOptions } from 'utils/txConfig';
 
-import { useToast } from '../Toast/ToastProvider';
 import AddressField from './AddressField';
 import AmountField from './AmountField';
 import DestinationField from './DestinationField';
 import TokenField from './TokenField';
+import { useToast } from '../Toast/ToastProvider';
 
 const maxGas = 6000000;
 const maxGas2 = 100000;
@@ -40,7 +42,7 @@ export default function TransactionForm() {
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
-
+  const [pubkey, setPubkey] = useState('');
 
   const { handleSubmit, control, watch } = useForm({
     mode: 'all'
@@ -58,9 +60,8 @@ export default function TransactionForm() {
     // eslint-disable-next-line
     const gasPriceInWei = web3.utils.hexToNumber(transaction.gasPrice._hex);
     const gasPriceInWeiBN = new web3.utils.BN(gasPriceInWei);
-    const gasPriceInWEIString = gasPriceInWeiBN.toString();
+
     // eslint-disable-next-line no-console
-    console.log("gasprice ", gasPriceInWEIString);
     const gasPricePlusBuffer = gasPriceInWeiBN.mul(new web3.utils.BN('12')).div(new web3.utils.BN('10')) // add 20%
 
     if (gasPricePlusBuffer.lt(new web3.utils.BN(MINIMUM_GAS_PRICE_WEI))) {
@@ -112,6 +113,46 @@ export default function TransactionForm() {
       setVerusTokens(tokens);
     }
   }, [delegatorContract, account])
+
+  useEffect(async () => {
+    if (account && !pubkey) {
+      try {
+        const from = account;
+        // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
+        // This uses a Node.js-style buffer shim in the browser.
+        const msg = `0x${Buffer.from("I agree to create a public key address for Verus Refunds.", 'utf8').toString('hex')}`;
+        const sign = await window.ethereum.request({
+          method: 'personal_sign',
+          params: [msg, from]
+        });
+
+        const messageHash = utils.hashMessage("I agree to create a public key address for Verus Refunds.");
+        const messageHashBytes = utils.arrayify(messageHash);
+
+        // Now you have the digest,
+        const publicKey = utils.recoverPublicKey(messageHashBytes, sign);
+        const recoveredAddress = utils.computeAddress(utils.arrayify(publicKey))
+        const formatted = `02${publicKey.slice(4, 68)}`;
+        const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(formatted, 'hex'), networks.verustest).getAddress()
+        // eslint-disable-next-line no-console
+        console.log({ address: account, publicKey, rAddress })
+        setPubkey({ address: account, publicKey, recoveredAddress })
+      } catch (err) {
+        setAlert(`
+          Error with public key: ${err.message} `
+        );
+      }
+
+
+    }
+  }, [account, pubkey])
+
+  useEffect(() => {
+    const items = JSON.parse(localStorage.getItem('pubkeyAddress'));
+    if (items) {
+      setPubkey(items);
+    }
+  }, []);
 
   const authoriseOneTokenAmount = async (token, amount) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Goerli balance.`);

@@ -15,8 +15,8 @@ import {
 import useContract from 'hooks/useContract';
 import { validateETHAddress } from 'utils/rules'
 
-import { useToast } from '../Toast/ToastProvider';
 import AddressAddressFieldField from './ClaimAddressField';
+import { useToast } from '../Toast/ToastProvider';
 
 function usePreviousValue(value) {
     const ref = useRef();

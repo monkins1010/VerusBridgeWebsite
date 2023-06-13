@@ -4,13 +4,13 @@ import { Button } from '@mui/material';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import { NoEthereumProviderError, UserRejectedRequestError } from '@web3-react/injected-connector';
 
-import { ID_NAME_MAPPING } from '../constants/chain';
 import { useToast } from './Toast/ToastProvider';
+import { ID_NAME_MAPPING } from '../constants/chain';
 
 const ConnectButton = ({ onClick }) => {
   const { account, chainId, error } = useWeb3React();
   const { addToast } = useToast();
-  
+
   useEffect(() => {
     if (error instanceof NoEthereumProviderError) {
       addToast({ type: 'error', description: 'Ethereum was not provided.' })
@@ -22,8 +22,8 @@ const ConnectButton = ({ onClick }) => {
   }, [error])
 
   return (
-    <Button 
-      variant="outlined" 
+    <Button
+      variant="outlined"
       onClick={onClick}
     >
       {account ? `${account.substr(0, 6)}...${account.substr(account.length - 4)} (${ID_NAME_MAPPING[chainId].title})` : 'Connect Wallet'}

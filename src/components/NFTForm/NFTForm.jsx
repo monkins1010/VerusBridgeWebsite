@@ -20,9 +20,9 @@ import { getContract } from 'utils/contract';
 import { convertVerusAddressToEthAddress } from "utils/convert";
 import { NFTAddressType } from 'utils/rules';
 
-import { useToast } from '../Toast/ToastProvider';
 import AddressField from './NFTAddressField';
 import NFTField from './NFTField';
+import { useToast } from '../Toast/ToastProvider';
 
 const maxGas = 6000000;
 const maxGas2 = 100000;
