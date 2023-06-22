@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Grid } from '@mui/material'
 
-import { WALLET_CONFIG } from '../constants/walletConfig'
 import WalletCard from './WalletCard'
+import { WALLET_CONFIG } from '../constants/walletConfig'
 
 const WalletConnectDialog = ({ isOpen, onClose, onConfirm }) => {
   const [selectedWallet, setSelectedWalllet] = useState(null);
@@ -27,8 +27,8 @@ const WalletConnectDialog = ({ isOpen, onClose, onConfirm }) => {
         <Grid container spacing={3}>
           {Object.values(WALLET_CONFIG).map(wallet => (
             <Grid item sm={6} key={wallet.title}>
-              <WalletCard 
-                onClick={() => handleClickWallet(wallet)} 
+              <WalletCard
+                onClick={() => handleClickWallet(wallet)}
                 isSelected={selectedWallet?.title === wallet.title}
               >
                 {wallet.icon}
@@ -38,14 +38,14 @@ const WalletConnectDialog = ({ isOpen, onClose, onConfirm }) => {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button 
+        <Button
           onClick={onClose}
         >
           Cancel
         </Button>
-        <Button 
-          autoFocus 
-          variant="contained" 
+        <Button
+          autoFocus
+          variant="contained"
           onClick={onConfirm}
         >
           Select

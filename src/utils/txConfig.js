@@ -7,6 +7,7 @@ import { ETH_FEES } from 'constants/contractAddress';
 export const DEST_PKH = 2
 export const DEST_ID = 4
 export const DEST_ETH = 9
+const FLAG_DEST_AUX = 64
 const FLAG_DEST_GATEWAY = 128
 
 const VALID = 1
@@ -17,7 +18,7 @@ const IMPORT_TO_SOURCE = 0x200           // set when the source currency not des
 const RESERVE_TO_RESERVE = 0x400         // for arbitrage or transient conversion 2 stage solving (2nd from new fractional to reserves)
 const bounceBackFee = Buffer.alloc(8); //write LE bounce back fee 
 
-export const getConfigOptions = ({ address, destination, poolAvailable, token, auxdest, GASPrice }) => {
+export const getConfigOptions = ({ address, destination, poolAvailable, token, auxdest, GASPrice, auxDest }) => {
   let destinationtype = null;
   let flagvalue = VALID;
   let secondreserveid = "0x0000000000000000000000000000000000000000"
@@ -32,8 +33,8 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
     destinationtype = DEST_PKH; //R TYPE
     destinationaddress = convertVerusAddressToEthAddress(address)
   } else if (isETHAddress(address)) {
-    destinationtype = DEST_ETH; //ETH TYPE
-    destinationaddress = address;
+    destinationtype = DEST_ETH + FLAG_DEST_AUX; //ETH TYPE
+    destinationaddress = `${address}01160214${convertVerusAddressToEthAddress(auxDest).slice(2)}`; // vec 01 , subvec length 0x16, type DEST_PKH length 0x14
   }
 
   if (destinationtype === DEST_ID || destinationtype === DEST_PKH) { //if I or R address chosen then do one way specific stuff          
@@ -113,7 +114,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
       }
     }
   } else if (
-    destinationtype === DEST_ETH
+    destinationtype === DEST_ETH + FLAG_DEST_AUX
     && poolAvailable
     && token.value !== GLOBAL_ADDRESS.BETH
     && GASPrice
@@ -123,7 +124,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
 
     bounceBackFee.writeUInt32LE(GASPrice.SATSCOST);
     //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
-    destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex');
+    destinationaddress = destinationaddress.slice(0, 42) + "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex') + destinationaddress.slice(42);
 
     if (destination === "swaptoVRSC") {
       secondreserveid = GLOBAL_ADDRESS.VRSC;
@@ -148,7 +149,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
        return null;
      } */
   } else if (
-    destinationtype === DEST_ETH
+    destinationtype === DEST_ETH + FLAG_DEST_AUX
     && poolAvailable
     && token.value === GLOBAL_ADDRESS.BETH
     && GASPrice
@@ -157,7 +158,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
 
     bounceBackFee.writeUInt32LE(GASPrice.SATSCOST);
     //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
-    destinationaddress += "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex');
+    destinationaddress = destinationaddress.slice(0, 42) + "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex') + destinationaddress.slice(42);
 
     if (destination === "swaptoVRSC") {
       destinationcurrency = GLOBAL_ADDRESS.VRSC;
