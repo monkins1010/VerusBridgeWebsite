@@ -52,8 +52,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -72,8 +71,20 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "bridgeConverterActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [],
@@ -86,8 +97,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -100,8 +110,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -120,8 +129,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -140,8 +148,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -160,8 +167,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -195,8 +201,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -209,22 +214,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [],
-      "name": "newContractsPendingHash",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -243,8 +233,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -273,22 +262,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [],
-      "name": "notaryHeight",
-      "outputs": [
-        {
-          "internalType": "uint64",
-          "name": "",
-          "type": "uint64"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -301,8 +275,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -312,22 +285,13 @@
           "type": "uint256"
         }
       ],
-      "name": "pendingContracts",
+      "name": "pendingVoteState",
       "outputs": [
         {
           "internalType": "address",
-          "name": "",
+          "name": "txid",
           "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [],
-      "name": "pendingVoteState",
-      "outputs": [
+        },
         {
           "internalType": "uint32",
           "name": "agree",
@@ -337,25 +301,20 @@
           "internalType": "uint32",
           "name": "count",
           "type": "uint32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [],
-      "name": "poolAvailable",
-      "outputs": [
+        },
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
+          "internalType": "uint32",
+          "name": "startHeight",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "nullified",
+          "type": "uint8"
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -374,8 +333,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -394,8 +352,39 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "rollingUpgradeVotes",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rollingVoteIndex",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [
@@ -414,8 +403,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -428,14 +416,13 @@
       "name": "storageGlobal",
       "outputs": [
         {
-          "internalType": "bytes32",
+          "internalType": "bytes",
           "name": "",
-          "type": "bytes32"
+          "type": "bytes"
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -454,8 +441,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -494,13 +480,11 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "stateMutability": "payable",
-      "type": "receive",
-      "payable": true
+      "type": "receive"
     },
     {
       "inputs": [
@@ -581,18 +565,151 @@
           "type": "tuple"
         }
       ],
-      "name": "export",
+      "name": "sendTransfer",
       "outputs": [],
       "stateMutability": "payable",
-      "type": "function",
-      "payable": true
+      "type": "function"
     },
     {
       "inputs": [
         {
-          "internalType": "bytes",
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "typeC",
+                  "type": "uint8"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint8",
+                      "name": "branchType",
+                      "type": "uint8"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint8",
+                          "name": "CMerkleBranchBase",
+                          "type": "uint8"
+                        },
+                        {
+                          "internalType": "uint32",
+                          "name": "nIndex",
+                          "type": "uint32"
+                        },
+                        {
+                          "internalType": "uint32",
+                          "name": "nSize",
+                          "type": "uint32"
+                        },
+                        {
+                          "internalType": "uint8",
+                          "name": "extraHashes",
+                          "type": "uint8"
+                        },
+                        {
+                          "internalType": "bytes32[]",
+                          "name": "branch",
+                          "type": "bytes32[]"
+                        }
+                      ],
+                      "internalType": "struct VerusObjects.CMerkleBranch",
+                      "name": "proofSequence",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct VerusObjects.CTXProof[]",
+                  "name": "txproof",
+                  "type": "tuple[]"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint8",
+                      "name": "elType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "elIdx",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "elVchObj",
+                      "type": "bytes"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint8",
+                          "name": "branchType",
+                          "type": "uint8"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "uint8",
+                              "name": "CMerkleBranchBase",
+                              "type": "uint8"
+                            },
+                            {
+                              "internalType": "uint32",
+                              "name": "nIndex",
+                              "type": "uint32"
+                            },
+                            {
+                              "internalType": "uint32",
+                              "name": "nSize",
+                              "type": "uint32"
+                            },
+                            {
+                              "internalType": "uint8",
+                              "name": "extraHashes",
+                              "type": "uint8"
+                            },
+                            {
+                              "internalType": "bytes32[]",
+                              "name": "branch",
+                              "type": "bytes32[]"
+                            }
+                          ],
+                          "internalType": "struct VerusObjects.CMerkleBranch",
+                          "name": "proofSequence",
+                          "type": "tuple"
+                        }
+                      ],
+                      "internalType": "struct VerusObjects.CTXProof[]",
+                      "name": "elProof",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct VerusObjects.CComponents[]",
+                  "name": "components",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct VerusObjects.CPtransactionproof",
+              "name": "partialtransactionproof",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "serializedTransfers",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct VerusObjects.CReserveTransferImport",
           "name": "data",
-          "type": "bytes"
+          "type": "tuple"
         }
       ],
       "name": "submitImports",
@@ -841,8 +958,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -899,8 +1015,7 @@
         }
       ],
       "stateMutability": "payable",
-      "type": "function",
-      "payable": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -956,7 +1071,7 @@
           "type": "uint8"
         }
       ],
-      "stateMutability": "nonpayable",
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -993,39 +1108,12 @@
     {
       "inputs": [
         {
-          "components": [
-            {
-              "internalType": "uint8",
-              "name": "_vs",
-              "type": "uint8"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "_rs",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "_ss",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "address",
-              "name": "notaryID",
-              "type": "address"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "salt",
-              "type": "bytes32"
-            }
-          ],
-          "internalType": "struct VerusObjects.revokeInfo",
-          "name": "_revokePacket",
-          "type": "tuple"
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
         }
       ],
-      "name": "revoke",
+      "name": "revokeWithMainAddress",
       "outputs": [
         {
           "internalType": "bool",
@@ -1039,49 +1127,31 @@
     {
       "inputs": [
         {
-          "components": [
-            {
-              "internalType": "uint8",
-              "name": "_vs",
-              "type": "uint8"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "_rs",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "_ss",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "address[]",
-              "name": "contracts",
-              "type": "address[]"
-            },
-            {
-              "internalType": "uint8",
-              "name": "upgradeType",
-              "type": "uint8"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "salt",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "address",
-              "name": "notarizerID",
-              "type": "address"
-            }
-          ],
-          "internalType": "struct VerusObjects.upgradeInfo",
-          "name": "_newContractPackage",
-          "type": "tuple"
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
         }
       ],
-      "name": "recover",
+      "name": "revokeWithMultiSig",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "recoverWithRecoveryAddress",
       "outputs": [
         {
           "internalType": "uint8",
@@ -1090,6 +1160,76 @@
         }
       ],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "recoverWithMultiSig",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "item",
+          "type": "uint256"
+        }
+      ],
+      "name": "getVoteState",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "txid",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "pendingContracts",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint32",
+              "name": "agree",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "count",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "startHeight",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "nullified",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct VerusObjects.voteState",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     }
   ]

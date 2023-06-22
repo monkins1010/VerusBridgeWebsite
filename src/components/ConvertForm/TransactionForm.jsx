@@ -80,7 +80,7 @@ export default function TransactionForm() {
   const checkBridgeLaunched = async (contract) => {
     try {
       const GASPrices = await getArticlesFromApi();
-      const pool = await contract.callStatic.poolAvailable();
+      const pool = await contract.callStatic.bridgeConverterActive();
       setGASPrice(GASPrices);
       setPoolAvailable(pool);
       const forksData = await delegatorContract.callStatic.bestForks(0);
@@ -115,28 +115,43 @@ export default function TransactionForm() {
   }, [delegatorContract, account])
 
   useEffect(async () => {
-    if (account && !pubkey) {
+    if (account) {
+
+      const items = JSON.parse(localStorage.getItem('pubkeyAddress'));
+      if (items) {
+        setPubkey(items);
+        const objKeys = Object.keys(items);
+
+        if (objKeys.indexOf(account) > -1) {
+          return
+        }
+      }
+
       try {
         const from = account;
         // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
         // This uses a Node.js-style buffer shim in the browser.
-        const msg = `0x${Buffer.from("I agree to create a public key address for Verus Refunds.", 'utf8').toString('hex')}`;
+        const msg = `0x${Buffer.from("Agreeing to this will create a public key address for Verus Refunds.", 'utf8').toString('hex')}`;
         const sign = await window.ethereum.request({
           method: 'personal_sign',
           params: [msg, from]
         });
 
-        const messageHash = utils.hashMessage("I agree to create a public key address for Verus Refunds.");
+        const messageHash = utils.hashMessage("Agreeing to this will create a public key address for Verus Refunds.");
         const messageHashBytes = utils.arrayify(messageHash);
 
         // Now you have the digest,
         const publicKey = utils.recoverPublicKey(messageHashBytes, sign);
-        const recoveredAddress = utils.computeAddress(utils.arrayify(publicKey))
-        const formatted = `02${publicKey.slice(4, 68)}`;
+
+        // Compress key
+        const oddEven = (parseInt(publicKey.slice(131), 16) % 2 === 0) ? "02" : "03";
+        const formatted = `${oddEven}${publicKey.slice(4, 68)}`;
         const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(formatted, 'hex'), networks.verustest).getAddress()
         // eslint-disable-next-line no-console
         console.log({ address: account, publicKey, rAddress })
-        setPubkey({ address: account, publicKey, recoveredAddress })
+        localStorage.setItem('pubkeyAddress', JSON.stringify({ ...items, [account]: rAddress }))
+        setPubkey({ ...items, [account]: rAddress })
+
       } catch (err) {
         setAlert(`
           Error with public key: ${err.message} `
@@ -145,14 +160,9 @@ export default function TransactionForm() {
 
 
     }
-  }, [account, pubkey])
+  }, [account])
 
-  useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('pubkeyAddress'));
-    if (items) {
-      setPubkey(items);
-    }
-  }, []);
+
 
   const authoriseOneTokenAmount = async (token, amount) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Goerli balance.`);
@@ -207,7 +217,7 @@ export default function TransactionForm() {
       if (token?.value !== GLOBAL_ADDRESS.ETH) {
         await authoriseOneTokenAmount(token, amount);
       }
-      const result = getConfigOptions({ ...values, poolAvailable, GASPrice });
+      const result = getConfigOptions({ ...values, poolAvailable, GASPrice, auxDest: pubkey[account] });
 
       if (result) {
         const { flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid } = result;
@@ -219,7 +229,7 @@ export default function TransactionForm() {
           flags: flagvalue,
           feecurrencyid: feecurrency, // fee is vrsctest pre bridge launch, veth or others post.
           fees,
-          destination: { destinationtype, destinationaddress }, // destination address currecny is going to
+          destination: { destinationtype, destinationaddress }, // destination address currency is going to
           destcurrencyid: destinationcurrency,   // destination currency is vrsc on direct. bridge.veth on bounceback
           destsystemid: "0x0000000000000000000000000000000000000000",     // destination system not used 
           secondreserveid    // used as return currency type on bounce back
@@ -234,13 +244,16 @@ export default function TransactionForm() {
         // eslint-disable-next-line
         if (destinationtype & FLAG_DEST_GATEWAY) {
           MetaMaskFee = MetaMaskFee.add(new BN(GASPrice.WEICOST)); // bounceback fee
+          if (!pubkey[account]) {
+            throw new Error('No Refund address present.');
+          }
         }
 
         if (token.value === GLOBAL_ADDRESS.ETH) {
           MetaMaskFee = MetaMaskFee.add(new BN(web3.utils.toWei(amount, 'ether')));
         }
 
-        const timeoutDuration = 60000; // 60 seconds
+        const timeoutDuration = 240000; // 240 seconds
 
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
@@ -248,7 +261,7 @@ export default function TransactionForm() {
           }, timeoutDuration);
         });
 
-        const txResult = await delegatorContract.export(
+        const txResult = await delegatorContract.sendTransfer(
           CReserveTransfer,
           { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
         );
@@ -256,7 +269,7 @@ export default function TransactionForm() {
         const promiseRace = await Promise.race([txResult.wait(), timeoutPromise]);
 
         if (promiseRace instanceof Error) {
-          throw new Error('TRansaction timed out');
+          throw new Error('Transaction timed out');
         }
 
         addToast({ type: "success", description: 'Transaction Success!' });

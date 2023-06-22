@@ -44,7 +44,7 @@ export default function NFTForm() {
   const checkBridgeLaunched = async (contract) => {
     try {
 
-      const pool = await contract.callStatic.poolAvailable();
+      const pool = await contract.callStatic.bridgeConverterActive();
       setPoolAvailable(pool);
       const forksData = await delegatorContract.callStatic.bestForks(0);
       const heightPos = 194;
@@ -97,16 +97,13 @@ export default function NFTForm() {
       const tokenID = await authoriseNFT(nft, amount);
       const addressType = NFTAddressType(address);
       const hexID = convertVerusAddressToEthAddress(address);
-
-      const formattedDesination = `0x${addressType}${hexID.slice(2)}${tokenID.slice(2)}`
-
       const CReserveTransfer = {
         version: 1,
         currencyvalue: { currency: nft.iaddress, amount: 1 }, // currency sending from ethereum
         flags: 1,
         feecurrencyid: GLOBAL_ADDRESS.ETH, // fee is vrsctest pre bridge launch, veth or others post.
         fees: ETH_FEES.SATS,
-        destination: { destinationtype: 10, destinationaddress: formattedDesination }, // destination address currecny is going to
+        destination: { destinationtype: addressType, destinationaddress: hexID }, // destination address currecny is going to
         destcurrencyid: GLOBAL_ADDRESS.BETH,   // destination currency is vrsc on direct. bridge.veth on bounceback
         destsystemid: "0x0000000000000000000000000000000000000000",     // destination system not used 
         secondreserveid: "0x0000000000000000000000000000000000000000"    // used as return currency type on bounce back
@@ -115,7 +112,7 @@ export default function NFTForm() {
       const { BN } = web3.utils;
       const MetaMaskFee = new BN(web3.utils.toWei(ETH_FEES.ETH, 'ether'));
 
-      const txResult = await delegatorContract.export(
+      const txResult = await delegatorContract.sendTransfer(
         CReserveTransfer,
         { from: account, gasLimit: maxGas, value: MetaMaskFee.toString() }
       );
