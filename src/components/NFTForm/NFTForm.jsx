@@ -94,7 +94,7 @@ export default function NFTForm() {
 
     try {
 
-      const tokenID = await authoriseNFT(nft, amount);
+      await authoriseNFT(nft, amount);
       const addressType = NFTAddressType(address);
       const hexID = convertVerusAddressToEthAddress(address);
       const CReserveTransfer = {
