@@ -29,7 +29,8 @@
     "react-scripts": "4.0.3",
     "web-vitals": "^1.0.1",
     "web3": "^1.6.1",
-    "web3-eth-abi": "^1.7.1"
+    "web3-eth-abi": "^1.7.1",
+    "verus-typescript-primitives": "https://github.com/VerusCoin/verus-typescript-primitives.git"
   },
   "devDependencies": {
     "eslint": "^7.28.0",

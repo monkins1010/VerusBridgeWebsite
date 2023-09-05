@@ -4,21 +4,30 @@ import { useWeb3React } from '@web3-react/core';
 
 import DELEGATOR_ABI from 'abis/DelegatorAbi.json';
 import AutocompleteControlField from 'components/AutocompleteControlField'
-import { DELEGATOR_ADD } from 'constants/contractAddress';
+import { DELEGATOR_ADD, FLAGS } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 
 const NFTField = ({ control }) => {
   const [verusNFTS, setVerusNFTS] = useState(['']);
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
   const { account } = useWeb3React();
-  const TOKEN_ETH_NFT_DEFINITION = 128;
-  const MAPPING_VERUS_OWNED = 2
+
   const getNFTs = async () => {
 
     const tokens = await delegatorContract.callStatic.getTokenList(0, 0);
-    // eslint-disable-next-line
-    const TOKEN_OPTIONS = tokens.map(e => ({ label: e.flags & MAPPING_VERUS_OWNED ? `${e.name}.VerusNFT` : e.name, value: e.tokenID, iaddress: e.iaddress, erc20address: e.erc20ContractAddress, flags: e.flags })).filter(nft => nft.flags & TOKEN_ETH_NFT_DEFINITION)
-    TOKEN_OPTIONS[0].label = `VerusNFTs are at (${TOKEN_OPTIONS[0].erc20address})`
+    const TOKEN_OPTIONS = tokens.map(e => ({
+      // eslint-disable-next-line
+      label: e.flags & FLAGS.MAPPING_ERC721_NFT_DEFINITION
+        ? `${e.name} [ERC721]`
+        // eslint-disable-next-line
+        : e.flags & FLAGS.MAPPING_ERC1155_NFT_DEFINITION ?
+          `${e.name} [ERC1155 Verus single NFT]` :
+          `${e.name} [ERC1155 Tokens]`,
+      value: e.tokenID, iaddress: e.iaddress, erc20address: e.erc20ContractAddress, flags: e.flags
+    }))
+      // eslint-disable-next-line
+      .filter(nft => nft.flags & (FLAGS.MAPPING_ERC1155_NFT_DEFINITION + FLAGS.MAPPING_ERC1155_ERC_DEFINITION + FLAGS.MAPPING_ERC721_NFT_DEFINITION))
+    TOKEN_OPTIONS[0].label = `Verus created ERC721's are in contract (${TOKEN_OPTIONS[0].erc20address})`
 
     return TOKEN_OPTIONS
   }
