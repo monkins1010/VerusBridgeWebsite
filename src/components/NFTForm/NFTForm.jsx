@@ -148,7 +148,7 @@ export default function NFTForm() {
         amountToSend = 1;
       } else {
         await authorise1155NFT(nft, amount);
-        amountToSend = amount;
+        amountToSend = amount || 1;
       }
       const addressType = NFTAddressType(address);
       const hexID = convertVerusAddressToEthAddress(address);
