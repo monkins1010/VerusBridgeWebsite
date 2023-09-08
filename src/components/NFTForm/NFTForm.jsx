@@ -9,11 +9,13 @@ import { useForm } from 'react-hook-form';
 import web3 from 'web3';
 
 import DELEGATOR_ABI from 'abis/DelegatorAbi.json';
+import ERC1155_ABI from 'abis/ERC1155.json';
 import ERC721_ABI from 'abis/ERC721Abi.json';
 import {
   DELEGATOR_ADD,
   ETH_FEES,
-  GLOBAL_ADDRESS
+  GLOBAL_ADDRESS,
+  FLAGS
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -21,6 +23,7 @@ import { convertVerusAddressToEthAddress } from "utils/convert";
 import { NFTAddressType } from 'utils/rules';
 
 import AddressField from './NFTAddressField';
+import NFTAmountField from './NFTAmountField';
 import NFTField from './NFTField';
 import { useToast } from '../Toast/ToastProvider';
 
@@ -36,10 +39,11 @@ export default function NFTForm() {
   const { account, library } = useWeb3React();
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
 
-
-  const { handleSubmit, control } = useForm({
+  const { handleSubmit, control, watch } = useForm({
     mode: 'all'
   });
+  const selectedToken = watch('nft');
+  const address = watch('address');
 
   const checkBridgeLaunched = async (contract) => {
     try {
@@ -64,7 +68,7 @@ export default function NFTForm() {
   }, [delegatorContract, account])
 
 
-  const authoriseNFT = async (nft) => {
+  const authorise721NFT = async (nft) => {
     setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to transfer (${nft.name}) from your wallet.`);
 
     const tokenERC = nft.erc20address // await verusBridgeStorageContract.getERCMapping(GLOBAL_ADDRESS[token])
@@ -87,24 +91,75 @@ export default function NFTForm() {
     return tokenID;
   }
 
+  const authorise1155NFT = async (nft, amount) => {
+    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to transfer (${nft.name}) from your wallet.`);
+
+    const tokenERC = nft.erc20address
+    const NFTInstContract = getContract(tokenERC, ERC1155_ABI, library, account)
+
+    let nftcontract;
+
+    try {
+
+      nftcontract = await delegatorContract.callStatic.contracts(11);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+      nftcontract = DELEGATOR_ADD;
+    }
+
+    const tokenID = `0x${web3.utils.padLeft(nft.value.toHexString().slice(2), 64)}`
+
+    const checkApproved = await NFTInstContract.callStatic.isApprovedForAll(account, nftcontract);
+    const amountOfNFTs = await NFTInstContract.callStatic.balanceOf(account, tokenID);
+
+    if (amountOfNFTs < amount) {
+      throw new Error(`You do not have enough NFT's to send. You have ${amountOfNFTs} and you are trying to send ${amount}.`)
+
+    }
+    // await NFTInstContract.approve(bridgeStorageAddress, tokenID, { from: account, gasLimit: maxGas2 })
+
+    if (!checkApproved) {
+      const approve = await NFTInstContract.setApprovalForAll(nftcontract, true, { from: account, gasLimit: maxGas2 })
+      setAlert(`Authorising, please wait... (${nft.name})`);
+      const reply = await approve.wait();
+
+      if (reply.status === 0) {
+        throw new Error("Authorising NFT spend Failed, Do you own the NFT?")
+      }
+      setAlert(`
+        Your Goerli account has authorised the bridge to transfer your NFT.`
+      );
+    }
+    return tokenID;
+  }
+
   const onSubmit = async (values) => {
     const { nft, amount, address } = values;
     setAlert(null);
     setIsTxPending(true);
 
-    try {
+    let amountToSend;
 
-      const tokenID = await authoriseNFT(nft, amount);
+    try {
+      // eslint-disable-next-line
+      if (parseInt(nft.flags & FLAGS.MAPPING_ERC721_NFT_DEFINITION) == FLAGS.MAPPING_ERC721_NFT_DEFINITION) {
+        await authorise721NFT(nft)
+        amountToSend = 1;
+      } else {
+        await authorise1155NFT(nft, amount);
+        amountToSend = amount || 1;
+      }
       const addressType = NFTAddressType(address);
       const hexID = convertVerusAddressToEthAddress(address);
       const CReserveTransfer = {
         version: 1,
-        currencyvalue: { currency: nft.iaddress, amount: 1 }, // currency sending from ethereum
+        currencyvalue: { currency: nft.iaddress, amount: amountToSend }, // currency sending from ethereum
         flags: 1,
-        feecurrencyid: GLOBAL_ADDRESS.ETH, // fee is vrsctest pre bridge launch, veth or others post.
-        fees: ETH_FEES.SATS,
+        feecurrencyid: poolAvailable ? GLOBAL_ADDRESS.ETH : GLOBAL_ADDRESS.VRSC, // fee is vrsctest pre bridge launch, veth or others post.
+        fees: poolAvailable ? ETH_FEES.SATS : ETH_FEES.VRSC_SATS_FEE,
         destination: { destinationtype: addressType, destinationaddress: hexID }, // destination address currecny is going to
-        destcurrencyid: GLOBAL_ADDRESS.BETH,   // destination currency is vrsc on direct. bridge.veth on bounceback
+        destcurrencyid: poolAvailable ? GLOBAL_ADDRESS.BETH : GLOBAL_ADDRESS.VRSC,   // destination currency is vrsc on direct. bridge.veth on bounceback
         destsystemid: "0x0000000000000000000000000000000000000000",     // destination system not used 
         secondreserveid: "0x0000000000000000000000000000000000000000"    // used as return currency type on bounce back
       }
@@ -170,8 +225,17 @@ export default function NFTForm() {
               poolAvailable={poolAvailable}
             />
           </Grid>
+          { /* eslint-disable-next-line */}
+          {(parseInt(selectedToken?.flags & FLAGS.MAPPING_ERC1155_ERC_DEFINITION) == FLAGS.MAPPING_ERC1155_ERC_DEFINITION) && (
+            <Grid item xs={12}>
+              <NFTAmountField
+                control={control}
+                selectedToken={selectedToken}
+              />
+            </Grid>
+          )}
           <Box mt="30px" textAlign="center" width="100%">
-            <LoadingButton loading={isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
+            <LoadingButton loading={isTxPending} disabled={!address || !selectedToken?.value} type="submit" color="primary" variant="contained">Send</LoadingButton>
           </Box>
         </Grid>
       </form>
