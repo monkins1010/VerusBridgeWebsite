@@ -1,5 +1,5 @@
 // private testnetwork address
-export const DELEGATOR_ADD = "0xCefcc9415C8d58186b5eE9D84B075497cf7B5134";
+export const DELEGATOR_ADD = "0x85a7dE2278E52327471e174AeeB280cdFdC6A68a";
 export const DAI_ERC20ADD = "0xB897f2448054bc5b133268A53090e110D101FFf0";  // DAI token is pre-existing goerli
 export const ETH_ERC20ADD = "0x5ef378642a309485fd0f27850ec7f0550104f530"
 

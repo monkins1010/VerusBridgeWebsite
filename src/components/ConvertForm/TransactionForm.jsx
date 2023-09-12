@@ -8,6 +8,7 @@ import { Box } from '@mui/system';
 import { useWeb3React } from '@web3-react/core';
 import { utils } from 'ethers'
 import { useForm } from 'react-hook-form';
+import { VerusdRpcInterface } from 'verusd-rpc-ts-client'
 import web3 from 'web3';
 
 import DELEGATOR_ABI from 'abis/DelegatorAbi.json';
@@ -25,6 +26,7 @@ import AddressField from './AddressField';
 import AmountField from './AmountField';
 import DestinationField from './DestinationField';
 import TokenField from './TokenField';
+import bitGoUTXO from '../../utils/bitUTXO';
 import { useToast } from '../Toast/ToastProvider';
 
 const maxGas = 6000000;
@@ -37,11 +39,16 @@ export default function TransactionForm() {
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
+  const [currentOptionsPrices, setcurrentOptionsPrices] = useState(null);
   const [verusTokens, setVerusTokens] = useState(['']);
   const [GASPrice, setGASPrice] = useState("");
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
+
+  // Testnet Verusd RPC
+  const verusd = new VerusdRpcInterface("iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq", process.env.VERUS_RPC_URL || "http://192.168.1.160:8000")
+
   const [pubkey, setPubkey] = useState('');
 
   const { handleSubmit, control, watch } = useForm({
@@ -50,6 +57,8 @@ export default function TransactionForm() {
   const selectedToken = watch('token');
   const address = watch('address');
   const token = watch('token');
+  const destination = watch('destination');
+  const amount = watch('amount');
 
   const getArticlesFromApi = async () => {
 
@@ -100,6 +109,45 @@ export default function TransactionForm() {
     const TOKEN_OPTIONS = tokens.map(e => ({ label: e.name, value: e.ticker, iaddress: e.iaddress, erc20address: e.erc20ContractAddress }))
     return TOKEN_OPTIONS
   }
+
+  useEffect(async () => {
+    if (selectedToken && destination && amount !== "0") {
+
+      const currencies = {
+        "vrsctest": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.VRSC.slice(2), 'hex'), 102),
+        "bridgeBRIDGE": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.BETH.slice(2), 'hex'), 102),
+        "bridgeVRSCTEST": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.VRSC.slice(2), 'hex'), 102),
+        "bridgeETH": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.ETH.slice(2), 'hex'), 102),
+        "bridgeDAI": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.DAI.slice(2), 'hex'), 102)
+      }
+
+      const fromIaddress = bitGoUTXO.address.toBase58Check(Buffer.from(selectedToken.value.slice(2), 'hex'), 102);
+
+      const convertedto = currencies[destination];
+
+      const conversionPacket = { currency: fromIaddress, convertto: convertedto, amount };
+
+      if (convertedto !== "iSojYsotVzXz4wh2eJriASGo6UidJDDhL2" && fromIaddress !== "iSojYsotVzXz4wh2eJriASGo6UidJDDhL2") {
+        conversionPacket.via = "iSojYsotVzXz4wh2eJriASGo6UidJDDhL2";
+      }
+
+      if (Object.keys(GLOBAL_ADDRESS).map((key) => GLOBAL_ADDRESS[key]).indexOf(selectedToken.value) > -1) {
+        const estimation = await verusd.estimateConversion(conversionPacket);
+
+        if (estimation?.result?.estimatedcurrencyout > 0 && destination !== "vrsctest") {
+
+          const currency = await verusd.getCurrency(convertedto);
+
+          setcurrentOptionsPrices({ value: `${estimation.result.estimatedcurrencyout}`, destination: currency.result.fullyqualifiedname });
+        } else {
+          setcurrentOptionsPrices(null);
+        }
+      }
+
+    } else {
+      setcurrentOptionsPrices(null);
+    }
+  }, [selectedToken, destination, amount])
 
   useEffect(() => {
     if (delegatorContract && account) {
@@ -340,6 +388,7 @@ export default function TransactionForm() {
               control={control}
               selectedToken={selectedToken}
             />
+            {`${currentOptionsPrices ? `Converts to ~${parseFloat(currentOptionsPrices.value)} ${currentOptionsPrices.destination} ` : ''}`}
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">
             <LoadingButton loading={isTxPending} disabled={!verusTokens || !token?.value || isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>
