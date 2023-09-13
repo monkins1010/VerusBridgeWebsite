@@ -47,7 +47,7 @@ export default function TransactionForm() {
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
 
   // Testnet Verusd RPC
-  const verusd = new VerusdRpcInterface("iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq", process.env.VERUS_RPC_URL || "http://192.168.1.160:8000")
+  const verusd = new VerusdRpcInterface("iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq", process.env.REACT_APP_VERUS_RPC_URL)
 
   const [pubkey, setPubkey] = useState('');
 
