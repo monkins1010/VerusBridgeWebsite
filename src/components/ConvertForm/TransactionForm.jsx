@@ -391,10 +391,10 @@ export default function TransactionForm() {
               selectedToken={selectedToken}
             />
             {currentOptionsPrices ? (<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-              <Typography style={{ fontSize: '12px', color: 'blue' }}>
-                Converts to: <b>{`~${parseFloat(currentOptionsPrices.value)}`}</b>
+              <Typography style={{ fontSize: '12px', color: 'grey' }}>
+                <b>{`${parseFloat(currentOptionsPrices.value) < 0.001 ? parseFloat(currentOptionsPrices.value).toFixed(8) : parseFloat(currentOptionsPrices.value).toFixed(3)}`}</b>
               </Typography>
-              <Typography style={{ fontSize: '11px', color: 'grey', padding: '0 10px' }}>
+              <Typography style={{ fontSize: '11px', color: 'grey', padding: '0 5px' }}>
                 {`${currentOptionsPrices.destination}`}
               </Typography>
             </div>) : null}

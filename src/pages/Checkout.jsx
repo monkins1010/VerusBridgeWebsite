@@ -19,8 +19,8 @@ export default function Checkout() {
       <CssBaseline />
       <Header />
       <StyledContainer component="main" maxWidth="sm">
-        <Paper variant="outlined" sx={{ px: { xs: 2, md: 3 }, py: {md: 8, xs: 2}, mb:3 }}>
-          <Typography component="h1" variant="h4" align="center" sx={{mb:3}}>
+        <Paper variant="outlined" sx={{ px: { xs: 2, md: 3 }, py: { md: 8, xs: 2 }, mb: 3, border: '2px solid grey', borderRadius: '10px' }}>
+          <Typography component="h1" variant="h4" align="center" sx={{ mb: 3 }}>
             Verus Ethereum Bridge
           </Typography>
           <TransactionForm />
@@ -31,8 +31,8 @@ export default function Checkout() {
 }
 
 const StyledContainer = styled(Container)(() => ({
-  display: 'flex', 
-  flexDirection: "column", 
-  justifyContent:'center', 
-  height:"calc(100vh - 64px)"
+  display: 'flex',
+  flexDirection: "column",
+  justifyContent: 'center',
+  height: "calc(100vh - 64px)"
 }))
