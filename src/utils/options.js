@@ -1,21 +1,20 @@
 import { isETHAddress, isiAddress, isRAddress } from "./rules";
-import { FLAGS } from 'constants/contractAddress';
-import { GLOBAL_ADDRESS } from 'constants/contractAddress';
+import { GLOBAL_ADDRESS, BLOCKCHAIN_NAME, FLAGS } from 'constants/contractAddress';
 
 export const getTokenOptions = (poolAvailable, tokens) => (
-  !poolAvailable ? tokens.filter(option => !(parseInt(option.flags) & 8)) : tokens
+  poolAvailable ? tokens : tokens.filter(option => !(parseInt(option.flags) & FLAGS.MAPPING_ISBRIDGE_CURRENCY))
 )
 
 export const getDestinations = (token, addr) => ([
-  { value: "vrsctest", label: `${token ?? 'VRSCTEST'} on VRSCTEST`, iaddress: addr },
-  { value: "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST", iaddress: GLOBAL_ADDRESS.BETH },
-  { value: "bridgeDAI", label: "Convert to DAI on VRSCTEST", iaddress: GLOBAL_ADDRESS.DAI },
-  { value: "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: GLOBAL_ADDRESS.VRSC },
-  { value: "bridgeETH", label: "Convert to ETH on VRSCTEST", iaddress: GLOBAL_ADDRESS.ETH },
-  { value: "swaptoBRIDGE", label: "Convert to Bridge.vETH Token (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.BETH },
-  { value: "swaptoVRSC", label: "Convert to VRSCTEST Token (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.VRSC },
-  { value: "swaptoDAI", label: "Convert to DAI Token (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.DAI },
-  { value: "swaptoETH", label: "Convert to ETH (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.ETH }
+  { value: BLOCKCHAIN_NAME, label: `${token ?? BLOCKCHAIN_NAME} on ${BLOCKCHAIN_NAME}`, iaddress: addr },
+  { value: "bridgeBRIDGE", label: `Convert to Bridge.vETH on ${BLOCKCHAIN_NAME}`, iaddress: GLOBAL_ADDRESS.BETH },
+  { value: "bridgeDAI", label: `Convert to DAI on ${BLOCKCHAIN_NAME}`, iaddress: GLOBAL_ADDRESS.DAI },
+  { value: "bridgeVRSC", label: `Convert to ${BLOCKCHAIN_NAME} on ${BLOCKCHAIN_NAME}`, iaddress: GLOBAL_ADDRESS.VRSC },
+  { value: "bridgeETH", label: `Convert to ETH on ${BLOCKCHAIN_NAME}`, iaddress: GLOBAL_ADDRESS.ETH },
+  { value: "swaptoBRIDGE", label: "Convert to Bridge.vETH Token and (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.BETH },
+  { value: "swaptoVRSC", label: `Convert to ${BLOCKCHAIN_NAME} Token and (Bounce back to ETH)`, iaddress: GLOBAL_ADDRESS.VRSC },
+  { value: "swaptoDAI", label: "Convert to DAI Token and (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.DAI },
+  { value: "swaptoETH", label: "Convert to ETH and (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.ETH }
 ]);
 
 const destionationOptionsByPool = [
@@ -24,14 +23,18 @@ const destionationOptionsByPool = [
 
 export const getDestinationOptions = (poolAvailable, address, selectedToken, tokenName) => {
 
+  // Destination currency is vrsc all curencies pre pool launch.
+  if (!address || !selectedToken) {
+    return [];
+  }
   const options = !poolAvailable
-    ? getDestinations(tokenName, selectedToken).filter(option => !destionationOptionsByPool.includes(option.value))
+    ? [{ value: BLOCKCHAIN_NAME, label: `${tokenName ?? BLOCKCHAIN_NAME} on ${BLOCKCHAIN_NAME}`, iaddress: selectedToken }]
     : getDestinations(tokenName, selectedToken)
 
   const addedToken = ![GLOBAL_ADDRESS.DAI, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(selectedToken);
 
   if (isETHAddress(address)) {
-    const ethOptions = options.filter(option => !['vrsctest', 'bridgeBRIDGE', 'bridgeDAI', 'bridgeVRSC', 'bridgeETH', 'bridgeVRSCTEST'].includes(option.value));
+    const ethOptions = options.filter(option => ![BLOCKCHAIN_NAME, 'bridgeBRIDGE', 'bridgeDAI', 'bridgeVRSC', 'bridgeETH', `bridge${BLOCKCHAIN_NAME}`].includes(option.value));
     if (addedToken) {
       return [] //if its a mapped added token dont offer bounce back
     }
@@ -42,50 +45,18 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
       return ethOptions
     }
   }
-
-  if (isiAddress(address) || isRAddress(address)) {
-    const vscOptions = options.filter(option => ['vrsctest', 'bridgeBRIDGE', 'bridgeDAI', 'bridgeVRSC', 'bridgeETH'].includes(option.value));
+  else if (isiAddress(address) || isRAddress(address)) {
+    const vscOptions = options.filter(option => [BLOCKCHAIN_NAME, 'bridgeBRIDGE', 'bridgeDAI', 'bridgeVRSC', 'bridgeETH'].includes(option.value));
 
     if (!poolAvailable || addedToken) {
-      return vscOptions.filter(option => option.value === 'vrsctest')
-    } //else {
-    // return vscOptions.filter(option => option.iaddress !== selectedToken);
-    // }
-    if (selectedToken == GLOBAL_ADDRESS.DAI) {
-      return [
-        { value: "vrsctest", label: 'DAI ON VRSCTEST', iaddress: GLOBAL_ADDRESS.DAI },
-        { value: "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST", iaddress: GLOBAL_ADDRESS.BETH },
-        { value: "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: GLOBAL_ADDRESS.VRSC },
-        { value: "bridgeETH", label: "Convert to vETH on VRSCTEST", iaddress: GLOBAL_ADDRESS.ETH }
-      ]
-    }
-    else if (selectedToken == GLOBAL_ADDRESS.VRSC) {
-      return [
-        { value: "vrsctest", label: 'VRSCTEST ON VRSCTEST', iaddress: GLOBAL_ADDRESS.VRSC },
-        { value: "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST", iaddress: GLOBAL_ADDRESS.BETH },
-        { value: "bridgeDAI", label: "Convert to DAI on VRSCTEST", iaddress: GLOBAL_ADDRESS.DAI },
-        { value: "bridgeETH", label: "Convert to vETH on VRSCTEST", iaddress: GLOBAL_ADDRESS.ETH }
-      ]
-    }
-    else if (selectedToken == GLOBAL_ADDRESS.BETH) {
-      return [
-        { value: "vrsctest", label: 'Bridge.vETH ON VRSCTEST', iaddress: GLOBAL_ADDRESS.BETH },
-        { value: "bridgeDAI", label: "Convert to DAI on VRSCTEST", iaddress: GLOBAL_ADDRESS.DAI },
-        { value: "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: GLOBAL_ADDRESS.VRSC },
-        { value: "bridgeETH", label: "Convert to vETH on VRSCTEST", iaddress: GLOBAL_ADDRESS.ETH }
-      ]
-    }
-    else if (selectedToken == GLOBAL_ADDRESS.ETH) {
-      return [
-        { value: "vrsctest", label: 'vETH ON VRSCTEST', iaddress: GLOBAL_ADDRESS.ETH },
-        { value: "bridgeBRIDGE", label: "Convert to Bridge.vETH on VRSCTEST", iaddress: GLOBAL_ADDRESS.BETH },
-        { value: "bridgeDAI", label: "Convert to DAI on VRSCTEST", iaddress: GLOBAL_ADDRESS.DAI },
-        { value: "bridgeVRSCTEST", label: "Convert to VRSCTEST on VRSCTEST", iaddress: GLOBAL_ADDRESS.VRSC }
-      ]
+      return vscOptions.filter(option => option.value === BLOCKCHAIN_NAME)
     }
 
-    return vscOptions
+    else {
+      return vscOptions.filter(option => (option.iaddress !== selectedToken) || (option.value.slice(0, 6) !== 'bridge'));
+    }
   }
-
-  return options;
+  else {
+    return options;
+  }
 }

@@ -8,6 +8,8 @@ import { DELEGATOR_ADD, FLAGS } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getTokenOptions } from 'utils/options'
 
+import bitGoUTXO from '../../utils/bitUTXO';
+
 const TokenField = ({ control, poolAvailable }) => {
   const [verusTokens, setVerusTokens] = useState(['']);
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
@@ -16,7 +18,13 @@ const TokenField = ({ control, poolAvailable }) => {
 
     const tokens = await delegatorContract.callStatic.getTokenList(0, 0);
     // eslint-disable-next-line
-    const tokenList = tokens.map(e => ({ label: e.name, value: e.iaddress, flags: e.flags })).filter(token => (token.flags & FLAGS.MAPPING_ERC20_DEFINITION) && token.label)
+    const tokenList = tokens.map(e => ({
+      label: e.name,
+      value: e.iaddress,
+      id: bitGoUTXO.address.toBase58Check(Buffer.from(e.iaddress.slice(2), 'hex'), 102), flags: e.flags
+    }))
+      // eslint-disable-next-line
+      .filter(token => (token.flags & FLAGS.MAPPING_ERC20_DEFINITION) && token.label)
     return tokenList
   }
 
@@ -24,10 +32,8 @@ const TokenField = ({ control, poolAvailable }) => {
 
     if (delegatorContract && account) {
       let tokens = await getTokens();
-      // REMOVE BELOW DEBUG
-      // tokens.push({ value: "CRS", label: "chriscoin" })
-      tokens = getTokenOptions(poolAvailable, tokens);
 
+      tokens = getTokenOptions(poolAvailable, tokens);
       setVerusTokens(tokens);
     }
   }, [delegatorContract, account])
