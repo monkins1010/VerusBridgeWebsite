@@ -157,7 +157,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, G
     destinationtype += FLAG_DEST_GATEWAY;
 
     bounceBackFee.writeUInt32LE(GASPrice.SATSCOST);
-    //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
+    //destination is concatenated with the gateway back address (vETH) + uint160() + 0.003 ETH in fees uint64LE
     destinationaddress = destinationaddress.slice(0, 42) + "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex') + destinationaddress.slice(42);
 
     if (destination === "swaptoVRSC") {

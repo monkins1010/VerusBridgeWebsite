@@ -19,7 +19,8 @@ import {
   ETH_FEES,
   GLOBAL_IADDRESS,
   BLOCKCHAIN_NAME,
-  TESTNET
+  TESTNET,
+  HEIGHT_LOCATION_IN_FORKS
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -43,6 +44,7 @@ export default function TransactionForm() {
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
   const [currentOptionsPrices, setcurrentOptionsPrices] = useState(null);
+  const [dollarsOutcome, setdollarsOutcome] = useState(null);
   const [verusTokens, setVerusTokens] = useState(['']);
   const [GASPrice, setGASPrice] = useState("");
   const { addToast } = useToast();
@@ -99,7 +101,7 @@ export default function TransactionForm() {
       setGASPrice(GASPrices);
       setPoolAvailable(pool);
       const forksData = await delegatorContract.callStatic.bestForks(0);
-      const heightPos = 194;
+      const heightPos = HEIGHT_LOCATION_IN_FORKS;
       const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 8)}`, 16);
       setVerusTestHeight(heightHex || 1);
     } catch (err) {
@@ -129,11 +131,11 @@ export default function TransactionForm() {
 
       const fromIaddress = bitGoUTXO.address.toBase58Check(Buffer.from(selectedToken.value.slice(2), 'hex'), 102);
 
-      const convertedto = currencies[destination];
+      const convertedto = poolAvailable ? currencies[destination] : currencies.bridgeBRIDGE;
 
       const conversionPacket = { currency: fromIaddress, convertto: convertedto, amount };
 
-      if (convertedto !== GLOBAL_IADDRESS.BETH && fromIaddress !== GLOBAL_IADDRESS.BETH) {
+      if (convertedto !== GLOBAL_IADDRESS.BETH && fromIaddress !== GLOBAL_IADDRESS.BETH && poolAvailable) {
         conversionPacket.via = GLOBAL_IADDRESS.BETH;
       }
 
@@ -145,6 +147,12 @@ export default function TransactionForm() {
           const currency = await verusd.getCurrency(convertedto);
 
           setcurrentOptionsPrices({ value: `${estimation.result.estimatedcurrencyout}`, destination: currency.result.fullyqualifiedname });
+
+          if (poolAvailable) {
+            // todo get price from api.
+
+          }
+
         } else {
           setcurrentOptionsPrices(null);
         }
