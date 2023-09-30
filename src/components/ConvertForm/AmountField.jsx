@@ -67,7 +67,7 @@ const AmountField = ({ control, selectedToken }) => {
       fullWidth
       variant="standard"
       control={control}
-      type="number"
+      type="tel"
       defaultValue="0"
       min={0}
       rules={{

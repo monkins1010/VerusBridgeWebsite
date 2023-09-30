@@ -15,7 +15,8 @@ import {
   DELEGATOR_ADD,
   ETH_FEES,
   GLOBAL_ADDRESS,
-  FLAGS
+  FLAGS,
+  TESTNET
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -86,7 +87,7 @@ export default function NFTForm() {
       throw new Error("Authorising NFT spend Failed, Do you own the NFT?")
     }
     setAlert(`
-      Your Goerli account has authorised the bridge to transfer your NFT.`
+      Your ${TESTNET ? 'Goerli' : 'Ethereum'} account has authorised the bridge to transfer your NFT.`
     );
     return tokenID;
   }
@@ -128,7 +129,7 @@ export default function NFTForm() {
         throw new Error("Authorising NFT spend Failed, Do you own the NFT?")
       }
       setAlert(`
-        Your Goerli account has authorised the bridge to transfer your NFT.`
+        Your ${TESTNET ? 'Goerli' : 'Ethereum'} account has authorised the bridge to transfer your NFT.`
       );
     }
     return tokenID;
@@ -156,7 +157,7 @@ export default function NFTForm() {
         version: 1,
         currencyvalue: { currency: nft.iaddress, amount: amountToSend }, // currency sending from ethereum
         flags: 1,
-        feecurrencyid: poolAvailable ? GLOBAL_ADDRESS.ETH : GLOBAL_ADDRESS.VRSC, // fee is vrsctest pre bridge launch, veth or others post.
+        feecurrencyid: poolAvailable ? GLOBAL_ADDRESS.ETH : GLOBAL_ADDRESS.VRSC, // fee is vrsc pre bridge launch, veth or others post.
         fees: poolAvailable ? ETH_FEES.SATS : ETH_FEES.VRSC_SATS_FEE,
         destination: { destinationtype: addressType, destinationaddress: hexID }, // destination address currecny is going to
         destcurrencyid: poolAvailable ? GLOBAL_ADDRESS.BETH : GLOBAL_ADDRESS.VRSC,   // destination currency is vrsc on direct. bridge.veth on bounceback

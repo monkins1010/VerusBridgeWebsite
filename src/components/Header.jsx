@@ -3,6 +3,8 @@ import React, { useState } from 'react'
 import { AppBar, Toolbar, Typography } from '@mui/material'
 import { useWeb3React } from '@web3-react/core';
 
+import { BLOCKCHAIN_NAME } from "constants/contractAddress";
+
 import ConnectButton from './ConnectButton'
 import WalletConnectDialog from './WalletConnectDialog';
 import { injectedConnector } from '../connectors/injectedConnector';
@@ -43,7 +45,7 @@ const Header = () => {
           noWrap
           sx={{ flexGrow: 1, marginLeft: '20px' }}
         >
-          (VRSCTEST)
+          ({`${BLOCKCHAIN_NAME.toUpperCase()}`})
         </Typography>
         <ConnectButton onClick={handleClickConnect} />
         <WalletConnectDialog

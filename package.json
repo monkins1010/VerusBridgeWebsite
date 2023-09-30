@@ -30,7 +30,7 @@
     "web-vitals": "^1.0.1",
     "web3": "^1.6.1",
     "web3-eth-abi": "^1.7.1",
-    "verus-typescript-primitives": "https://github.com/VerusCoin/verus-typescript-primitives.git"
+    "verusd-rpc-ts-client": "git+https://github.com/VerusCoin/verusd-rpc-ts-client.git"
   },
   "devDependencies": {
     "eslint": "^7.28.0",
@@ -45,6 +45,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "startlegacy": "NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

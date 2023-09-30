@@ -33,6 +33,7 @@ const InputControlField = ({
         error={!!error}
         autoFocus={autoFocus}
         helperText={error ? error.message : helperText}
+        FormHelperTextProps={{ style: { fontSize: 10 } }}
         {...props}
       />
     )}

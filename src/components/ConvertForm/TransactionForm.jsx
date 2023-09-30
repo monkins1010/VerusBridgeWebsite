@@ -8,6 +8,7 @@ import { Box } from '@mui/system';
 import { useWeb3React } from '@web3-react/core';
 import { utils } from 'ethers'
 import { useForm } from 'react-hook-form';
+import { VerusdRpcInterface } from 'verusd-rpc-ts-client'
 import web3 from 'web3';
 
 import DELEGATOR_ABI from 'abis/DelegatorAbi.json';
@@ -15,7 +16,11 @@ import ERC20_ABI from 'abis/ERC20Abi.json';
 import {
   DELEGATOR_ADD,
   GLOBAL_ADDRESS,
-  ETH_FEES
+  ETH_FEES,
+  GLOBAL_IADDRESS,
+  BLOCKCHAIN_NAME,
+  TESTNET,
+  HEIGHT_LOCATION_IN_FORKS
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -25,6 +30,7 @@ import AddressField from './AddressField';
 import AmountField from './AmountField';
 import DestinationField from './DestinationField';
 import TokenField from './TokenField';
+import bitGoUTXO from '../../utils/bitUTXO';
 import { useToast } from '../Toast/ToastProvider';
 
 const maxGas = 6000000;
@@ -37,11 +43,17 @@ export default function TransactionForm() {
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
+  const [currentOptionsPrices, setcurrentOptionsPrices] = useState(null);
+  const [dollarsOutcome, setdollarsOutcome] = useState(null);
   const [verusTokens, setVerusTokens] = useState(['']);
   const [GASPrice, setGASPrice] = useState("");
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
+
+  // Testnet Verusd RPC
+  const verusd = new VerusdRpcInterface("iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq", process.env.REACT_APP_VERUS_RPC_URL)
+
   const [pubkey, setPubkey] = useState('');
 
   const { handleSubmit, control, watch } = useForm({
@@ -50,11 +62,16 @@ export default function TransactionForm() {
   const selectedToken = watch('token');
   const address = watch('address');
   const token = watch('token');
+  const destination = watch('destination');
+  const amount = watch('amount');
 
   const getArticlesFromApi = async () => {
 
     const latestBlock = await library.getBlockNumber();
-    const block = await library.getBlock(latestBlock - 10);
+    let block = await library.getBlock(latestBlock - 10);
+    if (block.transactions.length < 1) {
+      block = await library.getBlock(latestBlock - 11);
+    }
     const transaction = await library.getTransaction(block.transactions[Math.ceil(block.transactions.length / 2)]);
 
     // eslint-disable-next-line
@@ -84,7 +101,7 @@ export default function TransactionForm() {
       setGASPrice(GASPrices);
       setPoolAvailable(pool);
       const forksData = await delegatorContract.callStatic.bestForks(0);
-      const heightPos = 194;
+      const heightPos = HEIGHT_LOCATION_IN_FORKS;
       const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 8)}`, 16);
       setVerusTestHeight(heightHex || 1);
     } catch (err) {
@@ -100,6 +117,51 @@ export default function TransactionForm() {
     const TOKEN_OPTIONS = tokens.map(e => ({ label: e.name, value: e.ticker, iaddress: e.iaddress, erc20address: e.erc20ContractAddress }))
     return TOKEN_OPTIONS
   }
+
+  useEffect(async () => {
+    if (selectedToken && destination && amount !== "0") {
+
+      const currencies = {
+        [BLOCKCHAIN_NAME]: bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.VRSC.slice(2), 'hex'), 102),
+        "bridgeBRIDGE": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.BETH.slice(2), 'hex'), 102),
+        "bridgeVRSC": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.VRSC.slice(2), 'hex'), 102),
+        "bridgeETH": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.ETH.slice(2), 'hex'), 102),
+        "bridgeDAI": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.DAI.slice(2), 'hex'), 102)
+      }
+
+      const fromIaddress = bitGoUTXO.address.toBase58Check(Buffer.from(selectedToken.value.slice(2), 'hex'), 102);
+
+      const convertedto = poolAvailable ? currencies[destination] : currencies.bridgeBRIDGE;
+
+      const conversionPacket = { currency: fromIaddress, convertto: convertedto, amount };
+
+      if (convertedto !== GLOBAL_IADDRESS.BETH && fromIaddress !== GLOBAL_IADDRESS.BETH && poolAvailable) {
+        conversionPacket.via = GLOBAL_IADDRESS.BETH;
+      }
+
+      if (Object.keys(GLOBAL_ADDRESS).map((key) => GLOBAL_ADDRESS[key]).indexOf(selectedToken.value) > -1) {
+        const estimation = await verusd.estimateConversion(conversionPacket);
+
+        if (estimation?.result?.estimatedcurrencyout > 0 && destination !== BLOCKCHAIN_NAME) {
+
+          const currency = await verusd.getCurrency(convertedto);
+
+          setcurrentOptionsPrices({ value: `${estimation.result.estimatedcurrencyout}`, destination: currency.result.fullyqualifiedname });
+
+          if (poolAvailable) {
+            // todo get price from api.
+
+          }
+
+        } else {
+          setcurrentOptionsPrices(null);
+        }
+      }
+
+    } else {
+      setcurrentOptionsPrices(null);
+    }
+  }, [selectedToken, destination, amount])
 
   useEffect(() => {
     if (delegatorContract && account) {
@@ -142,13 +204,11 @@ export default function TransactionForm() {
 
         // Now you have the digest,
         const publicKey = utils.recoverPublicKey(messageHashBytes, sign);
-
         // Compress key
-        const oddEven = (parseInt(publicKey.slice(131), 16) % 2 === 0) ? "02" : "03";
-        const formatted = `${oddEven}${publicKey.slice(4, 68)}`;
-        const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(formatted, 'hex'), networks.verustest).getAddress()
-        // eslint-disable-next-line no-console
-        console.log({ address: account, publicKey, rAddress })
+        const compressed = utils.computePublicKey(publicKey, true)
+
+        const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
+
         localStorage.setItem('pubkeyAddress', JSON.stringify({ ...items, [account]: rAddress }))
         setPubkey({ ...items, [account]: rAddress })
 
@@ -162,10 +222,8 @@ export default function TransactionForm() {
     }
   }, [account])
 
-
-
   const authoriseOneTokenAmount = async (token, amount) => {
-    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your Goerli balance.`);
+    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your ${TESTNET ? 'Goerli' : 'Ethereum'} balance.`);
 
     const tokenERC = verusTokens.find(add => add.iaddress === token.value).erc20address;
     const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)
@@ -202,7 +260,7 @@ export default function TransactionForm() {
       throw new Error("Authorising ERC20 Token Spend Failed, please check your balance.")
     }
     setAlert(`
-      Your Goerli account has authorised the bridge to spend ${token.name} token, the amount: ${amount}. 
+      Your ${TESTNET ? 'Goerli' : 'Ethereum'} account has authorised the bridge to spend ${token.name} token, the amount: ${amount}. 
       \n Next, after this window please check the amount in Meta mask is what you wish to send.`
     );
   }
@@ -227,7 +285,7 @@ export default function TransactionForm() {
           version: 1,
           currencyvalue: { currency: currencyIaddress, amount: verusAmount.toFixed(0) }, // currency sending from ethereum
           flags: flagvalue,
-          feecurrencyid: feecurrency, // fee is vrsctest pre bridge launch, veth or others post.
+          feecurrencyid: feecurrency, // fee is vrsc pre bridge launch, veth or others post.
           fees,
           destination: { destinationtype, destinationaddress }, // destination address currency is going to
           destcurrencyid: destinationcurrency,   // destination currency is vrsc on direct. bridge.veth on bounceback
@@ -340,6 +398,14 @@ export default function TransactionForm() {
               control={control}
               selectedToken={selectedToken}
             />
+            {currentOptionsPrices ? (<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+              <Typography style={{ fontSize: '12px', color: 'grey' }}>
+                <b>{`${parseFloat(currentOptionsPrices.value) < 0.001 ? parseFloat(currentOptionsPrices.value).toFixed(8) : parseFloat(currentOptionsPrices.value).toFixed(3)}`}</b>
+              </Typography>
+              <Typography style={{ fontSize: '11px', color: 'grey', padding: '0 5px' }}>
+                {`${currentOptionsPrices.destination}`}
+              </Typography>
+            </div>) : null}
           </Grid>
           <Box mt="30px" textAlign="center" width="100%">
             <LoadingButton loading={isTxPending} disabled={!verusTokens || !token?.value || isTxPending} type="submit" color="primary" variant="contained">Send</LoadingButton>

@@ -3,19 +3,19 @@ export const ID_NAME_MAPPING = {
     title: "Rinkeby Network",
     name: "BSCMAIN"
   },
-   5: {
-     title: "Goerli Network",
-     name: "GOERLI"
-   }
-  // 1: {
-  //   title: "Main Network",
-  //   name: "HOMESTEAD"
-  // }
+  5: {
+    title: "Goerli Network",
+    name: "GOERLI"
+  },
+  1: {
+    title: "Ethereum Network",
+    name: "HOMESTEAD"
+  }
 };
 
 export const NAME_ID_MAPPING = {
   GOERLI: {
-     title: "Goerli Network",
-     id: 5
-   }
+    title: "Goerli Network",
+    id: 5
+  }
 };

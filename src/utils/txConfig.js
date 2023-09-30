@@ -1,6 +1,6 @@
 import { convertVerusAddressToEthAddress, fromBase58ToHex } from "./convert";
 import { isiAddress, isRAddress, isETHAddress } from 'utils/rules';
-import { GLOBAL_ADDRESS } from "constants/contractAddress";
+import { GLOBAL_ADDRESS, BLOCKCHAIN_NAME } from "constants/contractAddress";
 import { ETH_FEES } from 'constants/contractAddress';
 
 // Flags for CTransferDesination type
@@ -18,7 +18,7 @@ const IMPORT_TO_SOURCE = 0x200           // set when the source currency not des
 const RESERVE_TO_RESERVE = 0x400         // for arbitrage or transient conversion 2 stage solving (2nd from new fractional to reserves)
 const bounceBackFee = Buffer.alloc(8); //write LE bounce back fee 
 
-export const getConfigOptions = ({ address, destination, poolAvailable, token, auxdest, GASPrice, auxDest }) => {
+export const getConfigOptions = ({ address, destination, poolAvailable, token, GASPrice, auxDest }) => {
   let destinationtype = null;
   let flagvalue = VALID;
   let secondreserveid = "0x0000000000000000000000000000000000000000"
@@ -39,7 +39,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
 
   if (destinationtype === DEST_ID || destinationtype === DEST_PKH) { //if I or R address chosen then do one way specific stuff          
     if (!poolAvailable) { // pool not available
-      if (destination === 'vrsctest') {
+      if (destination === BLOCKCHAIN_NAME) {
         flagvalue = VALID;
         destinationcurrency = GLOBAL_ADDRESS.VRSC;
       } else {
@@ -47,7 +47,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
         return null;
       }
     } else {
-      if (destination === 'vrsctest') {
+      if (destination === BLOCKCHAIN_NAME) {
         destinationcurrency = GLOBAL_ADDRESS.BETH; //bridge open all sends go to bridge.veth         
         flagvalue = VALID;
       } else if (destination === 'bridgeDAI') {
@@ -59,19 +59,19 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
           destinationcurrency = GLOBAL_ADDRESS.DAI;
           flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
         } else {
-          alert("Cannot convert DAI to DAI. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+          alert(`Cannot convert DAI to DAI. Send Direct to ${BLOCKCHAIN_NAME}`); //add in FLAGS logic for destination
           return null;
         }
       } else if (destination === 'bridgeVRSC') {
         if (token.value !== GLOBAL_ADDRESS.VRSC && token.value !== GLOBAL_ADDRESS.BETH) {
-          destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token to VRSCTEST
+          destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token to VRSC
           secondreserveid = GLOBAL_ADDRESS.VRSC;
           flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;   //add convert flag on
         } else if (token.value === GLOBAL_ADDRESS.BETH) {
           destinationcurrency = GLOBAL_ADDRESS.VRSC;
           flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
         } else {
-          alert("Cannot convert VRSCTEST to VRSCTEST. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+          alert(`Cannot convert ${BLOCKCHAIN_NAME} to ${BLOCKCHAIN_NAME}. Send Direct to ${BLOCKCHAIN_NAME}`); //add in FLAGS logic for destination
           return null;
         }
       } else if (destination === 'bridgeETH') {
@@ -83,10 +83,10 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
           destinationcurrency = GLOBAL_ADDRESS.ETH;
           flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
         } else {
-          alert("Cannot convert ETH to ETH. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+          alert(`Cannot convert ETH to ETH. Send Direct to ${BLOCKCHAIN_NAME}`); //add in FLAGS logic for destination
           return null;
         }
-      } else if (destination === 'bridgeVRSCTEST') {
+      } else if (destination === `bridge${BLOCKCHAIN_NAME.toUpperCase()}`) {
         if (token.value !== GLOBAL_ADDRESS.VRSC && token.value !== GLOBAL_ADDRESS.BETH) {
           destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token to ETH
           secondreserveid = GLOBAL_ADDRESS.VRSC;
@@ -95,7 +95,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
           destinationcurrency = GLOBAL_ADDRESS.VRSC;
           flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
         } else {
-          alert("Cannot convert VRSCTEST to VRSCTEST. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+          alert(`Cannot convert ${BLOCKCHAIN_NAME} to ${BLOCKCHAIN_NAME}. Send Direct to ${BLOCKCHAIN_NAME}`); //add in FLAGS logic for destination
           return null;
         }
       }
@@ -105,7 +105,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
         if (token.value !== GLOBAL_ADDRESS.BETH) {
           flagvalue = VALID + CONVERT;   //add convert flag on
         } else {
-          alert("Cannot convert bridge to bridge. Send Direct to VRSCTEST"); //add in FLAGS logic for destination
+          alert(`Cannot convert bridge to bridge. Send Direct to ${BLOCKCHAIN_NAME}`); //add in FLAGS logic for destination
           return null;
         }
       } else {
@@ -157,7 +157,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
     destinationtype += FLAG_DEST_GATEWAY;
 
     bounceBackFee.writeUInt32LE(GASPrice.SATSCOST);
-    //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
+    //destination is concatenated with the gateway back address (vETH) + uint160() + 0.003 ETH in fees uint64LE
     destinationaddress = destinationaddress.slice(0, 42) + "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex') + destinationaddress.slice(42);
 
     if (destination === "swaptoVRSC") {
@@ -190,8 +190,8 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, a
     feecurrency = GLOBAL_ADDRESS.ETH;
     fees = ETH_FEES.SATS; //0.003 ETH FEE
   } else {
-    feecurrency = GLOBAL_ADDRESS.VRSC; //pre bridge launch fees must be set as vrsctest
-    fees = 2000000  // 0.02 VRSCTEST
+    feecurrency = GLOBAL_ADDRESS.VRSC; //pre bridge launch fees must be set as vrsc
+    fees = 2000000  // 0.02 VRSC
   }
 
   return { flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid }
