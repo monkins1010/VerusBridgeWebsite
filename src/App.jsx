@@ -33,7 +33,7 @@ const router = createBrowserRouter([
     element: <Claim />
   },
   {
-    path: "/exclude",
+    path: "/exclude.json",
     element: <Exclude />
   }
 ]);
