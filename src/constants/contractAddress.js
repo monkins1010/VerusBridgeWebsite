@@ -1,6 +1,6 @@
 // private testnetwork address
-export const DELEGATOR_ADD = "0xd0C131f0F8f81065788F2Ff17373534626afdaD4";   // "0x358c61f321f4B48D3baaDEF92Fe44EFe1B246672";
-export const TESTNET = true;
+export const DELEGATOR_ADD = "0x71518580f36FeCEFfE0721F06bA4703218cD7F63";   // "0x71518580f36FeCEFfE0721F06bA4703218cD7F63";
+export const TESTNET = false;
 export const ETHEREUM_BLOCKCHAIN_NAME = TESTNET ? "Goerli" : "Ethereum";
 
 export const BLOCKCHAIN_NAME = (TESTNET ? "vrsctest" : "vrsc").toUpperCase();
