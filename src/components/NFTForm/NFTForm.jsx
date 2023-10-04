@@ -16,7 +16,7 @@ import {
   ETH_FEES,
   GLOBAL_ADDRESS,
   FLAGS,
-  TESTNET
+  ETHEREUM_BLOCKCHAIN_NAME
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -87,7 +87,7 @@ export default function NFTForm() {
       throw new Error("Authorising NFT spend Failed, Do you own the NFT?")
     }
     setAlert(`
-      Your ${TESTNET ? 'Goerli' : 'Ethereum'} account has authorised the bridge to transfer your NFT.`
+      Your ${ETHEREUM_BLOCKCHAIN_NAME} account has authorised the bridge to transfer your NFT.`
     );
     return tokenID;
   }
@@ -129,7 +129,7 @@ export default function NFTForm() {
         throw new Error("Authorising NFT spend Failed, Do you own the NFT?")
       }
       setAlert(`
-        Your ${TESTNET ? 'Goerli' : 'Ethereum'} account has authorised the bridge to transfer your NFT.`
+        Your ${ETHEREUM_BLOCKCHAIN_NAME} account has authorised the bridge to transfer your NFT.`
       );
     }
     return tokenID;

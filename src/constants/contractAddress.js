@@ -1,6 +1,7 @@
 // private testnetwork address
-export const DELEGATOR_ADD = "0x6D852A2DF7d235B0fdf251a0e6c5DD8536CD6E54";   // "0xF9A0053E50B12353b7ded01f91665BC8Ba6bCdFA"; 
+export const DELEGATOR_ADD = "0xd0C131f0F8f81065788F2Ff17373534626afdaD4";   // "0x358c61f321f4B48D3baaDEF92Fe44EFe1B246672";
 export const TESTNET = true;
+export const ETHEREUM_BLOCKCHAIN_NAME = TESTNET ? "Goerli" : "Ethereum";
 
 export const BLOCKCHAIN_NAME = (TESTNET ? "vrsctest" : "vrsc").toUpperCase();
 
@@ -12,12 +13,13 @@ export const GLOBAL_ADDRESS = TESTNET ? { // vrsctest hex 'id' names of currenci
   ETH: "0x67460C2f56774eD27EeB8685f29f6CEC0B090B00",
   DAI: "0xCCe5d18f305474F1e0e0ec1C507D8c85e7315fdf",
   BETH: "0xffEce948b8A38bBcC813411D2597f7f8485a0689",
-  MKR: "0x005005b2b10a897fed36fbd71c878213a7a169bf"
+  MKR: "0x005005b2b10a897FeD36FbD71c878213a7a169BF"
 } : {
   VRSC: "0x1Af5b8015C64d39Ab44C60EAd8317f9F5a9B6C4C",
   ETH: "0x454CB83913D688795E237837d30258d11ea7c752",
   DAI: "0x8b72F1c2D326d376aDd46698E385Cf624f0CA1dA",
-  BETH: "0x0200EbbD26467B866120D84A0d37c82CdE0acAEB"
+  BETH: "0x0200EbbD26467B866120D84A0d37c82CdE0acAEB",
+  MKR: "0x65b5AaC6A4aa0Eb656AB6B8812184e7545b6A221"
 }
 
 export const GLOBAL_IADDRESS = TESTNET ? { // vrsctest hex 'id' names of currencies must be checksummed i.e. mixture of capitals
@@ -30,7 +32,8 @@ export const GLOBAL_IADDRESS = TESTNET ? { // vrsctest hex 'id' names of currenc
   VRSC: "i5w5MuNik5NtLcYmNzcvaoixooEebB6MGV",
   ETH: "i9nwxtKuVYX4MSbeULLiK2ttVi6rUEhh4X",
   DAI: "iGBs4DWztRNvNEJBt4mqHszLxfKTNHTkhM",
-  BETH: "i3f7tSctFkiPpiedY8QR5Tep9p4qDVebDx"
+  BETH: "i3f7tSctFkiPpiedY8QR5Tep9p4qDVebDx",
+  MKR: "iCkKJuJScy4Z6NSDK7Mt42ZAB2NEnAE1o4"
 }
 
 export const ETH_FEES = {

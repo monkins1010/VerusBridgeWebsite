@@ -17,5 +17,9 @@ export const NAME_ID_MAPPING = {
   GOERLI: {
     title: "Goerli Network",
     id: 5
+  },
+  HOMESTEAD: {
+    title: "Ethereum Network",
+    id: 1
   }
 };
