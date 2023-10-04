@@ -10,6 +10,7 @@ import ToastProvider from 'components/Toast/ToastProvider';
 
 import Tabs from "./components/TabComponent/Tabs";
 import Claim from './pages/Claim';
+import Exclude from './pages/Exclude';
 import Web3ConnectionProvider from './providers/Web3ConnectionProvider';
 import WrappedWeb3ReactProvider from './providers/WrappedWeb3ReactProvider';
 
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: "/claim",
     element: <Claim />
+  },
+  {
+    path: "/exclude",
+    element: <Exclude />
   }
 ]);
 
