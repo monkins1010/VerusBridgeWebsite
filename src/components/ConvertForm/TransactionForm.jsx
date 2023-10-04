@@ -19,7 +19,7 @@ import {
   ETH_FEES,
   GLOBAL_IADDRESS,
   BLOCKCHAIN_NAME,
-  TESTNET,
+  ETHEREUM_BLOCKCHAIN_NAME,
   HEIGHT_LOCATION_IN_FORKS
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
@@ -52,7 +52,7 @@ export default function TransactionForm() {
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
 
   // Testnet Verusd RPC
-  const verusd = new VerusdRpcInterface("iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq", process.env.REACT_APP_VERUS_RPC_URL)
+  const verusd = new VerusdRpcInterface(GLOBAL_IADDRESS.VRSC, process.env.REACT_APP_VERUS_RPC_URL)
 
   const [pubkey, setPubkey] = useState('');
 
@@ -126,7 +126,8 @@ export default function TransactionForm() {
         "bridgeBRIDGE": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.BETH.slice(2), 'hex'), 102),
         "bridgeVRSC": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.VRSC.slice(2), 'hex'), 102),
         "bridgeETH": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.ETH.slice(2), 'hex'), 102),
-        "bridgeDAI": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.DAI.slice(2), 'hex'), 102)
+        "bridgeDAI": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.DAI.slice(2), 'hex'), 102),
+        "bridgeMKR": bitGoUTXO.address.toBase58Check(Buffer.from(GLOBAL_ADDRESS.MKR.slice(2), 'hex'), 102)
       }
 
       const fromIaddress = bitGoUTXO.address.toBase58Check(Buffer.from(selectedToken.value.slice(2), 'hex'), 102);
@@ -223,7 +224,7 @@ export default function TransactionForm() {
   }, [account])
 
   const authoriseOneTokenAmount = async (token, amount) => {
-    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your ${TESTNET ? 'Goerli' : 'Ethereum'} balance.`);
+    setAlert(`Metamask will now pop up to allow the Verus Bridge Contract to spend ${amount}(${token.name}) from your ${ETHEREUM_BLOCKCHAIN_NAME} balance.`);
 
     const tokenERC = verusTokens.find(add => add.iaddress === token.value).erc20address;
     const tokenInstContract = getContract(tokenERC, ERC20_ABI, library, account)
@@ -260,7 +261,7 @@ export default function TransactionForm() {
       throw new Error("Authorising ERC20 Token Spend Failed, please check your balance.")
     }
     setAlert(`
-      Your ${TESTNET ? 'Goerli' : 'Ethereum'} account has authorised the bridge to spend ${token.name} token, the amount: ${amount}. 
+      Your ${ETHEREUM_BLOCKCHAIN_NAME} account has authorised the bridge to spend ${token.name} token, the amount: ${amount}. 
       \n Next, after this window please check the amount in Meta mask is what you wish to send.`
     );
   }

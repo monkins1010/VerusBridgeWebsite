@@ -86,6 +86,18 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, G
           alert(`Cannot convert ETH to ETH. Send Direct to ${BLOCKCHAIN_NAME}`); //add in FLAGS logic for destination
           return null;
         }
+      } else if (destination === 'bridgeMKR') {
+        if (token.value !== GLOBAL_ADDRESS.MKR && token.value !== GLOBAL_ADDRESS.BETH) {
+          destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token to ETH
+          secondreserveid = GLOBAL_ADDRESS.MKR;
+          flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;   //add convert flag on
+        } else if (token.value === GLOBAL_ADDRESS.BETH) {
+          destinationcurrency = GLOBAL_ADDRESS.MKR;
+          flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
+        } else {
+          alert(`Cannot convert MKR to MKR. Send Direct to ${BLOCKCHAIN_NAME}`); //add in FLAGS logic for destination
+          return null;
+        }
       } else if (destination === `bridge${BLOCKCHAIN_NAME.toUpperCase()}`) {
         if (token.value !== GLOBAL_ADDRESS.VRSC && token.value !== GLOBAL_ADDRESS.BETH) {
           destinationcurrency = GLOBAL_ADDRESS.BETH;  //bridge open convert from token to ETH
@@ -124,7 +136,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, G
 
     bounceBackFee.writeUInt32LE(GASPrice.SATSCOST);
     //destination is concatenated with the gateway back address (bridge.veth) + uint160() + 0.003 ETH in fees uint64LE
-    destinationaddress = destinationaddress.slice(0, 42) + "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex') + destinationaddress.slice(42);
+    destinationaddress = destinationaddress.slice(0, 42) + GLOBAL_ADDRESS.ETH.slice(2) + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex') + destinationaddress.slice(42);
 
     if (destination === "swaptoVRSC") {
       secondreserveid = GLOBAL_ADDRESS.VRSC;
@@ -141,13 +153,12 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, G
       secondreserveid = GLOBAL_ADDRESS.ETH;
       flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;
     }
+    if (destination === "swaptoMKR") {
+      secondreserveid = GLOBAL_ADDRESS.ETH;
+      flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;
+    }
 
-    /* if (auxdest) {
-       destinationaddress += "01160214" + fromBase58ToHex(auxdest);
-     } else {
-       alert("R address Must be supplied");
-       return null;
-     } */
+
   } else if (
     destinationtype === DEST_ETH + FLAG_DEST_AUX
     && poolAvailable
@@ -158,7 +169,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, G
 
     bounceBackFee.writeUInt32LE(GASPrice.SATSCOST);
     //destination is concatenated with the gateway back address (vETH) + uint160() + 0.003 ETH in fees uint64LE
-    destinationaddress = destinationaddress.slice(0, 42) + "67460C2f56774eD27EeB8685f29f6CEC0B090B00" + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex') + destinationaddress.slice(42);
+    destinationaddress = destinationaddress.slice(0, 42) + GLOBAL_ADDRESS.ETH.slice(2) + "0000000000000000000000000000000000000000" + bounceBackFee.toString('hex') + destinationaddress.slice(42);
 
     if (destination === "swaptoVRSC") {
       destinationcurrency = GLOBAL_ADDRESS.VRSC;
@@ -172,13 +183,11 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, G
       destinationcurrency = GLOBAL_ADDRESS.ETH;
       flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
     }
+    if (destination === "swaptoMKR") {
+      destinationcurrency = GLOBAL_ADDRESS.MKR;
+      flagvalue = VALID + CONVERT + IMPORT_TO_SOURCE;
+    }
 
-    /* if (auxdest) {
-       destinationaddress += "01160214" + fromBase58ToHex(auxdest);
-     } else {
-       alert("R address Must be supplied");
-       return null;
-     }*/
   } else {
     alert("Bridge.veth not launched yet, send only direct to i or R until launch complete"); //add in FLAGS logic for destination
     return null;

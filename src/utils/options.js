@@ -11,14 +11,16 @@ export const getDestinations = (token, addr) => ([
   { value: "bridgeDAI", label: `Convert to DAI on ${BLOCKCHAIN_NAME}`, iaddress: GLOBAL_ADDRESS.DAI },
   { value: "bridgeVRSC", label: `Convert to ${BLOCKCHAIN_NAME} on ${BLOCKCHAIN_NAME}`, iaddress: GLOBAL_ADDRESS.VRSC },
   { value: "bridgeETH", label: `Convert to ETH on ${BLOCKCHAIN_NAME}`, iaddress: GLOBAL_ADDRESS.ETH },
+  { value: "bridgeMKR", label: `Convert to MKR on ${BLOCKCHAIN_NAME}`, iaddress: GLOBAL_ADDRESS.MKR },
   { value: "swaptoBRIDGE", label: "Convert to Bridge.vETH Token and (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.BETH },
   { value: "swaptoVRSC", label: `Convert to ${BLOCKCHAIN_NAME} Token and (Bounce back to ETH)`, iaddress: GLOBAL_ADDRESS.VRSC },
   { value: "swaptoDAI", label: "Convert to DAI Token and (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.DAI },
-  { value: "swaptoETH", label: "Convert to ETH and (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.ETH }
+  { value: "swaptoETH", label: "Convert to ETH and (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.ETH },
+  { value: "swaptoMKR", label: "Convert to MKR Token and (Bounce back to ETH)", iaddress: GLOBAL_ADDRESS.MKR }
 ]);
 
 const destionationOptionsByPool = [
-  "swaptoBRIDGE", "swaptoVRSC", 'bridgeBRIDGE', 'swaptoDAI', 'swaptoETH'
+  "swaptoBRIDGE", "swaptoVRSC", 'bridgeBRIDGE', 'swaptoDAI', 'swaptoETH', "swaptoMKR"
 ]
 
 export const getDestinationOptions = (poolAvailable, address, selectedToken, tokenName) => {
@@ -31,10 +33,10 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
     ? [{ value: BLOCKCHAIN_NAME, label: `${tokenName ?? BLOCKCHAIN_NAME} on ${BLOCKCHAIN_NAME}`, iaddress: selectedToken }]
     : getDestinations(tokenName, selectedToken)
 
-  const addedToken = ![GLOBAL_ADDRESS.DAI, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH].includes(selectedToken);
+  const addedToken = ![GLOBAL_ADDRESS.DAI, GLOBAL_ADDRESS.VRSC, GLOBAL_ADDRESS.BETH, GLOBAL_ADDRESS.ETH, GLOBAL_ADDRESS.MKR].includes(selectedToken);
 
   if (isETHAddress(address)) {
-    const ethOptions = options.filter(option => ![BLOCKCHAIN_NAME, 'bridgeBRIDGE', 'bridgeDAI', 'bridgeVRSC', 'bridgeETH', `bridge${BLOCKCHAIN_NAME}`].includes(option.value));
+    const ethOptions = options.filter(option => ![BLOCKCHAIN_NAME, 'bridgeBRIDGE', 'bridgeDAI', 'bridgeVRSC', 'bridgeETH', 'bridgeMKR', `bridge${BLOCKCHAIN_NAME}`].includes(option.value));
     if (addedToken) {
       return [] //if its a mapped added token dont offer bounce back
     }
@@ -46,7 +48,7 @@ export const getDestinationOptions = (poolAvailable, address, selectedToken, tok
     }
   }
   else if (isiAddress(address) || isRAddress(address)) {
-    const vscOptions = options.filter(option => [BLOCKCHAIN_NAME, 'bridgeBRIDGE', 'bridgeDAI', 'bridgeVRSC', 'bridgeETH'].includes(option.value));
+    const vscOptions = options.filter(option => [BLOCKCHAIN_NAME, 'bridgeBRIDGE', 'bridgeDAI', 'bridgeVRSC', 'bridgeETH', 'bridgeMKR'].includes(option.value));
 
     if (!poolAvailable || addedToken) {
       return vscOptions.filter(option => option.value === BLOCKCHAIN_NAME)
