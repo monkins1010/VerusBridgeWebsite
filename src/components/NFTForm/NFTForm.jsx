@@ -16,7 +16,8 @@ import {
   ETH_FEES,
   GLOBAL_ADDRESS,
   FLAGS,
-  ETHEREUM_BLOCKCHAIN_NAME
+  ETHEREUM_BLOCKCHAIN_NAME,
+  HEIGHT_LOCATION_IN_FORKS
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
@@ -35,7 +36,7 @@ export default function NFTForm() {
   const [poolAvailable, setPoolAvailable] = useState(false);
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
-  const [verusTestHeight, setVerusTestHeight] = useState(null);
+  const [verusChainHeight, setverusChainHeight] = useState(null);
   const { addToast } = useToast();
   const { account, library } = useWeb3React();
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
@@ -52,13 +53,13 @@ export default function NFTForm() {
       const pool = await contract.callStatic.bridgeConverterActive();
       setPoolAvailable(pool);
       const forksData = await delegatorContract.callStatic.bestForks(0);
-      const heightPos = 194;
+      const heightPos = HEIGHT_LOCATION_IN_FORKS;
       const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 8)}`, 16);
-      setVerusTestHeight(heightHex || 1);
+      setverusChainHeight(heightHex || 1);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
-      setVerusTestHeight(1);
+      setverusChainHeight(1);
     }
   }
 
@@ -204,7 +205,7 @@ export default function NFTForm() {
               {poolAvailable ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
             </Typography>
             <Typography>
-              Last Confirmed VerusTest height: <b>{verusTestHeight > 1 ? verusTestHeight : "-"}</b>
+              Last Confirmed Verus height: <b>{verusChainHeight > 1 ? verusChainHeight : "-"}</b>
             </Typography>
           </Alert>
         ) :

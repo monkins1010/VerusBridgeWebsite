@@ -1,20 +1,21 @@
 import React from 'react'
 
 import InputControlField from 'components/InputControlField'
-import { validateETHAddress } from 'utils/rules'
+import { validateClaimAddress } from 'utils/rules'
 
-const AddressField = ({ control }) => (
+const AddressField = ({ control, usePublicKey, disabled }) => (
     <InputControlField
         name="address"
         label="Address"
         fullWidth
         variant="standard"
         defaultValue=""
+        disabled={disabled}
         control={control}
-        helperText="Your Ethereum Address"
-        rules={{
+        helperText="Your R-Address or i-Address"
+        rules={() => usePublicKey ? null : {
             required: 'Address is required',
-            validate: validateETHAddress
+            validate: validateClaimAddress
         }}
     />
 )

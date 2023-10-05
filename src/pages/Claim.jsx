@@ -13,7 +13,7 @@ import Header from '../components/Header';
 
 const theme = createTheme();
 
-export default function Checkout() {
+export default function Claim() {
 
     return (
         <ThemeProvider theme={theme}>

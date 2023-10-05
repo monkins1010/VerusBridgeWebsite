@@ -1,6 +1,9 @@
-// private testnetwork address
-export const DELEGATOR_ADD = "0x71518580f36FeCEFfE0721F06bA4703218cD7F63";   // "0x71518580f36FeCEFfE0721F06bA4703218cD7F63";
-export const TESTNET = false;
+export const DELEGATOR_ADD = process.env.REACT_APP_DELEGATOR_CONTRACT
+export const TESTNET = () => {
+  const retVal = process.env.REACT_APP_TESTNET_ACTIVE !== undefined ||
+    process.env.REACT_APP_TESTNET_ACTIVE === true;
+  return retVal
+}
 export const ETHEREUM_BLOCKCHAIN_NAME = TESTNET ? "Goerli" : "Ethereum";
 
 export const BLOCKCHAIN_NAME = (TESTNET ? "vrsctest" : "vrsc").toUpperCase();

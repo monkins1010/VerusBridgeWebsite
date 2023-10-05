@@ -43,6 +43,11 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "react-app-rewired": "^2.1.8"
   },
+  "overrides": {
+    "@bitgo/utxo-lib": {
+      "bitcoin-ops": "git+https://github.com/VerusCoin/bitcoin-ops.git"
+    }
+  },
   "scripts": {
     "start": "react-scripts start",
     "startlegacy": "NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
