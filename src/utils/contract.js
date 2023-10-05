@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
-
+import web3 from 'web3';
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value) {
   try {
@@ -38,10 +38,12 @@ export function getContract(
   return new Contract(address, ABI, getProviderOrSigner(library, account));
 }
 
-export const getMaxAmount = async (DAIContract, account) => {
-  const DAIPrice = await DAIContract.balanceOf(account);
-  const decimals = await DAIContract.decimals();
-  const DAIBalance = parseInt(DAIPrice.toString(), 10) / (10 ** decimals);
+export const getMaxAmount = async (ERCContract, account) => {
+  const DAIPrice = await ERCContract.balanceOf(account);
+  const decimals = await ERCContract.decimals();
+  const ten = new web3.utils.BN(10);
+  const base = ten.pow(new web3.utils.BN(decimals));
+  const DAIBalance = parseInt(DAIPrice.div(base.toString()).toString());
 
   return DAIBalance;
 }

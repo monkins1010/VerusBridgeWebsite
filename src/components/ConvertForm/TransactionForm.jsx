@@ -44,7 +44,7 @@ export default function TransactionForm() {
   const [alert, setAlert] = useState(null);
   const [verusTestHeight, setVerusTestHeight] = useState(null);
   const [currentOptionsPrices, setcurrentOptionsPrices] = useState(null);
-  const [dollarsOutcome, setdollarsOutcome] = useState(null);
+  // const [dollarsOutcome, setdollarsOutcome] = useState(null);
   const [verusTokens, setVerusTokens] = useState(['']);
   const [GASPrice, setGASPrice] = useState("");
   const { addToast } = useToast();

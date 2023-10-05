@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 
+import { Button } from '@mui/material';
+import { Link } from "react-router-dom";
+
 import Checkout from '../../pages/Checkout';
 import NFT from '../../pages/NFT';
 
@@ -17,7 +20,7 @@ export default function Tabs() {
     };
     // eslint-disable jsx-a11y/no-noninteractive-element-interactions
     return (
-        <div>
+        <div className="maintab">
             <div className="Tabs">
                 {/* Tab nav */}
                 <ul className="nav">
@@ -40,9 +43,13 @@ export default function Tabs() {
                     </li>
                 </ul>
                 <div className="outlet">
-                    {/* content will be shown here */}
+                    <Link to="/claim">
+                        <Button
+                            variant="outlined"
+                            style={{ marginLeft: '10px', marginRight: '10px' }}
+                        > CLAIM<br />FEES</Button>
+                    </Link>
                 </div>
-
             </div>
             {activeTab === "Tokens" ? <Checkout /> : <NFT />}
         </div>
