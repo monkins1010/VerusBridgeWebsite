@@ -42,7 +42,7 @@ export default function TransactionForm() {
   const [poolAvailable, setPoolAvailable] = useState(false);
   const [isTxPending, setIsTxPending] = useState(false);
   const [alert, setAlert] = useState(null);
-  const [verusTestHeight, setVerusTestHeight] = useState(null);
+  const [verusChainHeight, setverusChainHeight] = useState(null);
   const [currentOptionsPrices, setcurrentOptionsPrices] = useState(null);
   // const [dollarsOutcome, setdollarsOutcome] = useState(null);
   const [verusTokens, setVerusTokens] = useState(['']);
@@ -51,7 +51,6 @@ export default function TransactionForm() {
   const { account, library } = useWeb3React();
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
 
-  // Testnet Verusd RPC
   const verusd = new VerusdRpcInterface(GLOBAL_IADDRESS.VRSC, process.env.REACT_APP_VERUS_RPC_URL)
 
   const [pubkey, setPubkey] = useState('');
@@ -103,11 +102,11 @@ export default function TransactionForm() {
       const forksData = await delegatorContract.callStatic.bestForks(0);
       const heightPos = HEIGHT_LOCATION_IN_FORKS;
       const heightHex = parseInt(`0x${forksData.substring(heightPos, heightPos + 8)}`, 16);
-      setVerusTestHeight(heightHex || 1);
+      setverusChainHeight(heightHex || 1);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
-      setVerusTestHeight(1);
+      setverusChainHeight(1);
     }
   }
 
@@ -364,7 +363,7 @@ export default function TransactionForm() {
               {poolAvailable ? "Bridge.veth currency Launched." : "Bridge.veth currency not launched."}
             </Typography>
             <Typography>
-              Last Confirmed VerusTest height: <b>{verusTestHeight > 1 ? verusTestHeight : "-"}</b>
+              Last Confirmed Verus height: <b>{verusChainHeight > 1 ? verusChainHeight : "-"}</b>
             </Typography>
           </Alert>
         ) :
@@ -381,7 +380,7 @@ export default function TransactionForm() {
             />
           </Grid>
           <Grid item xs={12}>
-            {verusTestHeight > 0 && (<TokenField
+            {verusChainHeight > 0 && (<TokenField
               control={control}
               poolAvailable={poolAvailable}
             />)}

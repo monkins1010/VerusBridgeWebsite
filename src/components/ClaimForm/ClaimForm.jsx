@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 
 import { ECPair, networks } from '@bitgo/utxo-lib';
 import { LoadingButton } from '@mui/lab';
-import { Alert, Typography } from '@mui/material';
+import { Alert, Typography, Button } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Grid from '@mui/material/Grid';
@@ -11,6 +11,7 @@ import { Box } from '@mui/system';
 import { useWeb3React } from '@web3-react/core';
 import { utils } from 'ethers'
 import { useForm } from 'react-hook-form';
+import { Link } from "react-router-dom";
 import web3 from 'web3';
 
 import DELEGATOR_ABI from 'abis/DelegatorAbi.json';
@@ -233,8 +234,17 @@ export default function ClaimForm() {
                             />
                         </FormGroup>
                     </Grid>
+
                 </Grid>
+                <div style={{ alignItems: 'center', paddingTop: 42 }}>
+                    <Link to="/">
+                        <Button variant="outlined">
+                            BACK
+                        </Button>
+                    </Link>
+                </div>
             </form>
+
         </>
     );
 }

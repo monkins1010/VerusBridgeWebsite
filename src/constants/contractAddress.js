@@ -1,4 +1,3 @@
-// private testnetwork address
 export const DELEGATOR_ADD = process.env.REACT_APP_DELEGATOR_CONTRACT
 export const TESTNET = () => {
   const retVal = process.env.REACT_APP_TESTNET_ACTIVE !== undefined ||
