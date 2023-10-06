@@ -56,3 +56,20 @@ export const validateClaimAddress = (address, usePublicKey) => {
   }
 }
 
+export const uint64ToVerusFloat = (number) => {
+
+  const input = BigInt(number);
+  let inter = `${(input / BigInt(100000000))}.`
+  let decimalp = `${(input % BigInt(100000000))}`
+
+  if (input < 0) {
+    inter = `-${inter}`;
+    decimalp = decimalp.slice(1);
+  }
+
+  while (decimalp.length < 8) {
+    decimalp = `0${decimalp}`;
+  }
+  return (inter + decimalp)
+}
+
