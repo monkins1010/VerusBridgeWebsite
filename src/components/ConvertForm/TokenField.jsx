@@ -10,7 +10,7 @@ import { getTokenOptions } from 'utils/options'
 
 import bitGoUTXO from '../../utils/bitUTXO';
 
-const TokenField = ({ control, poolAvailable }) => {
+const TokenField = ({ control, poolAvailable, token }) => {
   const [verusTokens, setVerusTokens] = useState(['']);
   const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
   const { account } = useWeb3React();
@@ -42,7 +42,7 @@ const TokenField = ({ control, poolAvailable }) => {
   return (<AutocompleteControlField
     name="token"
     id="token"
-    label="Token"
+    label={token || "Token"}
     fullWidth
     variant="standard"
     defaultValue=""

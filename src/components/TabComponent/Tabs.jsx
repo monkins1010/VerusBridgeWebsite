@@ -1,8 +1,5 @@
 import React, { useState } from "react";
 
-import { Button } from '@mui/material';
-import { Link } from "react-router-dom";
-
 import Checkout from '../../pages/Checkout';
 import NFT from '../../pages/NFT';
 
@@ -42,14 +39,6 @@ export default function Tabs() {
                             NFT&#39;s</div>
                     </li>
                 </ul>
-                <div className="outlet">
-                    <Link to="/claim">
-                        <Button
-                            variant="outlined"
-                            style={{ marginLeft: '10px', marginRight: '10px' }}
-                        > CLAIM<br />FEES</Button>
-                    </Link>
-                </div>
             </div>
             {activeTab === "Tokens" ? <Checkout /> : <NFT />}
         </div>

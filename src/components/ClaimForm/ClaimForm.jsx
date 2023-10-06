@@ -19,14 +19,18 @@ import {
     DELEGATOR_ADD
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
-import { validateETHAddress, isRAddress, isiAddress } from 'utils/rules'
+import { validateClaimAddress, isRAddress, isiAddress, uint64ToVerusFloat } from 'utils/rules';
 
 import AddressAddressFieldField from './ClaimAddressField';
 import bitGoUTXO from '../../utils/bitUTXO';
+import TokenField from '../ConvertForm/TokenField';
 import { useToast } from '../Toast/ToastProvider';
 
 const maxGas = 6000000;
-
+const TYPE_FEE = 1;
+const TYPE_REFUND = 2;
+const TYPE_NOTARY_FEE = 3;
+const TYPE_DAI_BURN_BACK = 4;
 
 function usePreviousValue(value) {
     const ref = useRef();
@@ -45,82 +49,94 @@ export default function ClaimForm() {
     const previousValue = usePreviousValue(account);
     const delegatorContract = useContract(DELEGATOR_ADD, DELEGATOR_ABI);
     const [usePublicKey, setUsePublicKey] = useState(false);
+    const [claimRefund, setclaimRefund] = useState(false);
     const { handleSubmit, control, watch, reset } = useForm({
         mode: 'all'
     });
     const address = watch('address');
-    const uint64ToVerusFloat = (number) => {
+    const refundCurrency = watch('token');
 
-        const input = BigInt(number);
-        let inter = `${(input / BigInt(100000000))}.`
-        let decimalp = `${(input % BigInt(100000000))}`
-
-        if (input < 0) {
-            inter = `-${inter}`;
-            decimalp = decimalp.slice(1);
-        }
-
-        while (decimalp.length < 8) {
-            decimalp = `0${decimalp}`;
-        }
-        return (inter + decimalp)
-    }
     const handleUsePublicKeyChange = (event) => {
         reset({ address: "" });
         setUsePublicKey(event.target.checked);
+        if (claimRefund) {
+            setclaimRefund(false);
+        }
     };
 
-    const formatHexAddress = (address) => {
+    const handleRefundsEnable = (event) => {
+
+        setclaimRefund(event.target.checked);
+        if (!event.target.checked) {
+            reset({ address: "" });
+        } else {
+            setUsePublicKey(false);
+        }
+    };
+
+
+    const formatHexAddress = (address, type) => {
         try {
             const verusAddress = bitGoUTXO.address.fromBase58Check(address);
-
+            let retval;
             switch (verusAddress.version) {
-                case 60:
-                    return `0x${web3.utils.padLeft(`0214${verusAddress.hash.toString('hex')}`, 64)}`;
-                case 102:
-                    return `0x${web3.utils.padLeft(`0414${verusAddress.hash.toString('hex')}`, 64)}`;
+                case 60: // case R address
+                    retval = Buffer.from(`${web3.utils.padLeft(`0214${verusAddress.hash.toString('hex')}`, 64)}`, 'hex');
+                    break;
+                case 102: // case i address
+                    retval = Buffer.from(`${web3.utils.padLeft(`0414${verusAddress.hash.toString('hex')}`, 64)}`, 'hex');
+                    break;
                 default:
                     return null;
             }
+            if (type === TYPE_REFUND) {
+                retval[0] = 2;
+            }
+
+            return `0x${retval.toString('hex')}`;
+
         } catch (error) {
             throw new Error("Invalid Address");
         }
     }
 
-    const checkFeesETHAddressFees = async (address) => {
+    const checkForAssets = async (address, type, currency) => {
 
-        const formattedAddress = `0x${web3.utils.padLeft(`0c14${address.slice(2)}`, 64)}`
-        const feesSats = await delegatorContract.callStatic.claimableFees(formattedAddress);
-        const fees = uint64ToVerusFloat(feesSats);
-        setFeeToClaim(fees);
+        const formattedAddress = formatHexAddress(address, type);
+        let feeSats;
+        if (type === TYPE_FEE) {
+            feeSats = await delegatorContract.callStatic.claimableFees(formattedAddress);
+
+        } else if (type === TYPE_REFUND) {
+            feeSats = await delegatorContract.callStatic.refunds(formattedAddress, currency);
+
+        }
+        const fees = uint64ToVerusFloat(feeSats);
         setAlert({ state: fees === "0.00000000" ? "warning" : "info", message: `${fees} ETH available to claim` });
-        addToast({ type: "success", description: `You have ${fees} ETH to claim` });
-    }
-
-    const checkFeesVerusAddressFees = async (address) => {
-
-        const formattedAddress = formatHexAddress(address)
-        const feesSats = await delegatorContract.callStatic.claimableFees(formattedAddress);
-        const fees = uint64ToVerusFloat(feesSats);
         setFeeToClaim(fees);
-        setAlert({ state: fees === "0.00000000" ? "warning" : "info", message: `${fees} ETH available to claim` });
-        //  addToast({ type: "success", description: `You have ${fees} ETH to claim` });
         return fees;
     }
 
     useEffect(() => {
-        if (address && validateETHAddress(address) === true &&
-            (previousValue ? (previousValue !== address || feeToClaim === null || feeToClaim === "0.00000000") : true)) {
-            checkFeesETHAddressFees(address);
-        } if (address && (isRAddress(address) === true || isiAddress(address)) &&
-            (previousValue ? (previousValue !== address || feeToClaim === null || feeToClaim === "0.00000000") : true)) {
-            checkFeesVerusAddressFees(address);
-        } else if (address && validateETHAddress(address) !== true && feeToClaim !== null) {
+        if (address && (isRAddress(address) || isiAddress(address))) {
+            if (!claimRefund) {
+                if (previousValue ? (previousValue !== address || feeToClaim === null || feeToClaim === "0.00000000") : true) {
+                    checkForAssets(address, TYPE_FEE);
+                }
+            } else if (refundCurrency && refundCurrency.value) {
+                checkForAssets(address, TYPE_REFUND, refundCurrency.value);
+
+            } else {
+                removeAllToasts();
+                setFeeToClaim(null)
+                setAlert(null);
+            }
+        } else if (address && validateClaimAddress(address) !== true && feeToClaim !== null) {
             removeAllToasts();
             setFeeToClaim(null)
             setAlert(null);
         }
-    }, [address])
+    }, [address, claimRefund, refundCurrency])
 
     const onSubmit = async (values) => {
         const { address } = values;
@@ -148,7 +164,7 @@ export default function ClaimForm() {
 
                     const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
 
-                    if (await checkFeesVerusAddressFees(rAddress) === "0.00000000") {
+                    if (await checkForAssets(rAddress, TYPE_FEE) === "0.00000000") {
                         setIsTxPending(false);
                         return
                     }
@@ -159,7 +175,7 @@ export default function ClaimForm() {
                     await txResult.wait();
                     setAlert(null);
                     setIsTxPending(false);
-                    addToast({ type: "success", description: 'Transaction Success!' });
+                    addToast({ type: "success", description: 'Claim to ETH Transaction Success!' });
                     setFeeToClaim(null)
                 } catch (err) {
                     setAlert(`
@@ -167,16 +183,24 @@ export default function ClaimForm() {
                     );
                     throw err
                 }
+            } else if (claimRefund) {
+                const hexResult = formatHexAddress(address, TYPE_REFUND)
+                const txResult = await delegatorContract.claimRefund(hexResult, refundCurrency.value, { from: account, gasLimit: maxGas });
+                const txWaitResult = await txResult.wait();
+                setAlert(null);
+                setIsTxPending(false);
+                addToast({ type: "success", description: 'Refund Transaction Success!' });
+                setFeeToClaim(null)
             }
-
-            if (address !== account)
-                throw new Error("Please switch your metaMask account to the address you are claiming.")
-            const txResult = await delegatorContract.claimfees();
-            await txResult.wait();
-            setAlert(null);
-            setIsTxPending(false);
-            addToast({ type: "success", description: 'Transaction Success!' });
-            setFeeToClaim(null)
+            else {
+                const hexResult = formatHexAddress(address, TYPE_FEE)
+                const txResult = await delegatorContract.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`, { from: account, gasLimit: maxGas });
+                const txWaitResult = await txResult.wait();
+                setAlert(null);
+                setIsTxPending(false);
+                addToast({ type: "success", description: 'Fee reimburse Transaction Success!' });
+                setFeeToClaim(null)
+            }
         } catch (error) {
             if (error.message) {
                 addToast({ type: "error", description: error.message })
@@ -225,14 +249,36 @@ export default function ClaimForm() {
                                         name="usePublicKey"
                                     />
                                 }
-                                label={
-                                    <Typography sx={{ fontSize: 12 }}>
-                                        Use Public Key from ETH address
-                                    </Typography>
+                                sx={{ fontSize: '20px' }} // add this line to set the font size
+                            />
+                            <Typography sx={{ fontSize: 12 }}>
+                                Use your Public Key to claim
+                            </Typography>
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={claimRefund}
+                                        onChange={handleRefundsEnable}
+                                        name="claimRefund"
+                                    />
                                 }
                                 sx={{ fontSize: '20px' }} // add this line to set the font size
                             />
+                            <Typography sx={{ fontSize: 12 }}>
+                                Fees / Refund (Claim Type)
+                            </Typography>
                         </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        {claimRefund && (<TokenField
+                            control={control}
+                            poolAvailable={false}
+                            token="Refund Currency"
+                        />)}
                     </Grid>
 
                 </Grid>

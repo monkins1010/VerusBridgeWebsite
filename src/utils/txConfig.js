@@ -154,7 +154,7 @@ export const getConfigOptions = ({ address, destination, poolAvailable, token, G
       flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;
     }
     if (destination === "swaptoMKR") {
-      secondreserveid = GLOBAL_ADDRESS.ETH;
+      secondreserveid = GLOBAL_ADDRESS.MKR;
       flagvalue = VALID + CONVERT + RESERVE_TO_RESERVE;
     }
 
