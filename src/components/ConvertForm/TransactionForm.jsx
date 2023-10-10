@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { ECPair, networks, address as baddress, crypto as bcrypto } from '@bitgo/utxo-lib';
+import { address as baddress, crypto as bcrypto } from '@bitgo/utxo-lib';
 import { LoadingButton } from '@mui/lab';
 import { Alert, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
