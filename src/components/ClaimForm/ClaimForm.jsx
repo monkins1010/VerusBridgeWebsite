@@ -30,8 +30,8 @@ import { useToast } from '../Toast/ToastProvider';
 const maxGas = 6000000;
 const TYPE_FEE = 1;
 const TYPE_REFUND = 2;
-const TYPE_NOTARY_FEE = 3;
-const TYPE_DAI_BURN_BACK = 4;
+// const TYPE_NOTARY_FEE = 3;
+// const TYPE_DAI_BURN_BACK = 4;
 
 function usePreviousValue(value) {
     const ref = useRef();
@@ -190,7 +190,7 @@ export default function ClaimForm() {
             } else if (claimRefund) {
                 const hexResult = formatHexAddress(address, TYPE_REFUND)
                 const txResult = await delegatorContract.claimRefund(hexResult, refundCurrency.value, { from: account, gasLimit: maxGas });
-                const txWaitResult = await txResult.wait();
+                await txResult.wait();
                 setAlert(null);
                 setIsTxPending(false);
                 addToast({ type: "success", description: 'Refund Transaction Success!' });
@@ -199,7 +199,7 @@ export default function ClaimForm() {
             else {
                 const hexResult = formatHexAddress(address, TYPE_FEE)
                 const txResult = await delegatorContract.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`, { from: account, gasLimit: maxGas });
-                const txWaitResult = await txResult.wait();
+                await txResult.wait();
                 setAlert(null);
                 setIsTxPending(false);
                 addToast({ type: "success", description: 'Fee reimburse Transaction Success!' });
