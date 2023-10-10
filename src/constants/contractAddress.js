@@ -1,7 +1,5 @@
 export const DELEGATOR_ADD = process.env.REACT_APP_DELEGATOR_CONTRACT
-export const TESTNET = process.env.REACT_APP_TESTNET_ACTIVE !== undefined ||
-  process.env.REACT_APP_TESTNET_ACTIVE === true;
-
+export const TESTNET = process.env.REACT_APP_TESTNET_ACTIVE === "true";
 export const ETHEREUM_BLOCKCHAIN_NAME = TESTNET ? "Goerli" : "Ethereum";
 
 export const BLOCKCHAIN_NAME = (TESTNET ? "vrsctest" : "vrsc").toUpperCase();
