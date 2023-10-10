@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { ECPair, networks } from '@bitgo/utxo-lib';
+import { ECPair, networks, address as baddress, crypto as bcrypto } from '@bitgo/utxo-lib';
 import { LoadingButton } from '@mui/lab';
 import { Alert, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
@@ -180,7 +180,7 @@ export default function TransactionForm() {
     if (account) {
 
       const items = JSON.parse(localStorage.getItem('pubkeyAddress'));
-      if (items) {
+      if (!items) {
         setPubkey(items);
         const objKeys = Object.keys(items);
 
@@ -206,8 +206,9 @@ export default function TransactionForm() {
         const publicKey = utils.recoverPublicKey(messageHashBytes, sign);
         // Compress key
         const compressed = utils.computePublicKey(publicKey, true)
-
-        const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
+        const check = bcrypto.hash160(Buffer.from(compressed.slice(2), 'hex'));
+        const rAddress = baddress.toBase58Check(check, 60)
+        // const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
 
         localStorage.setItem('pubkeyAddress', JSON.stringify({ ...items, [account]: rAddress }))
         setPubkey({ ...items, [account]: rAddress })

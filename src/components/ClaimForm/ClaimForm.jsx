@@ -7,6 +7,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Grid from '@mui/material/Grid';
 import Switch from '@mui/material/Switch';
+import Tooltip from '@mui/material/Tooltip';
 import { Box } from '@mui/system';
 import { useWeb3React } from '@web3-react/core';
 import { utils } from 'ethers'
@@ -59,6 +60,7 @@ export default function ClaimForm() {
     const handleUsePublicKeyChange = (event) => {
         reset({ address: "" });
         setUsePublicKey(event.target.checked);
+        setAlert(null);
         if (claimRefund) {
             setclaimRefund(false);
         }
@@ -67,6 +69,7 @@ export default function ClaimForm() {
     const handleRefundsEnable = (event) => {
 
         setclaimRefund(event.target.checked);
+        setAlert(null);
         if (!event.target.checked) {
             reset({ address: "" });
         } else {
@@ -165,6 +168,7 @@ export default function ClaimForm() {
                     const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
 
                     if (await checkForAssets(rAddress, TYPE_FEE) === "0.00000000") {
+                        setAlert({ state: "warning", message: `${`${rAddress}\n`} has no fees to claim. Please try again with a different address.` });
                         setIsTxPending(false);
                         return
                     }
@@ -240,7 +244,8 @@ export default function ClaimForm() {
                         <LoadingButton loading={isTxPending} disabled={(feeToClaim === null || feeToClaim === "0.00000000") && !usePublicKey} type="submit" color="primary" variant="contained">Claim</LoadingButton>
                     </Box>
                     <Grid item xs={12}>
-                        <FormGroup>
+                        <FormGroup sx={{ flexWrap: 'nowrap' }}>
+
                             <FormControlLabel
                                 control={
                                     <Switch
@@ -251,9 +256,15 @@ export default function ClaimForm() {
                                 }
                                 sx={{ fontSize: '20px' }} // add this line to set the font size
                             />
-                            <Typography sx={{ fontSize: 12 }}>
-                                Use your Public Key to claim
-                            </Typography>
+                            <Tooltip title="The private Key for your refundaddress should be imported into metamask in order for you to receive refunds"
+                                arrow
+                                placement="bottom"
+                                PopperProps={{ style: { marginTop: -12 } }}>
+                                <Typography sx={{ fontSize: 12, flexWrap: 'nowrap' }}>
+                                    Use your Public Key to claim
+                                </Typography>
+                            </Tooltip>
+
                         </FormGroup>
                     </Grid>
                     <Grid item xs={12}>
