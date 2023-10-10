@@ -180,7 +180,7 @@ export default function TransactionForm() {
     if (account) {
 
       const items = JSON.parse(localStorage.getItem('pubkeyAddress'));
-      if (!items) {
+      if (items) {
         setPubkey(items);
         const objKeys = Object.keys(items);
 
