@@ -27,10 +27,11 @@
     "react-hook-form": "^7.20.5",
     "react-router-dom": "^6.11.1",
     "react-scripts": "4.0.3",
+    "swr": "^2.2.4",
+    "verusd-rpc-ts-client": "git+https://github.com/VerusCoin/verusd-rpc-ts-client.git",
     "web-vitals": "^1.0.1",
     "web3": "^1.6.1",
-    "web3-eth-abi": "^1.7.1",
-    "verusd-rpc-ts-client": "git+https://github.com/VerusCoin/verusd-rpc-ts-client.git"
+    "web3-eth-abi": "^1.7.1"
   },
   "devDependencies": {
     "eslint": "^7.28.0",
