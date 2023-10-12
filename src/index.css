@@ -67,3 +67,48 @@ ul.nav li.active {
   font-size: 2rem;
   text-align: center;
 }
+
+.blueRow {
+  background-color: rgba(49, 101, 212, 0.08);
+  border: 1px solid #3165d4;
+  padding: 14px;
+  border-radius: 7px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.blueRowTitle {
+  padding: 0 10px;
+  align-items: flex-end;
+}
+
+.greater, .equal, .less {
+  font-weight: bold;
+}
+
+.greater {
+  color: #229904; 
+  
+}
+
+.greater svg {
+    height: 10px;
+    color: #229904; 
+}
+
+.equal {
+  color:#939393;
+}
+.equal svg {
+  display: none;
+}
+
+.less {
+  color: #ea1818;
+}
+
+.less svg{
+  height: 10px;
+  color: #ea1818;
+  transform: rotate(180deg);
+}
