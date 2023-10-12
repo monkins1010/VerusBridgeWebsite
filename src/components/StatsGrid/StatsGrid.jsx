@@ -12,7 +12,7 @@ const CoinGeckoVRSC = 'https://api.coingecko.com/api/v3/coins/verus-coin'
 const CoinGeckoETH = 'https://api.coingecko.com/api/v3/coins/ethereum'
 const CoinGeckoMRK = 'https://api.coingecko.com/api/v3/coins/maker'
 const CoinGeckoDAI = 'https://api.coingecko.com/api/v3/coins/dai'
-const urls = [ CoinGeckoVRSC, CoinGeckoETH, CoinGeckoMRK, CoinGeckoDAI ]
+const urls = [CoinGeckoVRSC, CoinGeckoETH, CoinGeckoMRK, CoinGeckoDAI]
 
 const verusd = new VerusdRpcInterface('VRSC', 'https://api.verus.services')
 
@@ -33,10 +33,10 @@ const fetchConversion = async () => {
   const count = currencies.length
   const { supply } = bestState
   const blockdiff = blockNumber - block
-  const daiKey = Object.keys(res?.result?.currencynames).find((key) => currencyNames !== undefined && currencyNames[ key ] === 'DAI.vETH')
+  const daiKey = Object.keys(res?.result?.currencynames).find((key) => currencyNames !== undefined && currencyNames[key] === 'DAI.vETH')
   const daiAmount = currencies.find(c => c.currencyid === daiKey).reserves
 
-  let list = currencies.map((token) => ({ name: currencyNames[ token.currencyid ], amount: token.reserves, daiPrice: daiAmount / token.reserves }))
+  let list = currencies.map((token) => ({ name: currencyNames[token.currencyid], amount: token.reserves, daiPrice: daiAmount / token.reserves }))
   const bridge = { name: 'Bridge.vETH', amount: supply, daiPrice: (daiAmount * count) / supply }
 
   let conversions = [
@@ -104,31 +104,36 @@ const StatsGrid = () => {
     console.log("c", conversionList)
 
 
-  }, [ conversionList ])
+  }, [conversionList])
 
   if (!conversionList) return null
 
   return (
     <>
       <Grid container className="blueRowTitle" >
-        <Grid item xs={4}><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Liquidity pool</Typography></Grid>
+        <Grid item xs={3}><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Liquidity pool</Typography></Grid>
 
-        <Grid item xs={4} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Supply</Typography></Grid>
-        <Grid item xs={4} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Price in DAI</Typography></Grid>
+        <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Supply</Typography></Grid>
+        <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Price in DAI</Typography></Grid>
+        <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Total in DAI</Typography></Grid>
       </Grid>
 
       <Grid container className='blueRow' mb={5}>
-        <Grid item xs={4}><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{conversionList.bridge.name}</Typography></Grid>
-        <Grid item xs={4} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}> {Intl.NumberFormat('en-US', {
+        <Grid item xs={3}><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{conversionList.bridge.name}</Typography></Grid>
+        <Grid item xs={3} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}> {Intl.NumberFormat('en-US', {
           style: 'decimal',
           maximumFractionDigits: 0
         }).format(conversionList.bridge.amount)}</Typography></Grid>
-        <Grid item xs={4} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{Intl.NumberFormat('en-US', {
+        <Grid item xs={3} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{Intl.NumberFormat('en-US', {
           style: 'decimal',
           maximumFractionDigits: 3,
           minimumFractionDigits: 3
         }).format(conversionList.bridge.daiPrice)}</Typography></Grid>
-
+        <Grid item xs={3} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{Intl.NumberFormat('en-US', {
+          style: 'decimal',
+          maximumFractionDigits: 3,
+          minimumFractionDigits: 3
+        }).format(conversionList.bridge.daiPrice * conversionList.bridge.amount)}</Typography></Grid>
       </Grid>
 
       <Grid container className="blueRowTitle" >
