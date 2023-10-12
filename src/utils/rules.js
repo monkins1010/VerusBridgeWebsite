@@ -1,4 +1,4 @@
-import List from '../files/exclude.json'
+import List from '../exclude.json'
 
 export const isRAddress = (address) => (/^R[1-9A-HJ-NP-Za-km-z]{33,34}$/).test(address);
 export const isiAddress = (address) => (/^i[1-9A-HJ-NP-Za-km-z]{33,34}$/).test(address);

@@ -33,7 +33,7 @@ import TokenField from './TokenField';
 import bitGoUTXO from '../../utils/bitUTXO';
 import { useToast } from '../Toast/ToastProvider';
 
-const maxGas = 6000000;
+const maxGas = 1000000;
 const maxGas2 = 100000;
 const FLAG_DEST_GATEWAY = 128;
 const { GAS_TRANSACTIONIMPORTFEE, MINIMUM_GAS_PRICE_WEI } = ETH_FEES;
