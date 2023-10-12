@@ -39,11 +39,21 @@ export function getContract(
 }
 
 export const getMaxAmount = async (ERCContract, account) => {
-  const DAIPrice = await ERCContract.balanceOf(account);
+  const DAIBalanceInt = await ERCContract.balanceOf(account);
   const decimals = await ERCContract.decimals();
   const ten = new web3.utils.BN(10);
   const base = ten.pow(new web3.utils.BN(decimals));
-  const DAIBalance = parseFloat(DAIPrice.div(base.toString()).toString());
+  const DAIBalancewhole = parseFloat(DAIBalanceInt.div(base.toString()).toString());
 
-  return DAIBalance;
+  let mod = "";
+
+  const tempRemainder = DAIBalanceInt.mod(base.toString()).toString();
+  mod = tempRemainder;
+  while (mod.length < decimals) {
+
+    mod = "0" + mod;
+  }
+  const modulo = DAIBalancewhole + "." + mod;
+
+  return parseFloat(modulo);
 }
