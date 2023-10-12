@@ -43,7 +43,7 @@ export const getMaxAmount = async (ERCContract, account) => {
   const decimals = await ERCContract.decimals();
   const ten = new web3.utils.BN(10);
   const base = ten.pow(new web3.utils.BN(decimals));
-  const DAIBalance = parseInt(DAIPrice.div(base.toString()).toString());
+  const DAIBalance = parseFloat(DAIPrice.div(base.toString()).toString());
 
   return DAIBalance;
 }
