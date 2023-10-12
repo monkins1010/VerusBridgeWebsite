@@ -47,11 +47,10 @@ const StyledContainer = styled(Container)(() => ({
 
 const StyledRow = styled('div')(({ theme }) => ({
   display: 'flex',
-  margin: '0 200px',
-  [ theme.breakpoints.down('lg') ]: {
+  [theme.breakpoints.down('lg')]: {
     flexDirection: 'column-reverse'
   },
-  [ theme.breakpoints.up('lg') ]: {
+  [theme.breakpoints.up('lg')]: {
     flexDirection: 'row'
   },
 
