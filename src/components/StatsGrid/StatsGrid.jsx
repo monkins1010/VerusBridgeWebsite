@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
-
-import Grid, { Item } from '@mui/material/Grid'
+import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import useSWR from 'swr'
 import { VerusdRpcInterface } from 'verusd-rpc-ts-client'
+
+import { GLOBAL_IADDRESS } from 'constants/contractAddress';
 
 import { ReactComponent as Chevron } from '../../images/icons/chevron-icon.svg'
 
@@ -14,12 +15,9 @@ const CoinGeckoMRK = 'https://api.coingecko.com/api/v3/coins/maker'
 const CoinGeckoDAI = 'https://api.coingecko.com/api/v3/coins/dai'
 const urls = [CoinGeckoVRSC, CoinGeckoETH, CoinGeckoMRK, CoinGeckoDAI]
 
-const verusd = new VerusdRpcInterface('VRSC', 'https://api.verus.services')
-
-const fetcher = (url) => fetch(url).then((res) => res.json())
+const verusd = new VerusdRpcInterface(GLOBAL_IADDRESS.VRSC, process.env.REACT_APP_VERUS_RPC_URL)
 
 const blockNumber = process.env.REACT_APP_VERUS_END_BLOCK || '0'
-
 
 const fetchConversion = async () => {
   const res = await verusd.getCurrency('bridge.veth')
@@ -91,20 +89,11 @@ const fetchConversion = async () => {
   return { list, bridge, blockdiff, currencies }
 }
 
-
-
-
 const StatsGrid = () => {
-
 
   const { data: conversionList } = useSWR("fetchConversion", fetchConversion, {
     refreshInterval: 60_000 // every minute
   })
-  useEffect(() => {
-    console.log("c", conversionList)
-
-
-  }, [conversionList])
 
   if (!conversionList) return null
 
@@ -178,8 +167,6 @@ const StatsGrid = () => {
           </Grid >
         )
       })}
-
-
     </>
   )
 }
