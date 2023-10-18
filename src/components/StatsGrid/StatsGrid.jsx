@@ -100,29 +100,23 @@ const StatsGrid = () => {
   return (
     <>
       <Grid container className="blueRowTitle" >
-        <Grid item xs={3}><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Liquidity pool</Typography></Grid>
+        <Grid item xs={4}><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Liquidity pool</Typography></Grid>
 
-        <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Supply</Typography></Grid>
-        <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Price in DAI</Typography></Grid>
-        <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Total in DAI</Typography></Grid>
+        <Grid item xs={4} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Supply</Typography></Grid>
+        <Grid item xs={4} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Price in DAI</Typography></Grid>
       </Grid>
 
       <Grid container className='blueRow' mb={5}>
-        <Grid item xs={3}><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{conversionList.bridge.name}</Typography></Grid>
-        <Grid item xs={3} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}> {Intl.NumberFormat('en-US', {
+        <Grid item xs={4}><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{conversionList.bridge.name}</Typography></Grid>
+        <Grid item xs={4} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}> {Intl.NumberFormat('en-US', {
           style: 'decimal',
           maximumFractionDigits: 0
         }).format(conversionList.bridge.amount)}</Typography></Grid>
-        <Grid item xs={3} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{Intl.NumberFormat('en-US', {
+        <Grid item xs={4} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{Intl.NumberFormat('en-US', {
           style: 'decimal',
           maximumFractionDigits: 3,
           minimumFractionDigits: 3
         }).format(conversionList.bridge.daiPrice)}</Typography></Grid>
-        <Grid item xs={3} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{Intl.NumberFormat('en-US', {
-          style: 'decimal',
-          maximumFractionDigits: 3,
-          minimumFractionDigits: 3
-        }).format(conversionList.bridge.daiPrice * conversionList.bridge.amount)}</Typography></Grid>
       </Grid>
 
       <Grid container className="blueRowTitle" >
@@ -167,6 +161,16 @@ const StatsGrid = () => {
           </Grid >
         )
       })}
+      <Grid container className='white' mb={5}> </Grid>
+      <Grid container className='blueRow' mb={5}>
+        <Grid item xs={6}><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>Total Value of Liquidity</Typography></Grid>
+
+        <Grid item xs={6} textAlign="right"><Typography sx={{ color: '#3165d4', fontWeight: 'bold' }}>{Intl.NumberFormat('en-US', {
+          style: 'decimal',
+          maximumFractionDigits: 3,
+          minimumFractionDigits: 3
+        }).format(conversionList.bridge.daiPrice * conversionList.bridge.amount)} DAI</Typography></Grid>
+      </Grid>
     </>
   )
 }
