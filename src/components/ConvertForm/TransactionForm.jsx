@@ -24,13 +24,13 @@ import {
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
+import { validateAddress } from 'utils/rules'
 import { getConfigOptions } from 'utils/txConfig';
 
 import AddressField from './AddressField';
 import AmountField from './AmountField';
 import DestinationField from './DestinationField';
 import TokenField from './TokenField';
-import List from '../../exclude.json'
 import bitGoUTXO from '../../utils/bitUTXO';
 import { useToast } from '../Toast/ToastProvider';
 
@@ -271,7 +271,8 @@ export default function TransactionForm() {
     const { token, amount } = values;
     setAlert(null);
     setIsTxPending(true);
-    if (List?.ETH.indexOf(account) > -1) {
+    const validAccount = await validateAddress(account);
+    if (validAccount !== true) {
       addToast({ type: "error", description: 'Sending Account invalid' })
       setAlert(null);
       setIsTxPending(false);
