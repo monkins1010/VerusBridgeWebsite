@@ -24,6 +24,7 @@ import {
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
+import { validateAddress } from 'utils/rules'
 import { getConfigOptions } from 'utils/txConfig';
 
 import AddressField from './AddressField';
@@ -270,7 +271,13 @@ export default function TransactionForm() {
     const { token, amount } = values;
     setAlert(null);
     setIsTxPending(true);
-
+    const validAccount = await validateAddress(account);
+    if (validAccount !== true) {
+      addToast({ type: "error", description: 'Sending Account invalid' })
+      setAlert(null);
+      setIsTxPending(false);
+      return;
+    }
 
     try {
       if (token?.value !== GLOBAL_ADDRESS.ETH) {

@@ -14,7 +14,7 @@ const AddressField = ({ control }) => (
     helperText="I-Address, R-address to send to, or Ethereum address for bounceback conversions"
     rules={{
       required: 'Address is required',
-      validate: validateAddress
+      validate: async (address) => validateAddress(address)
     }}
   />
 )
