@@ -32,8 +32,9 @@ const maxGasClaim = 80000;
 const TYPE_FEE = 1;
 const TYPE_REFUND = 2;
 const TYPE_REFUND_CHECK = 3;
-// const TYPE_NOTARY_FEE = 4;
-// const TYPE_DAI_BURN_BACK = 5;
+const TYPE_PUBLICKEY = 4;
+// const TYPE_NOTARY_FEE = 5;
+// const TYPE_DAI_BURN_BACK = 6;
 
 function usePreviousValue(value) {
     const ref = useRef();
@@ -100,7 +101,7 @@ export default function ClaimForm() {
                 return `0x${retval.toString('hex')}`;
             }
 
-            if (type === TYPE_FEE) {
+            if (type === TYPE_FEE || type === TYPE_PUBLICKEY) {
                 retval = Buffer.from(`${web3.utils.padLeft(retval, 64)}`, 'hex');
                 return `0x${retval.toString('hex')}`;
             }
@@ -122,12 +123,21 @@ export default function ClaimForm() {
         if (type === TYPE_FEE) {
             feeSats = await delegatorContract.callStatic.claimableFees(formattedAddress);
             fees = uint64ToVerusFloat(feeSats);
-            setAlert({ state: fees === "0.00000000" ? "warning" : "info", message: `${fees} ETH available to claim` });
+            if (fees === "0.00000000" || (parseFloat(fees) < 0.006)) {
+                setAlert({ state: "warning", message: `${fees} ETH available to claim, minimum amount claimable is 0.006 ETH to cover import cost.` });
+                setFeeToClaim(null);
+                return fees;
+            }
+            setAlert({ state: "info", message: `${fees} ETH available to claim` });
+
 
         } else if (type === TYPE_REFUND_CHECK) {
             feeSats = await delegatorContract.callStatic.refunds(formattedAddress, currency);
             fees = uint64ToVerusFloat(feeSats);
             setAlert({ state: fees === "0.00000000" ? "warning" : "info", message: `${fees} Available to refund` });
+        } else if (type === TYPE_PUBLICKEY) {
+            feeSats = await delegatorContract.callStatic.claimableFees(formattedAddress);
+            fees = uint64ToVerusFloat(feeSats);
         }
         setFeeToClaim(fees);
         return fees;
@@ -180,11 +190,13 @@ export default function ClaimForm() {
 
                     const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
 
-                    if (await checkForAssets(rAddress, TYPE_FEE) === "0.00000000") {
-                        setAlert({ state: "warning", message: `${`${rAddress}\n`} has no fees to claim. Please try again with a different address.` });
+                    const checkfees = await checkForAssets(rAddress, TYPE_PUBLICKEY);
+                    if (checkfees === "0.00000000") {
+                        setAlert({ state: "warning", message: `${`${rAddress}\n`} has ${checkfees} fees to claim. Please try again with a different Ethereum account.` });
                         setIsTxPending(false);
-                        return
+                        return;
                     }
+                    setAlert({ state: "info", message: `${`${rAddress}\n`} has ${checkfees} ETH to claim.` });
 
                     const { x, y } = { x: publicKey.slice(4, 68), y: publicKey.slice(68, 132) };
 
