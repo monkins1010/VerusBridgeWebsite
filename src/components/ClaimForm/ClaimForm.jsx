@@ -93,7 +93,7 @@ export default function ClaimForm() {
                     return null;
             }
             if (type === TYPE_REFUND) {
-                retval[0] = 2;
+                retval[1] = 16;
             }
 
             return `0x${retval.toString('hex')}`;
