@@ -24,7 +24,7 @@ import {
 } from 'constants/contractAddress';
 import useContract from 'hooks/useContract';
 import { getContract } from 'utils/contract';
-import { validateAddress } from 'utils/rules'
+import { validateAddress, coinsToSats } from 'utils/rules'
 import { getConfigOptions } from 'utils/txConfig';
 
 import AddressField from './AddressField';
@@ -287,11 +287,11 @@ export default function TransactionForm() {
 
       if (result) {
         const { flagvalue, feecurrency, fees, destinationtype, destinationaddress, destinationcurrency, secondreserveid } = result;
-        const verusAmount = (amount * 100000000);
+        const verusAmount = coinsToSats(amount);
         const currencyIaddress = token.value;
         const CReserveTransfer = {
           version: 1,
-          currencyvalue: { currency: currencyIaddress, amount: verusAmount.toFixed(0) }, // currency sending from ethereum
+          currencyvalue: { currency: currencyIaddress, amount: verusAmount }, // currency sending from ethereum
           flags: flagvalue,
           feecurrencyid: feecurrency, // fee is vrsc pre bridge launch, veth or others post.
           fees,

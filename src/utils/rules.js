@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 
 export const isRAddress = (address) => (/^R[1-9A-HJ-NP-Za-km-z]{33,34}$/).test(address);
 export const isiAddress = (address) => (/^i[1-9A-HJ-NP-Za-km-z]{33,34}$/).test(address);
@@ -80,3 +81,13 @@ export const uint64ToVerusFloat = (number) => {
   return (inter + decimalp)
 }
 
+export const coinsToUnits = (coin, decimals) => {
+  return coin.multipliedBy(BigNumber(10).pow(BigNumber(decimals)))
+}
+
+export const coinsToSats = (coins) => {
+  BigNumber.set({ EXPONENTIAL_AT: 1000000, ROUNDING_MODE: BigNumber.ROUND_FLOOR });
+  let input = BigNumber(coins);
+
+  return BigNumber(coinsToUnits(input, 8).toFixed(0)).toString();
+}
