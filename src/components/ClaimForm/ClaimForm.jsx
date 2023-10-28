@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-import { ECPair, networks } from '@bitgo/utxo-lib';
+import { address as baddress, crypto as bcrypto } from '@bitgo/utxo-lib';
 import { LoadingButton } from '@mui/lab';
 import { Alert, Typography, Button } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -186,9 +186,10 @@ export default function ClaimForm() {
 
                     // Now you have the digest,
                     const publicKey = utils.recoverPublicKey(messageHashBytes, sign);
-                    const compressed = utils.computePublicKey(publicKey, true)
+                    const compressed = utils.computePublicKey(publicKey, true);
 
-                    const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
+                    const check = bcrypto.hash160(Buffer.from(compressed.slice(2), 'hex'));
+                    const rAddress = baddress.toBase58Check(check, 60)
 
                     const checkfees = await checkForAssets(rAddress, TYPE_PUBLICKEY);
                     if (checkfees === "0.00000000") {
@@ -215,6 +216,12 @@ export default function ClaimForm() {
             } else if (claimRefund) {
                 const hexResult = formatHexAddress(address, TYPE_REFUND);
                 // const txEstimation = await delegatorContract.estimateGas.claimRefund(hexResult, refundCurrency.value);
+                const testClaim = await delegatorContract.callStatic.claimRefund(hexResult, refundCurrency.value);
+                if (testClaim === "0x") {
+                    setAlert({ state: "warning", message: `No ${refundCurrency.value} available to refund` });
+                    setIsTxPending(false);
+                    return;
+                }
                 const txResult = await delegatorContract.claimRefund(hexResult, refundCurrency.value, { from: account, gasLimit: maxGas });
                 await txResult.wait();
                 setAlert(null);
@@ -225,6 +232,12 @@ export default function ClaimForm() {
             else {
                 const hexResult = formatHexAddress(address, TYPE_FEE);
                 // const txEstimation = await delegatorContract.estimateGas.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`);
+                if (address.slice(0, 1) === "R") {
+                    setAlert({ state: "warning", message: `Please import the private key for ${address} into metamask, and use the 'Public Key' claim option to be paid directly to that ETH address.` });
+                    setIsTxPending(false);
+                    return;
+                }
+                await delegatorContract.callStatic.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`);
                 const txResult = await delegatorContract.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`, { from: account, gasLimit: maxGas });
                 await txResult.wait();
                 setAlert(null);
