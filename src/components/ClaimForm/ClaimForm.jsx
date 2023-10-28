@@ -27,11 +27,14 @@ import bitGoUTXO from '../../utils/bitUTXO';
 import TokenField from '../ConvertForm/TokenField';
 import { useToast } from '../Toast/ToastProvider';
 
-const maxGas = 6000000;
+const maxGas = 800000;
+const maxGasClaim = 80000;
 const TYPE_FEE = 1;
 const TYPE_REFUND = 2;
-// const TYPE_NOTARY_FEE = 3;
-// const TYPE_DAI_BURN_BACK = 4;
+const TYPE_REFUND_CHECK = 3;
+const TYPE_PUBLICKEY = 4;
+// const TYPE_NOTARY_FEE = 5;
+// const TYPE_DAI_BURN_BACK = 6;
 
 function usePreviousValue(value) {
     const ref = useRef();
@@ -84,19 +87,28 @@ export default function ClaimForm() {
             let retval;
             switch (verusAddress.version) {
                 case 60: // case R address
-                    retval = Buffer.from(`${web3.utils.padLeft(`0214${verusAddress.hash.toString('hex')}`, 64)}`, 'hex');
+                    retval = `0214${verusAddress.hash.toString('hex')}`;
                     break;
                 case 102: // case i address
-                    retval = Buffer.from(`${web3.utils.padLeft(`0414${verusAddress.hash.toString('hex')}`, 64)}`, 'hex');
+                    retval = `0414${verusAddress.hash.toString('hex')}`;
                     break;
                 default:
                     return null;
             }
-            if (type === TYPE_REFUND) {
-                retval[0] = 2;
+            if (type === TYPE_REFUND_CHECK) {
+                retval = Buffer.from(`${web3.utils.padLeft(retval, 64)}`, 'hex');
+                retval[1] = 16;
+                return `0x${retval.toString('hex')}`;
             }
 
-            return `0x${retval.toString('hex')}`;
+            if (type === TYPE_FEE || type === TYPE_PUBLICKEY) {
+                retval = Buffer.from(`${web3.utils.padLeft(retval, 64)}`, 'hex');
+                return `0x${retval.toString('hex')}`;
+            }
+
+            return `0x${retval}`;
+
+
 
         } catch (error) {
             throw new Error("Invalid Address");
@@ -107,15 +119,26 @@ export default function ClaimForm() {
 
         const formattedAddress = formatHexAddress(address, type);
         let feeSats;
+        let fees;
         if (type === TYPE_FEE) {
             feeSats = await delegatorContract.callStatic.claimableFees(formattedAddress);
+            fees = uint64ToVerusFloat(feeSats);
+            if (fees === "0.00000000" || (parseFloat(fees) < 0.006)) {
+                setAlert({ state: "warning", message: `${fees} ETH available to claim, minimum amount claimable is 0.006 ETH to cover import cost.` });
+                setFeeToClaim(null);
+                return fees;
+            }
+            setAlert({ state: "info", message: `${fees} ETH available to claim` });
 
-        } else if (type === TYPE_REFUND) {
+
+        } else if (type === TYPE_REFUND_CHECK) {
             feeSats = await delegatorContract.callStatic.refunds(formattedAddress, currency);
-
+            fees = uint64ToVerusFloat(feeSats);
+            setAlert({ state: fees === "0.00000000" ? "warning" : "info", message: `${fees} Available to refund` });
+        } else if (type === TYPE_PUBLICKEY) {
+            feeSats = await delegatorContract.callStatic.claimableFees(formattedAddress);
+            fees = uint64ToVerusFloat(feeSats);
         }
-        const fees = uint64ToVerusFloat(feeSats);
-        setAlert({ state: fees === "0.00000000" ? "warning" : "info", message: `${fees} ETH available to claim` });
         setFeeToClaim(fees);
         return fees;
     }
@@ -127,7 +150,7 @@ export default function ClaimForm() {
                     checkForAssets(address, TYPE_FEE);
                 }
             } else if (refundCurrency && refundCurrency.value) {
-                checkForAssets(address, TYPE_REFUND, refundCurrency.value);
+                checkForAssets(address, TYPE_REFUND_CHECK, refundCurrency.value);
 
             } else {
                 removeAllToasts();
@@ -167,15 +190,17 @@ export default function ClaimForm() {
 
                     const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
 
-                    if (await checkForAssets(rAddress, TYPE_FEE) === "0.00000000") {
-                        setAlert({ state: "warning", message: `${`${rAddress}\n`} has no fees to claim. Please try again with a different address.` });
+                    const checkfees = await checkForAssets(rAddress, TYPE_PUBLICKEY);
+                    if (checkfees === "0.00000000") {
+                        setAlert({ state: "warning", message: `${`${rAddress}\n`} has ${checkfees} fees to claim. Please try again with a different Ethereum account.` });
                         setIsTxPending(false);
-                        return
+                        return;
                     }
+                    setAlert({ state: "info", message: `${`${rAddress}\n`} has ${checkfees} ETH to claim.` });
 
                     const { x, y } = { x: publicKey.slice(4, 68), y: publicKey.slice(68, 132) };
 
-                    const txResult = await delegatorContract.sendfees(`0x${x}`, `0x${y}`, { from: account, gasLimit: maxGas });
+                    const txResult = await delegatorContract.sendfees(`0x${x}`, `0x${y}`, { from: account, gasLimit: maxGasClaim });
                     await txResult.wait();
                     setAlert(null);
                     setIsTxPending(false);
@@ -188,7 +213,8 @@ export default function ClaimForm() {
                     throw err
                 }
             } else if (claimRefund) {
-                const hexResult = formatHexAddress(address, TYPE_REFUND)
+                const hexResult = formatHexAddress(address, TYPE_REFUND);
+                // const txEstimation = await delegatorContract.estimateGas.claimRefund(hexResult, refundCurrency.value);
                 const txResult = await delegatorContract.claimRefund(hexResult, refundCurrency.value, { from: account, gasLimit: maxGas });
                 await txResult.wait();
                 setAlert(null);
@@ -197,7 +223,8 @@ export default function ClaimForm() {
                 setFeeToClaim(null)
             }
             else {
-                const hexResult = formatHexAddress(address, TYPE_FEE)
+                const hexResult = formatHexAddress(address, TYPE_FEE);
+                // const txEstimation = await delegatorContract.estimateGas.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`);
                 const txResult = await delegatorContract.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`, { from: account, gasLimit: maxGas });
                 await txResult.wait();
                 setAlert(null);
