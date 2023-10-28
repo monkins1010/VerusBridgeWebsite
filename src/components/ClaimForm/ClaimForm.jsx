@@ -214,7 +214,7 @@ export default function ClaimForm() {
                 }
             } else if (claimRefund) {
                 const hexResult = formatHexAddress(address, TYPE_REFUND);
-                const txEstimation = await delegatorContract.estimateGas.claimRefund(hexResult, refundCurrency.value);
+                // const txEstimation = await delegatorContract.estimateGas.claimRefund(hexResult, refundCurrency.value);
                 const txResult = await delegatorContract.claimRefund(hexResult, refundCurrency.value, { from: account, gasLimit: maxGas });
                 await txResult.wait();
                 setAlert(null);
@@ -224,7 +224,7 @@ export default function ClaimForm() {
             }
             else {
                 const hexResult = formatHexAddress(address, TYPE_FEE);
-                const txEstimation = await delegatorContract.estimateGas.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`);
+                // const txEstimation = await delegatorContract.estimateGas.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`);
                 const txResult = await delegatorContract.sendfees(hexResult, `0x${Buffer.alloc(32).toString('hex')}`, { from: account, gasLimit: maxGas });
                 await txResult.wait();
                 setAlert(null);
