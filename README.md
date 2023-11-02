@@ -4,7 +4,8 @@ Please create .env file and copy the following code.
 ```
 REACT_APP_RPC_URL_GOERLI=https://goerli.infura.io/v3/6e67197573904e1486999a75454b69da
 REACT_APP_RPC_URL_HOMESTEAD=https://mainnet.infura.io/v3/74934b1a6e0046c1b48f42c4ca6a9c58
-VERUS_RPC_URL=https://api.verustest.net
+REACT_APP_TESTNET_ACTIVE=false
+REACT_APP_DELEGATOR_CONTRACT=0x71518580f36FeCEFfE0721F06bA4703218cD7F63
 ```
 
 ### `yarn install`
