@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-import { ECPair, networks } from '@bitgo/utxo-lib';
+import { address as baddress, crypto as bcrypto } from '@bitgo/utxo-lib';
 import { LoadingButton } from '@mui/lab';
 import { Alert, Typography, Button } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -188,7 +188,8 @@ export default function ClaimForm() {
                     const publicKey = utils.recoverPublicKey(messageHashBytes, sign);
                     const compressed = utils.computePublicKey(publicKey, true);
 
-                    const rAddress = ECPair.fromPublicKeyBuffer(Buffer.from(compressed.slice(2), 'hex'), networks.verustest).getAddress()
+                    const check = bcrypto.hash160(Buffer.from(compressed.slice(2), 'hex'));
+                    const rAddress = baddress.toBase58Check(check, 60)
 
                     const checkfees = await checkForAssets(rAddress, TYPE_PUBLICKEY);
                     if (checkfees === "0.00000000") {
