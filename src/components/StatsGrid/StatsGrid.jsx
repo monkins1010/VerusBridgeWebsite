@@ -38,10 +38,10 @@ const fetchConversion = async () => {
   const bridge = { name: 'Bridge.vETH', amount: supply, daiPrice: (daiAmount * count) / supply }
 
   let conversions = [
-    { symbol: 'vrsc', price: 0.412836 },
-    { symbol: 'eth', price: 1666.45 },
-    { symbol: 'mkr', price: 1449.5 },
-    { symbol: 'dai', price: 1 }
+    { symbol: 'vrsc', price: 0 },
+    { symbol: 'eth', price: 0 },
+    { symbol: 'mkr', price: 0 },
+    { symbol: 'dai', price: 0 }
   ]
 
   try {
@@ -64,12 +64,12 @@ const fetchConversion = async () => {
         return {
           ...token,
           price:
-            conversions.find((c) => c.symbol === 'vrsc')?.price || 0.412836
+            conversions.find((c) => c.symbol === 'vrsc')?.price
         }
       case 'vETH':
         return {
           ...token,
-          price: conversions.find((c) => c.symbol === 'eth')?.price || 1666.45
+          price: conversions.find((c) => c.symbol === 'eth')?.price
         }
       case 'DAI.vETH':
         return {
@@ -79,7 +79,7 @@ const fetchConversion = async () => {
       case 'MKR.vETH':
         return {
           ...token,
-          price: conversions.find((c) => c.symbol === 'mkr')?.price || 1449.5
+          price: conversions.find((c) => c.symbol === 'mkr')?.price
         }
       // return { ...token, price: vrscPrice }
       default:
@@ -152,12 +152,12 @@ const StatsGrid = () => {
               </Typography></Grid>
             <Grid item xs={3} textAlign="right">
               <Typography className={rate} noWrap>
-                <Chevron />
-                {Intl.NumberFormat('en-US', {
+                {token?.price !== 0 ? <Chevron /> : null}
+                {token?.price !== 0 ? Intl.NumberFormat('en-US', {
                   style: 'percent',
                   maximumFractionDigits: 2,
                   minimumFractionDigits: 2
-                }).format(Math.abs(percent))}</Typography></Grid>
+                }).format(Math.abs(percent)) : "Error"}</Typography></Grid>
           </Grid >
         )
       })}
