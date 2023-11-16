@@ -152,12 +152,12 @@ const StatsGrid = () => {
               </Typography></Grid>
             <Grid item xs={3} textAlign="right">
               <Typography className={rate} noWrap>
-                <Chevron />
-                {token?.price !== 0 && Intl.NumberFormat('en-US', {
+                {token?.price !== 0 ? <Chevron /> : null}
+                {token?.price !== 0 ? Intl.NumberFormat('en-US', {
                   style: 'percent',
                   maximumFractionDigits: 2,
                   minimumFractionDigits: 2
-                }).format(Math.abs(percent))}</Typography></Grid>
+                }).format(Math.abs(percent)) : "Error"}</Typography></Grid>
           </Grid >
         )
       })}
