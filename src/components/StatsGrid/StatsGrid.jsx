@@ -9,12 +9,12 @@ import { GLOBAL_IADDRESS } from 'constants/contractAddress';
 
 import { ReactComponent as Chevron } from '../../images/icons/chevron-icon.svg'
 
-const CoinGeckoVRSC = 'https://api.coingecko.com/api/v3/coins/verus-coin'
-const CoinGeckoETH = 'https://api.coingecko.com/api/v3/coins/ethereum'
-const CoinGeckoMRK = 'https://api.coingecko.com/api/v3/coins/maker'
-const CoinGeckoDAI = 'https://api.coingecko.com/api/v3/coins/dai'
-const urls = [CoinGeckoVRSC, CoinGeckoETH, CoinGeckoMRK, CoinGeckoDAI]
-
+// const CoinGeckoVRSC = 'https://api.coingecko.com/api/v3/coins/verus-coin'
+// const CoinGeckoETH = 'https://api.coingecko.com/api/v3/coins/ethereum'
+// const CoinGeckoMRK = 'https://api.coingecko.com/api/v3/coins/maker'
+// const CoinGeckoDAI = 'https://api.coingecko.com/api/v3/coins/dai'
+// const urls = [CoinGeckoVRSC, CoinGeckoETH, CoinGeckoMRK, CoinGeckoDAI]
+const CoinpaprikaURL = 'https://api.coinpaprika.com/v1/tickers'
 const verusd = new VerusdRpcInterface(GLOBAL_IADDRESS.VRSC, process.env.REACT_APP_VERUS_RPC_URL)
 
 const blockNumber = process.env.REACT_APP_VERUS_END_BLOCK || '0'
@@ -45,14 +45,33 @@ const fetchConversion = async () => {
   ]
 
   try {
-    conversions = await Promise.all(
-      urls.map(async (url) => fetch(url)
-        .then((res) => res.json())
-        .then((c) => ({
-          symbol: c.symbol,
-          price: c.market_data.current_price.usd
-        })))
-    )
+    // conversions = await Promise.all(
+    //   urls.map(async (url) => fetch(url)
+    //     .then((res) => res.json())
+    //     .then((c) => ({
+    //       symbol: c.symbol,
+    //       price: c.market_data.current_price.usd
+    //     })))
+    // )
+    conversions = await fetch(CoinpaprikaURL).then(res => res.json()).then(c => {
+      const m = conversions.map(t => {
+        switch (t.symbol) {
+          case 'vrsc':
+            return { symbol: t.symbol, price: c.filter(x => x.id === 'vrsc-verus-coin')[ 0 ].quotes.USD.price || 0 }
+          case 'eth':
+            return { symbol: t.symbol, price: c.filter(x => x.id === 'eth-ethereum')[ 0 ].quotes.USD.price || 0 }
+          case 'mkr':
+            return { symbol: t.symbol, price: c.filter(x => x.id === 'mkr-maker')[ 0 ].quotes.USD.price || 0 }
+          case 'dai':
+            return { symbol: t.symbol, price: c.filter(x => x.id === 'dai-dai')[ 0 ].quotes.USD.price || 0 }
+          default:
+            return { symbol: t.symbol, price: 0 }
+        }
+      })
+      return m
+    })
+
+
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('%s: fetching prices %s', Date().toString(), error)
@@ -123,7 +142,7 @@ const StatsGrid = () => {
         <Grid item xs={3}><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Bridge.vETH<br />reserve currencies</Typography></Grid>
         <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>in reserves</Typography></Grid>
         <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Price in Dai</Typography></Grid>
-        <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Compared to<br />CoinGecko</Typography></Grid>
+        <Grid item xs={3} textAlign="right"><Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>Compared to<br />Coinpaprika</Typography></Grid>
       </Grid>
       {conversionList.list && conversionList.list.map((token) => {
         // eslint-disable-next-line no-nested-ternary
