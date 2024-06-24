@@ -1,11 +1,9 @@
 export const DELEGATOR_ADD = process.env.REACT_APP_DELEGATOR_CONTRACT
 export const TESTNET = process.env.REACT_APP_TESTNET_ACTIVE === "true";
-export const ETHEREUM_BLOCKCHAIN_NAME = TESTNET ? "Goerli" : "Ethereum";
+export const ETHEREUM_BLOCKCHAIN_NAME = TESTNET ? "Sepolia" : "Ethereum";
 
 export const BLOCKCHAIN_NAME = (TESTNET ? "vrsctest" : "vrsc").toUpperCase();
 
-export const DAI_ERC20ADD = TESTNET ? "0xB897f2448054bc5b133268A53090e110D101FFf0" :
-  "0x6B175474E89094C44Da98b954EedeAC495271d0F";  // DAI token is pre-existing chain
 
 export const GLOBAL_ADDRESS = TESTNET ? { // vrsctest hex 'id' names of currencies must be checksummed i.e. mixture of capitals
   VRSC: "0xA6ef9ea235635E328124Ff3429dB9F9E91b64e2d",

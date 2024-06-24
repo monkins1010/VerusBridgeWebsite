@@ -10,6 +10,10 @@ export const ID_NAME_MAPPING = {
   1: {
     title: "Ethereum Network",
     name: "HOMESTEAD"
+  },
+  11155111: {
+    title: "Sepolia Network",
+    name: "SEPOLIA"
   }
 };
 
@@ -21,5 +25,9 @@ export const NAME_ID_MAPPING = {
   HOMESTEAD: {
     title: "Ethereum Network",
     id: 1
+  },
+  SEPOLIA: {
+    title: "Sepolia Network",
+    id: 11155111
   }
 };
